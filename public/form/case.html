@@ -1,0 +1,182 @@
+<!-- Tab links -->
+<div class="tab">
+  <button id="PACSTab" class="tablinks" onclick="openCity(event, 'PACSDiv')">PACS</button>	
+  <button id="SendWaitTab" class="tablinks" onclick="openCity(event, 'SendWaitDiv')">เคสรอส่ง</button>
+  <button id="ReadWaitTab" class="tablinks" onclick="openCity(event, 'ReadWaitDiv')">เคสรออ่าน</button>
+  <button id="ReadSuccessTab" class="tablinks" onclick="openCity(event, 'ReadSuccessDiv')">เคสได้ผลอ่านแล้ว</button>
+  <button id="AllCaseTab" class="tablinks" onclick="openCity(event, 'AllCaseDiv')">เคสทั้งหมด</button>
+  <button id="SendingTab" class="tablinks" onclick="openCity(event, 'SendingDiv')">กำลังส่งไฟล์</button>
+</div>
+
+<!-- Tab content -->
+<div id="PACSDiv" class="tabcontent">
+  <h3>PACS (OTHANC)</h3>
+  <div id="PACSDiv-Content">
+  	<div id="Dicom-Filter"></div>
+  	<div id="Spacing">&nbsp;</div>
+  	<div id="Dicom-Result"></div>
+  </div>
+</div>
+
+<div id="SendWaitDiv" class="tabcontent">
+  <h3>เคสรอส่ง</h3>
+  <div id="SendWaitDiv-Content">
+  	<p>กำลังอ่านข้อมูล...</p>
+	</div>
+</div>
+
+<div id="ReadWaitDiv" class="tabcontent">
+  <h3>เคสรออ่าน</h3>
+  <div id="ReadWaitDiv-Content">
+  	<p>กำลังอ่านข้อมูล...</p>
+  </div>  
+</div>
+
+<div id="ReadSuccessDiv" class="tabcontent">
+  <h3>เคสได้ผลอ่านแล้ว</h3>
+  <div id="ReadSuccessDiv-Content">
+  	<p>กำลังอ่านข้อมูล...</p>
+  </div>  
+</div>
+
+<div id="AllCaseDiv" class="tabcontent">
+  <h3>เคสทั้งหมด</h3>
+	<div id="AllCaseDiv-Content">
+  	<p>กำลังอ่านข้อมูล...</p>
+  </div>  
+</div>
+
+<div id="SendingDiv" class="tabcontent">
+  <h3>กำลังส่งไฟล์</h3>
+  <div id="SendWaitDiv-Content">
+  	<p>กำลังอ่านข้อมูล...</p>
+  </div>
+</div>
+
+
+<script>
+	function openCity(evt, cityName) {
+	  // Declare all variables
+	  var i, tabcontent, tablinks;
+
+	  // Get all elements with class="tabcontent" and hide them
+	  tabcontent = document.getElementsByClassName("tabcontent");
+	  for (i = 0; i < tabcontent.length; i++) {
+	    tabcontent[i].style.display = "none";
+	  }
+
+	  // Get all elements with class="tablinks" and remove the class "active"
+	  tablinks = document.getElementsByClassName("tablinks");
+	  for (i = 0; i < tablinks.length; i++) {
+	    tablinks[i].className = tablinks[i].className.replace(" active", "");
+	  }
+
+	  // Show the current tab, and add an "active" class to the button that opened the tab
+	  document.getElementById(cityName).style.display = "block";
+	  if (evt.currentTarget) {
+	  	evt.currentTarget.className += " active";
+	  }
+
+		let event = new CustomEvent(cityName, {"detail": {eventname: cityName}});
+		document.dispatchEvent(event);
+	}
+</script>
+
+<style>
+	/* Style the tab */
+	.tab {
+	  overflow: hidden;
+	  border: 1px solid #ccc;
+	  background-color: #f1f1f1;
+	  width: 100%;
+	}
+
+	/* Style the buttons that are used to open the tab content */
+	.tab button {
+	  background-color: inherit;
+	  float: left;
+	  border: none;
+	  outline: none;
+	  cursor: pointer;
+	  padding: 14px 16px;
+	  transition: 0.3s;
+	}
+
+	/* Change background color of buttons on hover */
+	.tab button:hover {
+	  background-color: #ddd;
+	}
+
+	/* Create an active/current tablink class */
+	.tab button.active {
+	  background-color: #ccc;
+	}
+
+	/* Style the tab content */
+	.tabcontent {
+	  display: none;
+	  padding: 6px 12px;
+	  border: 1px solid #ccc;
+	  border-top: none;
+ 	  width: 100%;
+	}
+	.align-right {
+		float: right;
+	}
+
+	/* Tooltip */
+	.tooltip {
+	  position: relative;
+	  display: inline-block;
+	  border-bottom: 1px dotted black;
+	}
+
+	.tooltip .tooltiptext {
+	  visibility: hidden;
+	  width: 120px;
+	  background-color: #555;
+	  color: #fff;
+	  text-align: center;
+	  border-radius: 6px;
+	  padding: 5px 0;
+	  position: absolute;
+	  z-index: 1;
+	  bottom: 125%;
+	  left: 50%;
+	  margin-left: -60px;
+	  opacity: 0;
+	  transition: opacity 0.3s;
+	}
+
+	.tooltip .tooltiptext::after {
+	  content: "";
+	  position: absolute;
+	  top: 100%;
+	  left: 50%;
+	  margin-left: -5px;
+	  border-width: 5px;
+	  border-style: solid;
+	  border-color: #555 transparent transparent transparent;
+	}
+
+	.tooltip:hover .tooltiptext {
+	  visibility: visible;
+	  opacity: 1;
+	}
+
+	/* etc */	
+	#Spacing {
+		min-height: 14px;
+	}
+	.study-desc {
+	  border-radius: 10px;
+	  border: 2px solid #73AD21;
+	  padding: 5px;
+	}
+	.protoname {
+		margin-top: 3px;
+	  border-radius: 10px;
+	  border: 2px solid #0066ff;
+	  padding: 5px;		
+	}
+</style>

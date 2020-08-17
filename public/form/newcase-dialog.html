@@ -1,0 +1,325 @@
+<div id="myModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+	  <div class="modal-header">
+	    <span class="close">&times;</span>
+	    <h2 id="dialog-title">สร้างเคสใหม่</h2>
+	  </div>
+    <div id="InputCaseBox">
+      <table width="100%" cellpadding="5" cellspacing="0" border="1">
+        <tr>
+          <td width="25%" align="left" class="input-label">ชื่อผู้ป่วย</td>
+          <td width="*" align="left"><input type="text" id="patient-name-th" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">Patient Name</td>
+          <td align="left"><input type="text" id="patient-name-en" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">เพศ</td>
+          <td align="left">
+            <select id="patient-sex">
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">อายุ</td>
+          <td align="left"><input type="text" id="patient-age" size="10"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">รูปประวัติ</td>
+          <td align="left">
+            <div id='ManageImageCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: block;">
+              <input type="button" id="OpenScaner-Cmd" value="Scanner"/>
+              <input type="button" id="OpenScreenCapture-Cmd" value="Capture"/>
+              <input type="button" id="OpenFileDialog-Cmd" value="Attach File"/>
+            </div>
+            <div id='SaveEditCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: none; float: left;">
+              <input type="button" id="SaveEdit-Cmd" value="Save Image"/>
+            </div>            
+            <div id="magic-box"></div>
+            <div id="images"></div>
+            <div id="ScanUploadForm">
+              <form id="form1" action="" method="POST" enctype="multipart/form-data">
+                <input type="button" id="upload-scan-cmd" value="Upload"/>
+              </form>
+            </div>
+            <div id='CaptureVideoDiv' style='display: none;'>
+              <video id='CaptureVideo' width='520' height='290' autoplay/>
+            </div>
+            <div id='CaptureCanvasDiv' style='margin-top: 5px; padding: 5px; border: 2px solid red; display: none;'>
+              <canvas id='CaptureCanvas' width='100%' height='auto'/>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">สิทธิ์ผู้ป่วย</td>
+          <td align="left">
+            <select id="patient-rights">
+              <option value="0">เลือกสิทธิ์ผู้ป่วย</option>
+            </select>
+          </td>
+        </tr>
+        <tr id="PriceRow">
+          <td align="left" class="input-label">ราคา</td>
+          <td align="left"><input type="number" id="price" size="10" value="0" /></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">HN</td>
+          <td align="left"><input type="text" id="hn" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">ACC</td>
+          <td align="left"><input type="text" id="acc" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">แผนก</td>
+          <td align="left"><input type="text" id="department" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">แพทย์เจ้าของไข้</td>
+          <td align="left"><input type="text" id="dr-owner" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">ตำแหน่งสแกน</td>
+          <td align="left"><input type="text" id="bodypart" size="50"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">แพทย์อ่านฟิมล์</td>
+          <td align="left">
+            <select id="dr-reader">
+              <option value="-1">เลือกหมอ</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">ประภทความเร่งด่วน</td>
+          <td align="left">
+            <select id="urgent-type">
+              <option value="0">เลือกประเภท</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">รายละเอียดเพิ่มเติม</td>
+          <td align="left"><textarea id="detail" cols="60" rows="10"></textarea></td>
+        </tr>
+      </table>
+      <input type="hidden" id="mdl"/>
+      <input type="hidden" id="patient-history"/>
+      <input type="hidden" id="studyID"/>
+      <input type="hidden" id="caseID"/>
+    </div>
+    <div class="modal-footer">
+      <input type="Button" value=" ส่งงาน " id="SaveNewCase-Cmd"/>
+      <input type="Button" value=" ปิด " onclick="doCloseNewCaseBox()"/>
+    </div>
+  </div>
+</div>
+
+<div id="sub-dialog" class="modal"></div>
+
+<script>
+  // Get the modal
+  var modal = document.getElementById("myModal");
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      //modal.style.display = "none";
+    }
+  }
+
+  modal.style.display = "block";
+  
+
+  /** Images scanned so far. */
+  var imagesScanned = [];
+
+  var selectArea = undefined;
+
+  function displayImagesOnPage(successful, mesg, response) {
+    if(!successful) { // On error
+      console.error('Failed: ' + mesg);
+      return;
+    }
+
+    if(successful && mesg != null && mesg.toLowerCase().indexOf('user cancel') >= 0) { // User cancelled.
+      console.info('User cancelled');
+      return;
+    }
+
+    let imagesBox = document.getElementById('images'); 
+    imagesBox.style.display = 'block';
+
+    var scannedImages = scanner.getScannedImages(response, true, false); // returns an array of ScannedImage
+    for(var i = 0; (scannedImages instanceof Array) && i < scannedImages.length; i++) {
+      var scannedImage = scannedImages[i];
+      processScannedImage(scannedImage);
+    }
+
+    let scanUploadForm = document.getElementById('ScanUploadForm');  
+    scanUploadForm.style.display = 'block';
+  }
+
+  /** Processes a ScannedImage */
+  function processScannedImage(scannedImage) {
+    imagesScanned.push(scannedImage);
+    var elementImg = scanner.createDomElementFromModel( {
+      'name': 'img',
+      'attributes': {
+        'class': 'scanned',
+        'src': scannedImage.src
+      }
+    });
+    let imagesBox = document.getElementById('images'); 
+    imagesBox.appendChild(elementImg);
+  }
+
+  function doVerifyInputForm() {
+    let patientNameTH = $('#patient-name-th').val();
+    let patientNameEN = $('#patient-name-en').val();
+    let patientSex = $('#patient-sex').val();
+    let patientAge = $('#patient-age').val();
+    let patientRights = $('#patient-rights').val();
+    let price = $('#price').val();
+    let hn = $('#hn').val();
+    let acc = $('#acc').val();
+    let department = $('#department').val();
+    let drOwner = $('#dr-owner').val();
+    let bodyPart = $('#bodypart').val();
+    let drReader = $('#dr-reader').val();
+    let urgentType = $('#urgent-type').val();
+    let detail = $('#detail').val();
+
+    let patientHistory = $('#patient-history').val();
+    let studyID = $('#studyID').val();
+    let mdl = $('#mdl').val();
+
+    if (!(Number(price) >= 0 )) {
+      $('#price').css("border","2px solid red");
+      $('#price').focus();
+      return false;
+    } else if (patientRights === '0') {
+      $('#price').css("border","");
+      $('#patient-rights').css("border","2px solid red");
+      $('#patient-rights').focus();
+      return false;
+    } else if (drReader === '-1') {
+      $('#patient-rights').css("border","");
+      $('#dr-reader').css("border","2px solid red");
+      $('#dr-reader').focus();
+      return false;
+    } else if (urgentType === '0') {
+      $('#dr-reader').css("border","");
+      $('#urgent-type').css("border","2px solid red");
+      $('#urgent-type').focus();
+      return false;
+    } else {
+      $('#urgent-type').css("border","");
+      let newCase = {patientNameTH, patientNameEN, patientHistory, studyID, patientSex, patientAge, patientRights, price, hn, acc, department, drOwner, bodyPart, drReader, urgentType, detail, mdl};
+      //console.log(newCase);
+      return newCase;
+    }
+  }
+
+  function doCloseNewCaseBox() {
+    imagesScanned = [];
+    /*
+    magicBox = null;  
+    imagesBox = null;  
+    scanUploadForm = null;  
+    */
+    modal.style.display = "none";
+  }
+
+</script>
+
+<style>
+    /* The Modal (background) */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Could be more or less, depending on screen size */
+    }
+
+    /* The Close Button */
+    .close {
+      color: #aaabbb;
+      float: right;
+      font-size: 24px;
+      font-weight:bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .modal-header {
+      padding: 2px 2px;
+      background-color: #5cb85c;
+      color: white;
+    }
+
+    .modal-footer {
+      padding: 2px 2px;
+      background-color: #5cb85c;
+      color: white;
+      text-align: center;
+    }
+
+    .input-label {
+       background-color: green;
+    }
+
+    #magic-box {
+      display: none;
+    }
+
+    img.scanned {
+      padding: 5px;
+      height: 200px; /** Sets the display size */
+      margin-right: 12px;
+    }
+
+    div#images {
+      padding: 5px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    div#ScanUploadForm {
+      padding: 5px;
+      margin-top: 20px;
+      display: none;
+    }
+</style>
