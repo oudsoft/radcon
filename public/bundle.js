@@ -275,7 +275,13 @@ function doLoadMainPage(){
 	let paths = window.location.pathname.split('/');
 	let rootname = paths[1];
 	let jqueryUiCssUrl = "/" + rootname + "/lib/jquery-ui.min.css";
+	let jqueryUiJsUrl = "/" + rootname + "/lib/jquery-ui.min.js";
+	$('head').append('<script src="' + jqueryUiJsUrl + '"></script>');
 	$('head').append('<link rel="stylesheet" href="' + jqueryUiCssUrl + '" type="text/css" />');
+  $('#HistoryDialogBox').dialog({ 
+    modal: true, autoOpen: false, width: 350, resizable: false, title: 'ประวัติผู้ป่วย'
+  });
+	
 	$('#app').load('form/main.html', function(){
 		var cookieValue = $.cookie(cookieName);
 		cookie = JSON.parse(cookieValue);
@@ -688,7 +694,7 @@ module.exports = function ( jq ) {
 
 			let historyButton = $('<input type="button" value="ประวัติ"/>');
 			$(historyButton).click(function() {
-				doOpenHistory(incidents[i].pn_history);
+				doShowPopupHistory(incidents[i].pn_history);
 			});
 			$(historyButton).appendTo($(commandCol));
 
@@ -698,13 +704,46 @@ module.exports = function ( jq ) {
 			});
 			$(editCaseButton).appendTo($(commandCol));
 
-
 		}
 		return $(swTable);
   }
 
-  function doOpenHistory(hsLink) {
-  	window.open(hsLink, '_blank');
+  function doShowPopupHistory(allUrl){
+  	$('#HistoryDialogBox').empty();
+  	let urls = allUrl.split(',');
+  	urls.forEach((url) => {
+  		if (url !== '') {
+	  		let hsBox = $('<div></div>');
+	  		$(hsBox).css('padding','3px');
+	  		//$(hsBox).css('border','1px solid red');
+	  		$(hsBox).css('width','100px');
+	  		$(hsBox).css('height', 'auto');
+				$(hsBox).css('float', 'left');
+	  		let hsImg = $('<img/>');
+	  		$(hsImg).css('width','94px');
+	  		$(hsImg).css('height', 'auto');
+
+	  		$(hsImg).css('cursor', 'pointer');
+	  		$(hsImg).attr('src', url);
+	  		$(hsImg).click(()=>{
+	  			window.open(url, '_blank');
+	  		})
+	  		$(hsImg).appendTo($(hsBox));
+	  		$('#HistoryDialogBox').append($(hsBox));
+	  	}
+  	});
+		let cmdBox = $('<div></div>'); 
+ 		$(cmdBox).css('width','100%');
+		$(cmdBox).css('padding','3px'); 		
+		$(cmdBox).css('clear','left'); 
+ 		$(cmdBox).css('text-align','center');
+  	let closeCmdBtn = $('<button>ปิด</button>');
+  	$(closeCmdBtn).click(()=>{
+  		$('#HistoryDialogBox').dialog('close');
+  	});
+  	$(closeCmdBtn).appendTo($(cmdBox));
+  	$('#HistoryDialogBox').append($(cmdBox));
+  	$('#HistoryDialogBox').dialog('open');
   }
 
   async function doCallEditCase(caseid) {
@@ -913,18 +952,15 @@ module.exports = function ( jq ) {
 			$('#dialog-title').text('แก้ไขเคส');
 			const main = require('../main.js'); 
 
-		  let magicBox = document.getElementById('magic-box');  
-		  let imagesBox = document.getElementById('images');  
-		  let scanUploadForm = document.getElementById('ScanUploadForm');  
-
 			await doPrepareOptionForm(defualtValue);
 
   		//console.log(defualtValue);
 
 			if (defualtValue.pn_history) {
-				$('#patient-history').val(defualtValue.pn_history)
-				doShowHistoryImage(imagesBox, defualtValue.pn_history);
+				doAddHistory(defualtValue.pn_history);
+				doRenderHistoryPreview();
 			}
+
 			$("#patient-sex").val(defualtValue.patient.sex);
 			$("#patient-age").val(defualtValue.patient.age);
 			$("#patient-rights").val(defualtValue.rights);
@@ -959,48 +995,38 @@ module.exports = function ( jq ) {
 		$(fileBrowser).attr("multiple", true);
 		$(fileBrowser).css('display', 'none');
 		$(fileBrowser).on('change', function(e) {
-			const defSize = 1000000;
+			const defSize = 10000000;
 			var fileSize = e.currentTarget.files[0].size;
 			var fileType = e.currentTarget.files[0].type;
-			console.log(fileType);
-			console.log(fileSize);			
 			if (fileSize <= defSize) {
 				$('#magic-box').empty();
 				$('#magic-box').show();
 				var uploadUrl = apiconnector.proxyRootUri + "/uploadpatienthistory";
-				console.log(uploadUrl);						
 				$('#fileupload').simpleUpload(uploadUrl, {
 					start: function(file){
-						console.log(file.name);
-						console.log(file.type);
-						console.log(file.size);
 						$('#magic-box').html('<div>' + file.type +' : ' + file.name + ' : ' + file.size + '</div>');
 					},
 					progress: function(progress){
-						//received progress
 						console.log("ดำเนินการได้ : " + Math.round(progress) + "%");
-						//$('#progressBar-'+ groupid).width(progress + "%");
 						$('#magic-box').html('<div>' + 'ดำเนินการได้ : ' + Math.round(progress) + '%' + '</div>');
 					},
 					success: function(data){
 						console.log('Uploaded.', data);
 						var imageUrl = data.link;
-						//var imageUrl = '../imgs/logo/who.png';
-						$("#fileupload").replaceWith($("#fileupload").val('').clone(true));
-						//self.options.messageSent(self.options.id, self.options.user, imageUrl, 'image');
+						$('#magic-box').show(); 
 						$('#magic-box').html('<div>อัพโหลดสำเร็จ</div>');
-						$('#patient-history').val(imageUrl);
-						let imagesBox = document.getElementById('images'); 
 						setTimeout(() => {
 							$('#magic-box').html('');
 							$('#magic-box').hide(); 
-							doShowHistoryImage(imagesBox, imageUrl);
+							doAddHistory(imageUrl);
+							doRenderHistoryPreview();
+							$(fileBrowser).remove();
+							$("#sub-dialog").empty();
 						}, 1200);
 					},
 					error: function(error){
-						//upload failed
-						console.log("Failure! " + error.name + ": " + error.message);
 						$('#magic-box').html('<div>' + "Failure! " + error.name + ": " + error.message + '</div>');
+						$("#sub-dialog").empty();
 					}
 				});
 
@@ -1008,13 +1034,39 @@ module.exports = function ( jq ) {
 				alert('File not excess ' + defSize + ' Byte.');
 			}
 		});
-		$(fileBrowser).appendTo($("#InputCaseBox"));
+		$(fileBrowser).appendTo($("#sub-dialog"));
 		$(fileBrowser).click();
   }
 
-  function doShowHistoryImage(imgBox, imgURL) {
+  function doAddHistory(newHs){
+  	let allHs = $('#patient-history').val();
+  	allHs = allHs + ',' + newHs;
+  	$('#patient-history').val(allHs);
+  }
+
+  function doRemoveHistory(index){
+		if (index > -1) {
+	  	let allHs = $('#patient-history').val();
+	  	let hss = allHs.split(',');
+  		hss.splice(index, 1);
+  		allHs = hss.join(',');
+  		$('#patient-history').val(allHs);
+	  } else {
+	  	console.log('index out of bound.')
+	  }
+  }
+
+  function doAppendNewHistoryImage(imgBox, imgURL, ind) {
+		let imgDiv = document.createElement('div');
+		imgDiv.style.float = 'left';
+		let removeLink = document.createElement('a');
+		removeLink.classList.add('remove');
+		removeLink.addEventListener("click", function(e){
+			doRemoveHsImage(ind);
+		});
+		imgDiv.appendChild(removeLink);
 		let hsImage = document.createElement('img');
-		hsImage.style.width = '50px';
+		hsImage.style.width = '100px';
 		hsImage.style.height = 'auto';
 		hsImage.style.border = '1px solid red';
 		hsImage.style.cursor = 'pointer';
@@ -1022,9 +1074,27 @@ module.exports = function ( jq ) {
 		hsImage.addEventListener("click", function(e){
 			window.open(imgURL, '_blank');
 		});
-		imgBox.innerHTML = '';
-		imgBox.appendChild(hsImage);
+		imgDiv.appendChild(hsImage);
+		imgBox.appendChild(imgDiv);
 		imgBox.style.display = 'block';
+  }
+
+  function doRenderHistoryPreview() {
+		let imagesBox = document.getElementById('images');   	
+		imagesBox.innerHTML = '';
+  	let allHs = $('#patient-history').val();
+  	let hss = allHs.split(',');
+  	console.log(hss);
+		hss.forEach((url, ind) => {
+			if (url !== '') {
+				doAppendNewHistoryImage(imagesBox, url, ind);
+			}
+		});
+  }
+
+  function doRemoveHsImage(index){
+  	doRemoveHistory(index);
+  	doRenderHistoryPreview();
   }
 
   function doOpenScaner(){
@@ -1048,10 +1118,8 @@ module.exports = function ( jq ) {
   	let params = {image: imageData};
     let uploadImageUrl = apiconnector.proxyRootUri + "/scannerupload";
 		$.post(uploadImageUrl, params, function(data){
-		  //let magicBox = document.getElementById('magic-box');  
-		  let imagesBox = document.getElementById('images');  
-		  let scanUploadForm = document.getElementById('ScanUploadForm');  
-		  doShowHistoryImage(imagesBox, data.link);
+			doAddHistory(data.link);
+			doRenderHistoryPreview()
 		  scanUploadForm.style.display = 'none';
 		}).fail(function(error) { 
 			console.log(error); 
@@ -1199,8 +1267,8 @@ module.exports = function ( jq ) {
 					$('#SaveEditCmdDiv').toggle();
 					$('#CaptureCanvasDiv').empty().hide();
 					let imgURL = e.link;
-					let imgBox = document.getElementById('magic-box');
-					doShowHistoryImage(imgBox, imgURL) 
+					doAddHistory(imgURL);
+					doRenderHistoryPreview()
 				}
 			);
 

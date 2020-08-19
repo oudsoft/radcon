@@ -142,7 +142,6 @@
 
   modal.style.display = "block";
   
-
   /** Images scanned so far. */
   var imagesScanned = [];
 
@@ -246,80 +245,93 @@
 </script>
 
 <style>
-    /* The Modal (background) */
-    .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      left: 0;
-      top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    }
+  /* The Modal (background) */
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
 
-    /* Modal Content/Box */
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto; /* 15% from the top and centered */
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%; /* Could be more or less, depending on screen size */
-    }
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
 
-    /* The Close Button */
-    .close {
-      color: #aaabbb;
-      float: right;
-      font-size: 24px;
-      font-weight:bold;
-    }
+  /* The Close Button */
+  .close {
+    color: #aaabbb;
+    float: right;
+    font-size: 24px;
+    font-weight:bold;
+  }
 
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
 
-    .modal-header {
-      padding: 2px 2px;
-      background-color: #5cb85c;
-      color: white;
-    }
+  .modal-header {
+    padding: 2px 2px;
+    background-color: #5cb85c;
+    color: white;
+  }
 
-    .modal-footer {
-      padding: 2px 2px;
-      background-color: #5cb85c;
-      color: white;
-      text-align: center;
-    }
+  .modal-footer {
+    padding: 2px 2px;
+    background-color: #5cb85c;
+    color: white;
+    text-align: center;
+  }
 
-    .input-label {
-       background-color: green;
-    }
+  .input-label {
+     background-color: green;
+  }
 
-    #magic-box {
-      display: none;
-    }
+  #magic-box {
+    display: none;
+  }
 
-    img.scanned {
-      padding: 5px;
-      height: 200px; /** Sets the display size */
-      margin-right: 12px;
-    }
+  img.scanned {
+    padding: 5px;
+    height: 200px; /** Sets the display size */
+    margin-right: 12px;
+  }
 
-    div#images {
-      padding: 5px;
-      margin-top: 20px;
-      display: none;
-    }
+  div#images {
+    padding: 5px;
+    margin-top: 20px;
+    display: none;
+  }
 
-    div#ScanUploadForm {
-      padding: 5px;
-      margin-top: 20px;
-      display: none;
-    }
+  div#ScanUploadForm {
+    padding: 5px;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .remove {
+    width: 100%;
+    top: 0;
+    right: 0;
+    font-size: 30px;
+    cursor: pointer;
+  }
+
+  .remove:after{
+    display: inline-block;
+    content: "\00d7"; /* This will render the 'X' */
+  }
 </style>
