@@ -933,7 +933,7 @@ module.exports = function ( jq ) {
 
 		  let magicBox = document.getElementById('magic-box');  
 		  let imagesBox = document.getElementById('images');  
-		  let scanUploadForm = document.getElementById('ScanUploadForm');  
+		  //let scanUploadForm = document.getElementById('ScanUploadForm');  
 
 			await doPrepareOptionForm(defualtValue);
 
@@ -1120,7 +1120,7 @@ module.exports = function ( jq ) {
 		$.post(uploadImageUrl, params, function(data){
 			doAddHistory(data.link);
 			doRenderHistoryPreview()
-		  scanUploadForm.style.display = 'none';
+		  //scanUploadForm.style.display = 'none';
 		}).fail(function(error) { 
 			console.log(error); 
 			alert('Error:' + error);
