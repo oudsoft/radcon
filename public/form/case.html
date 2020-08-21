@@ -1,11 +1,8 @@
 <!-- Tab links -->
 <div class="tab">
-  <button id="PACSTab" class="tablinks" onclick="openCity(event, 'PACSDiv')">PACS</button>	
-  <button id="SendWaitTab" class="tablinks" onclick="openCity(event, 'SendWaitDiv')">เคสรอส่ง</button>
+  <button id="PACSTab" class="tablinks" onclick="openCity(event, 'PACSDiv')">PACS</button>
   <button id="ReadWaitTab" class="tablinks" onclick="openCity(event, 'ReadWaitDiv')">เคสรออ่าน</button>
   <button id="ReadSuccessTab" class="tablinks" onclick="openCity(event, 'ReadSuccessDiv')">เคสได้ผลอ่านแล้ว</button>
-  <button id="AllCaseTab" class="tablinks" onclick="openCity(event, 'AllCaseDiv')">เคสทั้งหมด</button>
-  <button id="SendingTab" class="tablinks" onclick="openCity(event, 'SendingDiv')">กำลังส่งไฟล์</button>
 </div>
 
 <!-- Tab content -->
@@ -17,14 +14,6 @@
   	<div id="Dicom-Result"></div>
   </div>
 </div>
-
-<div id="SendWaitDiv" class="tabcontent">
-  <h3>เคสรอส่ง</h3>
-  <div id="SendWaitDiv-Content">
-  	<p>กำลังอ่านข้อมูล...</p>
-	</div>
-</div>
-
 <div id="ReadWaitDiv" class="tabcontent">
   <h3>เคสรออ่าน</h3>
   <div id="ReadWaitDiv-Content">
@@ -38,21 +27,6 @@
   	<p>กำลังอ่านข้อมูล...</p>
   </div>  
 </div>
-
-<div id="AllCaseDiv" class="tabcontent">
-  <h3>เคสทั้งหมด</h3>
-	<div id="AllCaseDiv-Content">
-  	<p>กำลังอ่านข้อมูล...</p>
-  </div>  
-</div>
-
-<div id="SendingDiv" class="tabcontent">
-  <h3>กำลังส่งไฟล์</h3>
-  <div id="SendWaitDiv-Content">
-  	<p>กำลังอ่านข้อมูล...</p>
-  </div>
-</div>
-
 
 <script>
 	function openCity(evt, cityName) {
@@ -84,6 +58,7 @@
 
 <style>
 	/* Style the tab */
+
 	.tab {
 	  overflow: hidden;
 	  border: 1px solid #ccc;
@@ -100,6 +75,9 @@
 	  cursor: pointer;
 	  padding: 14px 16px;
 	  transition: 0.3s;
+	  font-family: THSarabunNew; 
+	  font-size: 24px; 
+	  font-weight: normal;
 	}
 
 	/* Change background color of buttons on hover */
@@ -119,9 +97,9 @@
 	  border: 1px solid #ccc;
 	  border-top: none;
  	  width: 100%;
-	}
-	.align-right {
-		float: right;
+	  font-size: 24px;
+	  font-family: THSarabunNew; 
+	  font-weight: normal; 	  
 	}
 
 	/* Tooltip */
@@ -178,5 +156,10 @@
 	  border-radius: 10px;
 	  border: 2px solid #0066ff;
 	  padding: 5px;		
+	}
+	.pacs-command {
+		width: 35px;
+		height: auto;
+		cursor: pointer;
 	}
 </style>

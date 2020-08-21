@@ -20,6 +20,7 @@ const orthancproxy = require('./orthancproxy.js');
 const bushIndex = serveIndex(bushPath);
 
 const uploader = require('./uploader.js')(webApp);
+const notificator = require('./notification.js')(webApp);
 
 webApp.use('/geegee', geegee);
 webApp.use('/apiproxy', apiproxy);

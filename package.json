@@ -16,6 +16,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "serve-index": "^1.9.1",
+    "web-push": "^3.4.4",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
   }

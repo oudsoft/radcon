@@ -14,6 +14,7 @@ const userpass = process.env.ORTHANC_USER + ':' + process.env.ORTHANC_PASSWORD;
 const currentDir = __dirname;
 const parentDir = path.normalize(currentDir + '/..');
 const usrPreviewDir = parentDir + process.env.USRPREVIEW_DIR;
+const usrArchiveDir = parentDir + process.env.USRARCHIVE_DIR;
 
 const proxyRequest = function(rqParam) {
 	return new Promise(function(resolve, reject) {
@@ -60,9 +61,34 @@ const runcommand = function (command) {
 }
 
 const parseStr = function (str) {
-    var args = [].slice.call(arguments, 1),
-        i = 0;
-    return str.replace(/%s/g, () => args[i++]);
+  var args = [].slice.call(arguments, 1);
+  var i = 0;
+  return str.replace(/%s/g, () => args[i++]);
+}
+
+const doLoadArchive = function(studyID, rootname){
+	return new Promise(function(resolve, reject) {
+		var archiveFileName = studyID + '.zip';
+		var command = 'curl --user ' + userpass + '  ' + ORTHANC_URL + '/studies/' + studyID + '/archive > ' + usrArchiveDir + '/' + archiveFileName;
+		console.log('curl command >>', command);
+		runcommand(command).then((stdout) => {
+			let link = '/' + rootname + process.env.USRARCHIVE_PATH + '/' + archiveFileName;
+			resolve({link: link});		
+		});
+	});
+}
+
+const doTransferArchive = function(studyID) {
+	return new Promise(function(resolve, reject) {
+		let archiveFilename = studyID + '.zip';
+		let archiveSrc = usrArchiveDir + '/' + archiveFilename;
+		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + archiveSrc + ' ftp://119.59.125.63/domains/radconnext.com/private_html/rad_test/inc_files/';
+		console.log('curl command >>', command);
+		runcommand(command).then((stdout) => {
+			let link = 'https://radconnext.com/rad_test/inc_files/' + archiveFilename;
+			resolve({link: link});		
+		});
+	});
 }
 
 const logger = require('./logger');
@@ -117,8 +143,34 @@ app.get('/preview/(:instanceID)', function(req, res) {
 	console.log('curl command >>', command);
 	runcommand(command).then((stdout) => {
 		//res.redirect('/' + rootname + USRPREVIEW_PATH + '/' + previewFileName);
-		link = '/' + rootname + process.env.USRPREVIEW_PATH + '/' + previewFileName;
+		let link = '/' + rootname + process.env.USRPREVIEW_PATH + '/' + previewFileName;
 		res.status(200).send({preview: {link: link}});		
+	});
+});
+
+app.get('/loadarchive/(:studyID)', function(req, res) {
+	const rootname = req.originalUrl.split('/')[1];	
+	var studyID = req.params.studyID;
+	doLoadArchive(studyID).then((archive) => {
+		res.status(200).send({archive: {link: archive.link}});
+	});
+});
+
+app.get('/transferdicom/(:studyID)', function(req, res) {
+	const rootname = req.originalUrl.split('/')[1];	
+	var studyID = req.params.studyID;
+	doLoadArchive(studyID, rootname).then((archive) => {
+		if (archive.link) {
+			doTransferArchive(studyID).then((response) => {
+				res.status(200).send({local: {link: archive.link}, cloud: {link: response.link}});
+			}).catch((error) => {
+				res.status(500).send({error: {code: 502, detail: error}});
+			});
+		} else {
+			res.status(500).send({error: {code: 501, detail: 'Dicom of studies ' + studyID * ' is empty.'}});
+		}
+	}).catch((error) => {
+		res.status(500).send({error: {code: 503, detail: error}});
 	});
 });
 

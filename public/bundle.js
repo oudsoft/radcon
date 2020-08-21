@@ -120,7 +120,7 @@
 
 }));
 
-},{"jquery":13}],2:[function(require,module,exports){
+},{"jquery":14}],2:[function(require,module,exports){
 /* main.js */
 //const $ = require('jquery');
 window.$ = window.jQuery = require('jquery');
@@ -154,10 +154,10 @@ window.jQuery.cachedScript = function( url, options ) {
 
 const cookieName = "readconnext";
 
-var cookie, upwd;
-
+var cookie, upwd, noti;
 
 $( document ).ready(function() {
+	console.log('page on ready ...');
 	const initPage = function() {
 		var cookieValue = $.cookie(cookieName);
 		if (cookieValue) {
@@ -176,6 +176,32 @@ $( document ).ready(function() {
 		}
 	};
 
+	const doLoadServiceworker = function() {
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', function() {
+				const MAXAGE = 10; // seconds until recheck
+				const HASH = Math.floor(Date.now() / (MAXAGE * 1000)); // or a hash of lib.js
+				const URL = `/sw.js?hash=${HASH}`;
+				navigator.serviceWorker.register('sw.js?hash=' + HASH).then( async reg => {
+					console.log(`Registration:`, reg);
+					if (reg) {
+						noti = require('./mod/notimod.js')(reg);
+						noti.triggerPush();
+					}
+				});
+				navigator.serviceWorker.addEventListener('message', function(event) {
+					console.log("Got reply from service worker: " + event.data);
+				});
+			});
+		} else {
+			console.error('Service workers are not supported in this browser');
+		}
+	}
+	/*
+		Service Worker on https <type of sign self> of localhost, it 'll ssl's error massage
+		DOMException: Failed to register a ServiceWorker for scope ('https://192.168.1.108:8443/webapp/') with script ('https://192.168.1.108:8443/webapp/sw.js?hash=159800668'): An SSL certificate error occurred when fetching the script.
+	*/
+	//doLoadServiceworker();
 	initPage();
 
 });
@@ -278,6 +304,9 @@ function doLoadMainPage(){
 	let jqueryUiJsUrl = "/" + rootname + "/lib/jquery-ui.min.js";
 	$('head').append('<script src="' + jqueryUiJsUrl + '"></script>');
 	$('head').append('<link rel="stylesheet" href="' + jqueryUiCssUrl + '" type="text/css" />');
+	//https://carlosbonetti.github.io/jquery-loading/
+	$('head').append('<script src="lib/jquery.loading.min.js"></script>');
+
   $('#HistoryDialogBox').dialog({ 
     modal: true, autoOpen: false, width: 350, resizable: false, title: 'ประวัติผู้ป่วย'
   });
@@ -285,9 +314,8 @@ function doLoadMainPage(){
 	$('#app').load('form/main.html', function(){
 		var cookieValue = $.cookie(cookieName);
 		cookie = JSON.parse(cookieValue);
-		console.log(cookie);
-		$("#user-identify").text(cookie.name);
-		$("#user-identify").click(function(){
+		$("#User-Identify").text(cookie.name);
+		$("#User-Identify").click(function(){
 			doShowUserProfile();
 		});
 		$("#Home-Cmd").click(function(){
@@ -435,7 +463,7 @@ function doGetCookie(){
 module.exports = {
 	doGetCookie
 }
-},{"./lib/jquery.cookie.js":1,"./mod/apiconnect.js":3,"./mod/case.js":4,"./mod/doctor.js":5,"./mod/home.js":6,"./mod/hospital.js":7,"./mod/jquery-ex.js":8,"./mod/urgent.js":9,"jquery":13}],3:[function(require,module,exports){
+},{"./lib/jquery.cookie.js":1,"./mod/apiconnect.js":3,"./mod/case.js":4,"./mod/doctor.js":5,"./mod/home.js":6,"./mod/hospital.js":7,"./mod/jquery-ex.js":8,"./mod/notimod.js":9,"./mod/urgent.js":10,"jquery":14}],3:[function(require,module,exports){
 /* apiconnect.js */
 
 const apiExt = ".php";
@@ -527,6 +555,26 @@ module.exports = function ( jq ) {
   	});
 	}
 
+	const doCallDownloadDicom = function(studyID){
+		return new Promise(function(resolve, reject) {
+  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/loadarchive/' + studyID;
+  		let params = {};
+  		$.get(orthancProxyEndPoint, params, function(data){
+				resolve(data);
+			})
+  	});
+	}
+
+	const doCallTransferDicom = function(studyID){
+		return new Promise(function(resolve, reject) {
+  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/transferdicom/' + studyID;
+  		let params = {};
+  		$.get(orthancProxyEndPoint, params, function(data){
+				resolve(data);
+			})
+  	});
+	}
+
 	return {
 		/* const */
 		apiExt,
@@ -548,7 +596,9 @@ module.exports = function ( jq ) {
 		doCallApiByProxy,
 		doGetResourceByProxy,
 		doCallOrthancApiByProxy,
-		doCallDicomPreview
+		doCallDicomPreview,
+		doCallDownloadDicom,
+		doCallTransferDicom
 	}
 }
 },{}],4:[function(require,module,exports){
@@ -560,6 +610,8 @@ module.exports = function ( jq ) {
 	const util = require('./utilmod.js');
 	require('jquery-simple-upload');
 	
+	const defualtPacsLimit = '30';
+	const defualtPacsStudyDate = 'ALL';
 
 	/*******************************************************/
 
@@ -618,8 +670,8 @@ module.exports = function ( jq ) {
 
 	function doEventManagment() {
 		document.addEventListener("PACSDiv", openPACS);	
-		document.addEventListener("SendWaitDiv", openSwCaseList);	
-		document.addEventListener("ReadWaitDiv", evtMng);	
+		document.addEventListener("SendWaitDiv", evtMng);	
+		document.addEventListener("ReadWaitDiv", openRwCaseList);	
 		document.addEventListener("ReadSuccessDiv", evtMng);	
 		document.addEventListener("AllCaseDiv", evtMng);	
 		document.addEventListener("SendingDiv", evtMng);	
@@ -633,6 +685,8 @@ module.exports = function ( jq ) {
 
 	const openPACS = function(e) {
   	$("#Dicom-Filter").load('form/dicom-filter.html', function(){
+  		$("#studydate").val(defualtPacsStudyDate).change();
+  		$("#limit").val(defualtPacsLimit).change();
   		$("#search-cmd").on('click', doSearchOrthanc);
 	  	/*
 	  		ค่าข้อมูลใน query ที่ไม่ใช่สตริง ต้องเขียนแบบนี้เท่านั้น
@@ -647,27 +701,30 @@ module.exports = function ( jq ) {
 	  });
   }
 
-  const openSwCaseList = async function(e) {
+  const openRwCaseList = async function(e) {
+		$('body').loading('start');  	  	
 		const main = require('../main.js'); 
 		let rqParams = { username: main.doGetCookie().username }
 		let apiName = 'get_case_list';
 		try {
 			let response = await doCallApi(apiName, rqParams);
 			let resBody = JSON.parse(response.res.body);
-  		$("#SendWaitDiv").empty();
-  		let swTable = doShowSwCaseList(resBody.incident);
-  		$("#SendWaitDiv").append($(swTable));
+  		$("#ReadWaitDiv").empty();
+  		let rwTable = doShowRwCaseList(resBody.incident);
+  		$("#ReadWaitDiv").append($(rwTable));
+  		$('body').loading('stop');  	
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
+	    $('body').loading('stop');
     }	
   }
 
-  function doShowSwCaseList(incidents) {
-		console.log(incidents);
-		let swTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
+  function doShowRwCaseList(incidents) {
+		//console.log(incidents);
+		let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
 		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">ส่วนที่ Scan</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">&nbsp;</td>');
-		$(swTable).append($(headRow));
+		$(rwTable).append($(headRow));
 		$(headRow).append($(headColumns));
 		for (let i=0; i < incidents.length; i++) {
 			let dataRow = $('<tr></tr>');
@@ -690,22 +747,21 @@ module.exports = function ( jq ) {
 			let commandCol = $('<td align="center"></td>');
 			$(commandCol).appendTo($(dataRow));			
 			$(commandCol).appendTo($(dataRow));
-			$(swTable).append($(dataRow));
-
-			let historyButton = $('<input type="button" value="ประวัติ"/>');
+			$(rwTable).append($(dataRow));
+			let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
 			$(historyButton).click(function() {
 				doShowPopupHistory(incidents[i].pn_history);
 			});
 			$(historyButton).appendTo($(commandCol));
 
-			let editCaseButton = $('<input type="button" value="Edit..."/>');
+			let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
 			$(editCaseButton).click(function() {util
 				doCallEditCase(incidents[i].id);
 			});
 			$(editCaseButton).appendTo($(commandCol));
 
 		}
-		return $(swTable);
+		return $(rwTable);
   }
 
   function doShowPopupHistory(allUrl){
@@ -747,6 +803,7 @@ module.exports = function ( jq ) {
   }
 
   async function doCallEditCase(caseid) {
+  	$('body').loading('start');
   	const main = require('../main.js'); 
 		let rqParams = { username: main.doGetCookie().username, id: caseid }
 		let apiName = 'get_case_info';
@@ -766,17 +823,21 @@ module.exports = function ( jq ) {
 			defualtValue.dept = resBody.inc_data.dept;
 			defualtValue.inc_price = resBody.inc_data.inc_price;
   		doOpenEditCase(defualtValue);
+  		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
+	    $('body').loading('stop');
     }
   }
 
   const doSearchOrthanc = function() {
+		$('body').loading('start');  	
   	let modality = $('#modality').val();
   	let keyName = $('#Filter-Key-1').val();
   	let keyValue = $('#Filter-Value-1').val();
   	let studydate = $('#studydate').val();
-  	console.log({modality, keyName, keyValue, studydate});
+  	let limit = $('#limit').val();
+  	console.log({modality, keyName, keyValue, studydate, limit});
   	//let queryStr = '{"Level": "Series", "Expand": true, "Query": {';
   	let queryStr = '{"Level": "Study", "Expand": true, "Query": {';
   	if (modality === 'ALL') {
@@ -806,7 +867,14 @@ module.exports = function ( jq ) {
 			}
   	}
 
-  	queryStr += '}}';
+  	queryStr += '}';
+
+		if (limit !== 'ALL') {
+			queryStr += ', "Limit": ' + limit + '}';
+		} else {
+			queryStr += '}';
+		}
+
   	console.log(queryStr);
 
   	let orthancUri = '/tools/find';
@@ -838,6 +906,10 @@ module.exports = function ( jq ) {
 	  		$("#Dicom-Result").empty();
 	  		let resultTable = doShowOrthancResult(ob[0]);
 	  		$("#Dicom-Result").append($(resultTable));
+	  		$('body').loading('stop');
+	  	}).catch((err) => {
+	  		console.log(err);
+	  		$('body').loading('stop');
 	  	});
   	});
 
@@ -846,10 +918,11 @@ module.exports = function ( jq ) {
   function doShowOrthancResult(dj){
 		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">ID</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Body Part</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">&nbsp;</td>');
+		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">ID</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Body Part</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
 		$(rsTable).append($(headRow));
 		$(headRow).append($(headColumns));
 		for (let i=0; i < dj.length; i++) {
+			const spacingBox = $('<span>&nbsp;</span>');
 			let desc, protoname, mld, bdp, sa;
 			if ((dj[i].MainDicomTags) && (dj[i].SamplingSeries)){
 				if (dj[i].MainDicomTags.StudyDescription) {
@@ -898,7 +971,7 @@ module.exports = function ( jq ) {
 				$(dataRow).append($(dataCol));
 				operatingCol = $('<td align="center"></td>');
 				$(dataRow).append($(operatingCol));
-				let previewCmd = $('<input type="button" value="Preview"/>');
+				let previewCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
 				let instancePreview = dj[i].SamplingSeries.Instances[0];
 				$(previewCmd).on('click', function(evt){
 					doOpenPreview(instancePreview);
@@ -907,12 +980,20 @@ module.exports = function ( jq ) {
 
 				let patientProps = sa.split('/');
 				let defualtValue = {patient: {id: dj[i].PatientMainDicomTags.PatientID, name: dj[i].PatientMainDicomTags.PatientName, age: patientProps[1], sex: patientProps[0]}, bodypart: bdp, studyID: dj[i].ID, acc: dj[i].MainDicomTags.AccessionNumber, mdl: mld};
-				let creatwNewCaseCmd = $('<input type="button" value="สร้างเคส"/>');
+				let creatwNewCaseCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/new-icon.png" title="Create New case."/>');
 				$(creatwNewCaseCmd).on('click', function(evt){
 					doOpenCreateNewCase(defualtValue);
 				});
+
+				$(operatingCol).append($(spacingBox));
 				$(operatingCol).append($(creatwNewCaseCmd));
 
+				let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/download-icon.png" title="Download Dicom to zip file."/>');
+				$(downloadDicomCmd).on('click', function(evt){
+					doDownloadDicom(dj[i].ID);
+				});
+				$(operatingCol).append($(spacingBox));
+				$(operatingCol).append($(downloadDicomCmd));
 
 				$(rsTable).append($(dataRow));
 			}
@@ -927,7 +1008,16 @@ module.exports = function ( jq ) {
   	})
   }
 
+  function doDownloadDicom(studyID){
+  	apiconnector.doCallDownloadDicom(studyID).then((response) => {
+  		console.log(response);
+  		let openLink = response.archive.link;
+  		window.open(openLink, '_blank');
+  	})
+  }
+  
   function doOpenCreateNewCase(defualtValue) {
+  	$('body').loading('start');
 		$("#dialog").load('form/newcase-dialog.html', async function(){
 			const main = require('../main.js'); 
 
@@ -944,6 +1034,8 @@ module.exports = function ( jq ) {
 			$("#SaveNewCase-Cmd").click(function(){
 				doSaveNewCase();
 			});
+
+			$('body').loading('stop');
 		});
   }
 
@@ -977,6 +1069,8 @@ module.exports = function ( jq ) {
 			
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
+
+			$("#SaveNewCase-Cmd").val("บันทึก");
 
 			$("#upload-scan-cmd").click(function(){
 				doUploadSacanedImage();
@@ -1384,6 +1478,7 @@ module.exports = function ( jq ) {
 	async function doSaveNewCase() {
 		let newCaseData = doVerifyInputForm();
 		if (newCaseData) {
+			$('body').loading('start');
 			const main = require('../main.js');			
 			newCaseData.username = main.doGetCookie().username;
 			newCaseData.curr_host_id = main.doGetCookie().org[0].id;
@@ -1395,15 +1490,27 @@ module.exports = function ( jq ) {
 				let response = await doCallApi(apiName, rqParams);
 				//console.log(response);
 				if (response.res.statusCode == 200) {
-					alert('บันทึกเคสใหม่เข้าสู่ระบบเรียบร้อยแล้ว');
-					doCloseNewCaseBox();					
-					$("#SendWaitTab").trigger("click");
-					$("#SendWaitTab").addClass('active');
+					let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID);
+					console.log(transferRes);
+					if (transferRes.cloud.link) {
+						console.log(transferRes.local.link);
+						console.log(transferRes.cloud.link);
+						alert('บันทึกเคสใหม่เข้าสู่ระบบเรียบร้อยแล้ว');
+						doCloseNewCaseBox();					
+						$("#SendWaitTab").trigger("click");
+						$("#SendWaitTab").addClass('active');
+						$('body').loading('stop');
+					}else {
+						alert('Transfer Dicom File ขัดข้อง');
+						$('body').loading('stop');						
+					}
 				} else if (response.res.statusCode == 500) {
 					alert('API Server ขัดข้อง');
+					$('body').loading('stop');
 				}
  			} catch(e) {
         console.log('Unexpected error occurred =>', e);
+        $('body').loading('stop');
     	}
 		}
 	}
@@ -1428,7 +1535,7 @@ module.exports = function ( jq ) {
 				if (response.res.statusCode == 200) {
 					alert('บันทึกการแก้ไขเคสเข้าสู่ระบบเรียบร้อยแล้ว');
 					doCloseNewCaseBox();					
-					openSwCaseList();
+					openRwCaseList();
 				} else if (response.res.statusCode == 500) {
 					alert('API Server ขัดข้อง');
 				}
@@ -1444,7 +1551,7 @@ module.exports = function ( jq ) {
 		doLoadCaseList
 	}
 }		
-},{"../main.js":2,"./apiconnect.js":3,"./utilmod.js":10,"fabric":11,"jquery-simple-upload":12,"tui-image-editor":16}],5:[function(require,module,exports){
+},{"../main.js":2,"./apiconnect.js":3,"./utilmod.js":11,"fabric":12,"jquery-simple-upload":13,"tui-image-editor":17}],5:[function(require,module,exports){
 /* doctor.js */
 module.exports = function ( jq ) {
 	const $ = jq;
@@ -1745,7 +1852,68 @@ $.fn.center = function () {
   return this;
 }
 
-},{"jquery":13}],9:[function(require,module,exports){
+},{"jquery":14}],9:[function(require,module,exports){
+/* notimod.js */
+
+const publicVapidKey = 'BLR1KlwGuN0G6p9dGk7dAXXQyntqZzZO0LKcPsh2MNsd79DBcOAR4EDHuJdXHUC1rHhfSRtLXAIXO7N0OioNUjg';
+
+async function doPushNotification(username, msg) {
+	const subscription = await swreg.pushManager.subscribe({
+		userVisibleOnly: true,
+		applicationServerKey: utilMod.urlBase64ToUint8Array(publicVapidKey),
+	});
+	const subendpoint = JSON.stringify(subscription);
+	let pushTitle = 'Open Stream Call Center';
+	let reqBody = {subscription: subendpoint, username: username, msg: msg, title: pushTitle};
+	await fetch('/callcenter/messages', {
+		method: 'POST',
+		body: JSON.stringify(reqBody),
+		headers: {
+			'Content-Type': 'application/json',
+			'subscription': JSON.stringify(subendpoint)
+		},
+	});
+}
+
+async function triggerPushNotification() {
+	const subscription = await swreg.pushManager.subscribe({
+		userVisibleOnly: true,
+		applicationServerKey: utilMod.urlBase64ToUint8Array(publicVapidKey),
+	});
+	const subendpoint = JSON.stringify(subscription);
+	let pushTitle = 'Open Stream';
+	let msg = 'ขอบคุณที่ยอมรับการแจ้งเตือนจาก Open Stream';
+	let reqBody = {subscription: subendpoint, msg: msg, title: pushTitle};
+	await fetch('/callcenter/subscribe', {
+		method: 'POST',
+		body: JSON.stringify(reqBody),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+}
+
+module.exports = function ( swReg ) {
+	const sw = swReg;
+	
+	const push = function(message){
+		var username = 'openstream';      
+		doPushNotification(username, message);
+	}
+
+	const triggerPush = function() {
+		triggerPushNotification().catch(error => console.error(error));
+	}
+
+	return {
+		/* const */
+		sw,
+		/*method*/
+		push,
+		triggerPush
+	}
+}
+},{}],10:[function(require,module,exports){
 /* urgent.js */
 
 module.exports = function ( jq ) {
@@ -1888,7 +2056,7 @@ module.exports = function ( jq ) {
 		doSaveUserProfile
 	}
 }		
-},{"./apiconnect.js":3}],10:[function(require,module,exports){
+},{"./apiconnect.js":3}],11:[function(require,module,exports){
 /* utilmod.js */
 
 /* internal functions */
@@ -1948,8 +2116,6 @@ const doGetScreenSignalError = function(e) {
 
 	alert('Unable to capture your screen.\n\n' + error.name + '\n\n' + error.message + '\n\n' + error.stack);
 }
-
-
 
 /* export function */
 
@@ -2060,7 +2226,8 @@ exports.base64ToBlob = function (base64, mime) {
 	return new Blob(byteArrays, {type: mime});
 }
 
-},{}],11:[function(require,module,exports){
+
+},{}],12:[function(require,module,exports){
 (function (Buffer){
 /* build: `node build.js modules=ALL exclude=gestures,accessors requirejs minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
@@ -31784,7 +31951,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":20,"jsdom":19,"jsdom/lib/jsdom/living/generated/utils":19,"jsdom/lib/jsdom/utils":19}],12:[function(require,module,exports){
+},{"buffer":21,"jsdom":20,"jsdom/lib/jsdom/living/generated/utils":20,"jsdom/lib/jsdom/utils":20}],13:[function(require,module,exports){
 /*
  * simpleUpload.js v.1.1
  *
@@ -33525,7 +33692,7 @@ else window.attachEvent("onmessage", simpleUpload.postMessageCallback);
   };
 
 }));
-},{"jquery":13}],13:[function(require,module,exports){
+},{"jquery":14}],14:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.5.1
  * https://jquery.com/
@@ -44399,7 +44566,7 @@ if ( typeof noGlobal === "undefined" ) {
 return jQuery;
 } );
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*!
  * tui-code-snippet.js
  * @version 1.5.2
@@ -48758,7 +48925,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*!
  * TOAST UI Color Picker
  * @version 2.2.6
@@ -53985,7 +54152,7 @@ module.exports = {
 /***/ })
 /******/ ]);
 });
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*!
  * tui-image-editor.js
  * @version 3.10.0
@@ -56238,7 +56405,7 @@ eval("module.exports = __WEBPACK_EXTERNAL_MODULE_tui_color_picker__;\n\n//# sour
 
 /******/ });
 });
-},{"fabric":17,"tui-code-snippet":14,"tui-color-picker":15}],17:[function(require,module,exports){
+},{"fabric":18,"tui-code-snippet":15,"tui-color-picker":16}],18:[function(require,module,exports){
 (function (Buffer){
 /* build: `node build.js modules=ALL exclude=gestures,accessors requirejs minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
@@ -85890,7 +86057,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":20,"jsdom":19,"jsdom/lib/jsdom/living/generated/utils":19,"jsdom/lib/jsdom/utils":19}],18:[function(require,module,exports){
+},{"buffer":21,"jsdom":20,"jsdom/lib/jsdom/living/generated/utils":20,"jsdom/lib/jsdom/utils":20}],19:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -86044,9 +86211,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],19:[function(require,module,exports){
-
 },{}],20:[function(require,module,exports){
+
+},{}],21:[function(require,module,exports){
 (function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
@@ -87827,7 +87994,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"base64-js":18,"buffer":20,"ieee754":21}],21:[function(require,module,exports){
+},{"base64-js":19,"buffer":21,"ieee754":22}],22:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
