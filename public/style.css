@@ -6,3 +6,7 @@ input, select, textarea, button{
 	font-family:inherit;
 	font-size: 24px;
 }
+#HistoryDialogBox, #HistoryDialogBox > select, #HistoryDialogBox > button{
+	font-family:THSarabunNew;
+	font-size: 24px;
+}

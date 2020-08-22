@@ -28,18 +28,19 @@ const proxyRequest = function(rqParam) {
 }
 
 const API_NAME_LIST = ["chk_login", 
-											"logout", 
-											"get_dr_list", 
-											"get_case_list", 
-											"get_dr_work_schedule", 
-											"get_hospital_detail",
-											"get_urgent",
-											"update_urgent",
-											"get_new_case_info",
-											"save_new_inc",
-											"get_upload_list",
-											"get_case_info",
-											"save_update_inc"];
+						"logout", 
+						"get_dr_list", 
+						"get_case_list", 
+						"get_dr_work_schedule", 
+						"get_hospital_detail",
+						"get_urgent",
+						"update_urgent",
+						"get_new_case_info",
+						"save_new_inc",
+						"get_upload_list",
+						"get_case_info",
+						"save_update_inc",
+						"update_incident"];
 
 app.get('/callapi', function(req, res) {
 	res.status(200).send(req.query);		

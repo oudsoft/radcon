@@ -483,6 +483,33 @@ const hostURL = 'https://radconnext.com/rad_test/api';
 const hostOrthancUrl = 'http://' + hostIP + ':' +  hostOrthancApiPort;
 const orthancProxyApi = '/orthancproxy';
 
+const RadConStatus = [
+  {id: 1, status_en: 'draft', status_th: "Draft"},
+  {id: 2, status_en: 'wait_edit', status_th: "รอแก้ไข"},
+  {id: 3, status_en: 'wait_start', status_th: "รอเริ่ม"},
+  {id: 4, status_en: 'wait_zip', status_th: "รอเตรียมไฟล์ภาพ"},
+  {id: 5, status_en: 'processing', status_th: "กำลังเตรียมไฟล์ภาพ"},
+  {id: 6, status_en: 'wait_upload', status_th: "รอส่งไฟล์ภาพ"},
+  {id: 7, status_en: 'uploading', status_th: "กำลังส่งไฟล์ภาพ"},
+  {id: 8, status_en: 'wait_consult', status_th: "รอหมอ Consult"},
+  {id: 9, status_en: 'wait_dr_consult', status_th: "รอหมอตอบ Consult"},
+  {id: 10, status_en: 'consult_expire', status_th: "หมอตอบ Consult ไม่ทันเวลา"},
+  {id: 11, status_en: 'wait_consult_ack', status_th: "ตอบ Consult แล้ว"},
+  {id: 12, status_en: 'wait_response_1', status_th: "รอหมอตอบรับ"},
+  {id: 13, status_en: 'wait_response_2', status_th: "รอหมอตอบรับ"},
+  {id: 14, status_en: 'wait_response_3', status_th: "รอหมอตอบรับ"},
+  {id: 15, status_en: 'wait_response_4', status_th: "รอหมอตอบรับ"},
+  {id: 16, status_en: 'wait_response_5', status_th: "รอหมอตอบรับ"},
+  {id: 17, status_en: 'wait_response_6', status_th: "รอหมอตอบรับ"},
+  {id: 18, status_en: 'wait_dr_key', status_th: "รออ่านผล"},
+  {id: 19, status_en: 'wait_close', status_th: "รอพิมพ์ผล"},
+  {id: 20, status_en: 'wait_close2', status_th: "รอพิมพ์ผลที่แก้ไข"},
+  {id: 21, status_en: 'close', status_th: "ดูผลแล้ว"},
+  {id: 22, status_en: 'cancel', status_th: "ยกเลิก"},
+];
+
+const filterValue = (obj, key, value)=> obj.filter(v => v[key] === value);
+
 module.exports = function ( jq ) {
 	const $ = jq;
 
@@ -577,6 +604,16 @@ module.exports = function ( jq ) {
   	});
 	}
 
+	const doCallDeleteDicom = function (studyID) {
+		return new Promise(function(resolve, reject) {
+  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/deletedicom/' + studyID;
+  		let params = {};
+  		$.get(orthancProxyEndPoint, params, function(data){
+				resolve(data);
+			})
+  	});
+	}
+
 	return {
 		/* const */
 		apiExt,
@@ -592,7 +629,9 @@ module.exports = function ( jq ) {
 		hostURL,
 		hostOrthancUrl,
 		orthancProxyApi,
+		RadConStatus,
 		/*method*/
+		filterValue,
 		doTestAjaxCallApi,
 		doCallApiDirect,
 		doCallApiByProxy,
@@ -600,7 +639,8 @@ module.exports = function ( jq ) {
 		doCallOrthancApiByProxy,
 		doCallDicomPreview,
 		doCallDownloadDicom,
-		doCallTransferDicom
+		doCallTransferDicom,
+		doCallDeleteDicom
 	}
 }
 },{}],4:[function(require,module,exports){
@@ -750,6 +790,7 @@ module.exports = function ( jq ) {
 			$(commandCol).appendTo($(dataRow));			
 			$(commandCol).appendTo($(dataRow));
 			$(rwTable).append($(dataRow));
+
 			let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
 			$(historyButton).click(function() {
 				doShowPopupHistory(incidents[i].pn_history);
@@ -757,11 +798,22 @@ module.exports = function ( jq ) {
 			$(historyButton).appendTo($(commandCol));
 
 			let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
-			$(editCaseButton).click(function() {util
+			$(editCaseButton).click(function() {
 				doCallEditCase(incidents[i].id);
 			});
 			$(editCaseButton).appendTo($(commandCol));
 
+			let changeCaseStatusButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/status-icon.png" title="Change Case\'s Status."/>');
+			$(changeCaseStatusButton).click(function() {
+				doShowPopupChangeCaseStatus(incidents[i].id, incidents[i].status);
+			});
+			$(changeCaseStatusButton).appendTo($(commandCol));
+
+			let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Change Case\'s Status."/>');
+			$(deleteCaseButton).click(function() {
+				doCallDeleteCase(incidents[i].id);
+			});
+			$(deleteCaseButton).appendTo($(commandCol));
 		}
 		return $(rwTable);
   }
@@ -801,6 +853,7 @@ module.exports = function ( jq ) {
   	});
   	$(closeCmdBtn).appendTo($(cmdBox));
   	$('#HistoryDialogBox').append($(cmdBox));
+  	$('#HistoryDialogBox').dialog('option', 'title', 'ประวัติผู้ป่วย');
   	$('#HistoryDialogBox').dialog('open');
   }
 
@@ -920,12 +973,12 @@ module.exports = function ( jq ) {
   function doShowOrthancResult(dj){
 		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">ID</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Body Part</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
+		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
 		$(rsTable).append($(headRow));
 		$(headRow).append($(headColumns));
 		for (let i=0; i < dj.length; i++) {
 			const spacingBox = $('<span>&nbsp;</span>');
-			let desc, protoname, mld, bdp, sa;
+			let desc, protoname, mld, sa, studydate, bdp;
 			if ((dj[i].MainDicomTags) && (dj[i].SamplingSeries)){
 				if (dj[i].MainDicomTags.StudyDescription) {
 					desc = '<div class="study-desc">' + dj[i].MainDicomTags.StudyDescription + '</div>';
@@ -942,12 +995,12 @@ module.exports = function ( jq ) {
 				} else {
 					mld = '';				
 				}
-				if (dj[i].SamplingSeries.MainDicomTags.BodyPartExamined) {
-					bdp = dj[i].SamplingSeries.MainDicomTags.BodyPartExamined;
+				if (dj[i].MainDicomTags.StudyDate) {
+					studydate = dj[i].MainDicomTags.StudyDate;
+					studydate = util.formatStudyDate(studydate);
 				} else {
-					bdp = '';			
+					studydate = '';
 				}
-
 				if (dj[i].PatientMainDicomTags.PatientSex) {
 					sa = dj[i].PatientMainDicomTags.PatientSex;
 				} else {
@@ -958,7 +1011,7 @@ module.exports = function ( jq ) {
 				} else {
 					sa = sa + '/-';
 				}
-
+				bdp = dj[i].SamplingSeries.MainDicomTags.BodyPartExamined;
 				let dataRow = $('<tr></tr>');
 				let dataColText = '';
 				dataColText += '<td align="center">'+ (i+1) + '</td>'
@@ -966,8 +1019,7 @@ module.exports = function ( jq ) {
 				dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
 				dataColText += '<td align="left">' + sa + '</td>'
 				dataColText += '<td align="left">' + mld + '</td>';
-				dataColText += '<td align="center">' + bdp + '</td>'			
-				dataColText += '<td align="left">' + '<div class="tooltip">' + dj[i].MainDicomTags.StudyDate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
+				dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
 				dataColText += '<td align="left">' + desc +  protoname + '</td>'
 				let dataCol = $(dataColText);				
 				$(dataRow).append($(dataCol));
@@ -994,8 +1046,17 @@ module.exports = function ( jq ) {
 				$(downloadDicomCmd).on('click', function(evt){
 					doDownloadDicom(dj[i].ID);
 				});
+
 				$(operatingCol).append($(spacingBox));
 				$(operatingCol).append($(downloadDicomCmd));
+
+				let deleteDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Delete local file."/>');
+				$(deleteDicomCmd).on('click', function(evt){
+					doDeleteDicom(dj[i].ID);
+				});
+
+				$(operatingCol).append($(spacingBox));
+				$(operatingCol).append($(deleteDicomCmd));
 
 				$(rsTable).append($(dataRow));
 			}
@@ -1039,6 +1100,28 @@ module.exports = function ( jq ) {
 
 			$('body').loading('stop');
 		});
+  }
+
+  function doDeleteDicom(studyID) {
+  	let userConfirm = confirm('โปรดยืนยันเพื่อลบรายการนี้ โดยคลิกปุ่ม ตกลง หรือ OK');
+  	if (userConfirm == true){
+  		$('body').loading('start');
+			apiconnector.doCallDeleteDicom(studyID).then((response) => {
+				console.log(response);
+				if (response.status.code == 200) {
+					alert('เดำเนินการลบข้อมูลเรียบร้อยแล้ว');
+					doSearchOrthanc();
+					$('body').loading('stop');					
+				} else {
+					alert('เกิดความผิดพลาด ไม่สามารถลบรายการนี้ได้ในขณะนี้')
+					$('body').loading('stop');					
+				}
+			}).catch((err) => {
+				console.log('Error on Delete dicom from orthanc', err);
+				alert('เกิดความผิดพลาด ไม่สามารถลบรายการนี้ได้ในขณะนี้')
+				$('body').loading('stop');
+			})
+		}
   }
 
   function doOpenEditCase(defualtValue) {
@@ -1444,7 +1527,7 @@ module.exports = function ( jq ) {
 
 				resolve();
 			} catch(e) {
-	      console.log('Unexpected error occurred =>', e);
+	      reject(e);
     	}
 		});
 	}
@@ -1549,6 +1632,101 @@ module.exports = function ( jq ) {
         $('body').loading('stop');
     	}
 		}
+	}
+
+  function doShowPopupChangeCaseStatus(id, currentStatus){
+  	$('#HistoryDialogBox').empty();
+
+  	let selectBox = $('<div></div>'); 
+  	let statusSelect = $('<select id="newStatus"></select>');
+
+  	apiconnector.RadConStatus.forEach((item) => {
+  		let option = $('<option></option>');
+  		$(option).val(item.status_en);
+  		$(option).text(item.status_th);
+  		if (item.status_en === currentStatus) {
+  			$(option).attr('selected', true);
+  		}
+  		$(option).appendTo($(statusSelect));
+  	});
+  	$(selectBox).append($('<label>สถานะใหม่ที่ต้องการเปลี่ยน :</label>'));
+  	$(selectBox).append($(statusSelect));
+
+		let cmdBox = $('<div></div>'); 
+ 		$(cmdBox).css('width','100%');
+		$(cmdBox).css('padding','3px'); 		
+		$(cmdBox).css('clear','left'); 
+ 		$(cmdBox).css('text-align','center');
+  	let changeCmdBtn = $('<button>เปลี่ยน</button>');
+  	$(changeCmdBtn).click(()=>{
+  		doCallUpdateCaseStatus();
+  		$('#HistoryDialogBox').dialog('close');
+  	});
+  	$(changeCmdBtn).appendTo($(cmdBox));
+
+  	const spacingBox = $('<span>&nbsp;</span>');
+  	$(spacingBox).appendTo($(cmdBox));
+  	let cancelCmdBtn = $('<button>ยกเลิก</button>');
+  	$(cancelCmdBtn).click(()=>{
+  		$('#HistoryDialogBox').dialog('close');
+  	});
+		$(cancelCmdBtn).appendTo($(cmdBox));
+
+  	$('#HistoryDialogBox').append($(selectBox));
+  	$('#HistoryDialogBox').append($(cmdBox));
+
+  	let caseIDHidden = $('<input type="hidden" id="caseID" value="' + id + '"/>');
+  	$(caseIDHidden).appendTo($('#HistoryDialogBox'));
+
+  	$('#HistoryDialogBox').dialog('option', 'title', 'เปลี่ยนสถานะเคส');
+  	$('#HistoryDialogBox').dialog('open');
+  }
+
+	function doCallUpdateCaseStatus() {
+		$('body').loading('start');
+		let caseID = $('#caseID').val();
+		let newStatus = $('#newStatus').val();
+		console.log({caseID, newStatus});
+		doUpdateCaseStatus(caseID, newStatus).then((response) => {
+			console.log(response);
+			openRwCaseList();
+			$('body').loading('stop');
+		}).catch((err) => {
+			console.log(err);
+			$('body').loading('stop');
+		});
+	}
+
+	function doCallDeleteCase(caseID) {
+  	let userConfirm = confirm('โปรดยืนยันเพื่อลบรายการนี้ โดยคลิกปุ่ม ตกลง หรือ OK');
+  	if (userConfirm == true){
+  		$('body').loading('start');
+  		let newStatus = 'cancel';
+  		console.log({caseID, newStatus});
+			doUpdateCaseStatus(caseID, newStatus).then((response) => {
+				console.log(response);
+				openRwCaseList();
+				$('body').loading('stop');
+			}).catch((err) => {
+				console.log(err);
+				$('body').loading('stop');
+			});		
+  	}
+	}
+
+	function doUpdateCaseStatus(id, newStatus){
+		return new Promise(async function(resolve, reject) {
+			const main = require('../main.js');
+			let rqParams = { username: main.doGetCookie().username , id: id, update_status: newStatus};
+			let apiName = 'update_incident';
+			try {
+				let response = await doCallApi(apiName, rqParams);
+				let resO = JSON.parse(response.res.body);
+				resolve(resO);
+			} catch(e) {
+	      reject(e);
+    	}
+		});
 	}
 
 	return {
@@ -2192,6 +2370,19 @@ exports.getAge = function(dateString) {
   	}
   }
   return age;
+}
+exports.formatStudyDate = function(studydateStr){
+	if (studydateStr.length >= 8) {
+		var yy = studydateStr.substr(0, 4);
+		var mo = studydateStr.substr(4, 2);
+		var dd = studydateStr.substr(6, 2);
+		var stddf = yy + '-' + mo + '-' + dd;
+		var stdDate = new Date(stddf);
+		var month = stdDate.toLocaleString('default', { month: 'short' });
+		return dd + ' ' + month + ' ' + yy;
+	}else {
+		return studydateStr;
+	}
 }
 
 exports.invokeGetDisplayMedia = function(success) {

@@ -91,6 +91,16 @@ const doTransferArchive = function(studyID) {
 	});
 }
 
+const doDeleteStudy = function(studyID){
+	return new Promise(function(resolve, reject) {
+		var command = 'curl -X DELETE --user ' + userpass + '  ' + ORTHANC_URL + '/studies/' + studyID;
+		console.log('curl command >>', command);
+		runcommand(command).then((stdout) => {
+			resolve({response: {message: stdout}});		
+		});
+	});
+}
+
 const logger = require('./logger');
 
 app.get('/luatest', function(req, res) {
@@ -171,6 +181,13 @@ app.get('/transferdicom/(:studyID)', function(req, res) {
 		}
 	}).catch((error) => {
 		res.status(500).send({error: {code: 503, detail: error}});
+	});
+});
+
+app.get('/deletedicom/(:studyID)', function(req, res) {
+	var studyID = req.params.studyID;
+	doDeleteStudy(studyID).then((response) => {
+		res.status(200).send({status: {code: 200}, response: response});
 	});
 });
 
