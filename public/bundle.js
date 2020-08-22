@@ -318,9 +318,11 @@ function doLoadMainPage(){
 		$("#User-Identify").click(function(){
 			doShowUserProfile();
 		});
+		/*
 		$("#Home-Cmd").click(function(){
 			doShowHome();
 		});
+		*/
 		$("#Case-Cmd").click(function(){
 			doShowCase()
 		});
@@ -1518,6 +1520,7 @@ module.exports = function ( jq ) {
 	async function doSaveEditCase(caseid){
 		let newCaseData = doVerifyInputForm();
 		if (newCaseData) {
+			$('body').loading('start');
 			const main = require('../main.js');			
 			newCaseData.username = main.doGetCookie().username;
 			newCaseData.status = '';
@@ -1536,11 +1539,14 @@ module.exports = function ( jq ) {
 					alert('บันทึกการแก้ไขเคสเข้าสู่ระบบเรียบร้อยแล้ว');
 					doCloseNewCaseBox();					
 					openRwCaseList();
+					$('body').loading('stop');
 				} else if (response.res.statusCode == 500) {
 					alert('API Server ขัดข้อง');
+					$('body').loading('stop');
 				}
  			} catch(e) {
         console.log('Unexpected error occurred =>', e);
+        $('body').loading('stop');
     	}
 		}
 	}
