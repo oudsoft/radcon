@@ -6,31 +6,81 @@
 	    <h2 id="dialog-title">สร้างเคสใหม่</h2>
 	  </div>
     <div id="InputCaseBox">
-      <table width="100%" cellpadding="5" cellspacing="0" border="1">
+      <table id="MainTableForm" width="100%" cellpadding="5" cellspacing="0">
         <tr>
-          <td width="35%" align="left" class="input-label">ชื่อผู้ป่วย</td>
-          <td width="*" align="left"><input type="text" id="patient-name-th" size="50"/></td>
+          <td width="25%" align="left" class="input-label">Patient Name</td>
+          <td width="25%" align="left"><input type="text" id="patient-name-en" size="20"/></td>
+          <td width="25%" align="left" class="input-label">ชื่อผู้ป่วย(ไทย)</td>
+          <td width="*" align="left"><input type="text" id="patient-name-th" size="20"/></td>
         </tr>
         <tr>
-          <td align="left" class="input-label">Patient Name</td>
-          <td align="left"><input type="text" id="patient-name-en" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">เพศ</td>
+          <!--
+          <td colspan="4">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="10%" align="left" class="input-label">HN</td>
+                <td width="15%" align="left"><input type="text" id="hn" size="10"/></td>
+                <td width="10%" align="left" class="input-label">ACC</td>
+                <td width="15%" align="left"><input type="text" id="acc" size="10"/></td>
+                <td width="10%" align="left" class="input-label">เพศ</td>
+                <td width="15%" align="left">
+                  <select id="patient-sex">
+                    <option value="ชาย">ชาย</option>
+                    <option value="หญิง">หญิง</option>
+                  </select>
+                </td>
+                <td width="10%" align="left" class="input-label">อายุ</td>
+                <td width="*" align="left"><input type="text" id="patient-age" size="10"/></td>
+              </tr>
+            </table>
+          </td>   
+          -->
           <td align="left">
-            <select id="patient-sex">
-              <option value="ชาย">ชาย</option>
-              <option value="หญิง">หญิง</option>
+            <span class="input-label-span">HN</span>
+            <input type="text" id="hn" size="5"/>
+          </td>
+          <td align="left">
+            <span class="input-label-span">ACC</span>
+            <input type="text" id="acc" size="10"/>       
+          </td>
+          <td align="left">
+            <span class="input-label-span">เพศ</span>
+            <select id="patient-sex"><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option></select>
+          </td>
+          <td align="left">
+            <span class="input-label-span">อายุ</span>
+            <input type="text" id="patient-age" size="10"/>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">สิทธิ์ผู้ป่วย</td>
+          <td align="left">
+            <select id="patient-rights">
+              <option value="0">เลือกสิทธิ์ผู้ป่วย</option>
+            </select>
+          </td>
+          <td align="left" class="input-label">ราคา</td>
+          <td align="left"><input type="number" id="price" size="10" value="0" /></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">แพทย์เจ้าของไข้</td>
+          <td align="left"><input type="text" id="dr-owner" size="20"/></td>
+          <td align="left" class="input-label">แผนก</td>
+          <td align="left"><input type="text" id="department" size="20"/></td>
+        </tr>
+        <tr>
+          <td align="left" class="input-label">Study Desc. / Protocol Name</td>
+          <td align="left"><input type="text" id="bodypart" size="20"/></td>
+          <td align="left" class="input-label">ประภทความเร่งด่วน</td>
+          <td align="left">
+            <select id="urgent-type">
+              <option value="0">เลือกประเภท</option>
             </select>
           </td>
         </tr>
         <tr>
-          <td align="left" class="input-label">อายุ</td>
-          <td align="left"><input type="text" id="patient-age" size="10"/></td>
-        </tr>
-        <tr>
           <td align="left" class="input-label">รูปประวัติ</td>
-          <td align="left">
+          <td align="left" style="vertical-align: top">
             <div id='ManageImageCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: block;">
               <input type="button" id="OpenScaner-Cmd" value="Scanner"/>
               <input type="button" id="OpenScreenCapture-Cmd" value="Capture"/>
@@ -53,58 +103,16 @@
               <canvas id='CaptureCanvas' width='100%' height='auto'/>
             </div>
           </td>
+          <td align="left" class="input-label">รายละเอียดเพิ่มเติม</td>
+          <td align="left"><textarea id="detail" cols="25" rows="5"></textarea></td>
         </tr>
         <tr>
-          <td align="left" class="input-label">สิทธิ์ผู้ป่วย</td>
-          <td align="left">
-            <select id="patient-rights">
-              <option value="0">เลือกสิทธิ์ผู้ป่วย</option>
-            </select>
-          </td>
-        </tr>
-        <tr id="PriceRow">
-          <td align="left" class="input-label">ราคา</td>
-          <td align="left"><input type="number" id="price" size="10" value="0" /></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">HN</td>
-          <td align="left"><input type="text" id="hn" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">ACC</td>
-          <td align="left"><input type="text" id="acc" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">แผนก</td>
-          <td align="left"><input type="text" id="department" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">แพทย์เจ้าของไข้</td>
-          <td align="left"><input type="text" id="dr-owner" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">ตำแหน่งสแกน</td>
-          <td align="left"><input type="text" id="bodypart" size="50"/></td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">แพทย์อ่านฟิมล์</td>
-          <td align="left">
+          <td align="left" class="input-label">รังสีแพทย์</td>
+          <td align="left" colspan="3">
             <select id="dr-reader">
               <option value="-1">เลือกหมอ</option>
             </select>
           </td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">ประภทความเร่งด่วน</td>
-          <td align="left">
-            <select id="urgent-type">
-              <option value="0">เลือกประเภท</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td align="left" class="input-label">รายละเอียดเพิ่มเติม</td>
-          <td align="left"><textarea id="detail" cols="45" rows="5"></textarea></td>
         </tr>
       </table>
       <input type="hidden" id="mdl"/>
@@ -113,8 +121,8 @@
       <input type="hidden" id="caseID"/>
     </div>
     <div class="modal-footer">
-      <input type="Button" value=" ส่งงาน " id="SaveNewCase-Cmd"/>
-      <input type="Button" value=" ปิด " onclick="doCloseNewCaseBox()"/>
+      <input type="Button" value=" ส่งอ่าน " id="SaveNewCase-Cmd"/>
+      <input type="Button" value=" ยกเลิก " onclick="doCloseNewCaseBox()"/>
     </div>
   </div>
 </div>
@@ -292,6 +300,7 @@
     padding: 2px 2px;
     background-color: #5cb85c;
     color: white;
+    height: 70px;
   }
 
   .modal-footer {
@@ -299,10 +308,22 @@
     background-color: #5cb85c;
     color: white;
     text-align: center;
+    vertical-align: middle;;
+    height: 60px;
+  }
+
+  table#MainTableForm, th, td {
+    border: 1px solid black;
   }
 
   .input-label {
-     background-color: green;
+    background-color: green;
+  }
+
+  .input-label-span {
+    background-color: green;
+    padding: 3px;
+    border: 1px solid black;     
   }
 
   #magic-box {

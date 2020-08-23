@@ -604,6 +604,16 @@ module.exports = function ( jq ) {
   	});
 	}
 
+	const doCallTransferHistory = function(filename){
+		return new Promise(function(resolve, reject) {
+  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/transferhistory';
+  		let params = {filename: filename};
+  		$.post(orthancProxyEndPoint, params, function(data){
+				resolve(data);
+			})
+		});
+	}
+
 	const doCallDeleteDicom = function (studyID) {
 		return new Promise(function(resolve, reject) {
   		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/deletedicom/' + studyID;
@@ -640,6 +650,7 @@ module.exports = function ( jq ) {
 		doCallDicomPreview,
 		doCallDownloadDicom,
 		doCallTransferDicom,
+		doCallTransferHistory,
 		doCallDeleteDicom
 	}
 }
@@ -683,6 +694,8 @@ module.exports = function ( jq ) {
 
 	/*******************************************************/
 
+	let currentTab = undefined;
+
 	function doLoadCasePage(username) {
 		//username = username;
 		$(".mainfull").load('form/case.html', function(){
@@ -712,11 +725,9 @@ module.exports = function ( jq ) {
 
 	function doEventManagment() {
 		document.addEventListener("PACSDiv", openPACS);	
-		document.addEventListener("SendWaitDiv", evtMng);	
+		//document.addEventListener("SendWaitDiv", evtMng);	
 		document.addEventListener("ReadWaitDiv", openRwCaseList);	
-		document.addEventListener("ReadSuccessDiv", evtMng);	
-		document.addEventListener("AllCaseDiv", evtMng);	
-		document.addEventListener("SendingDiv", evtMng);	
+		document.addEventListener("ReadSuccessDiv", openRsCaseList);	
 		document.addEventListener("EditImageCmd", openImageEditor);
 	}
 
@@ -726,6 +737,7 @@ module.exports = function ( jq ) {
   }
 
 	const openPACS = function(e) {
+		currentTab = e.detail.eventname;
   	$("#Dicom-Filter").load('form/dicom-filter.html', function(){
   		$("#studydate").val(defualtPacsStudyDate).change();
   		$("#limit").val(defualtPacsLimit).change();
@@ -744,7 +756,8 @@ module.exports = function ( jq ) {
   }
 
   const openRwCaseList = async function(e) {
-		$('body').loading('start');  	  	
+		$('body').loading('start');  
+		currentTab = e.detail.eventname;	  	
 		const main = require('../main.js'); 
 		let rqParams = { username: main.doGetCookie().username }
 		let apiName = 'get_case_list';
@@ -761,17 +774,75 @@ module.exports = function ( jq ) {
     }	
   }
 
+  const openRsCaseList = async function(e) {
+		$('body').loading('start');  
+		currentTab = e.detail.eventname;	  	
+		const main = require('../main.js'); 
+		let rqParams = { username: main.doGetCookie().username }
+		let apiName = 'get_case_list';
+		try {
+			let response = await doCallApi(apiName, rqParams);
+			let resBody = JSON.parse(response.res.body);
+  		$("#ReadSuccessDiv").empty();
+  		let rwTable = doShowRsCaseList(resBody.incident);
+  		$("#ReadSuccessDiv").append($(rwTable));
+  		$('body').loading('stop');  	
+		} catch(e) {
+	    console.log('Unexpected error occurred =>', e);
+	    $('body').loading('stop');
+    }	
+  }
+
   function doShowRwCaseList(incidents) {
+  	const caseStatusList = ['draft',
+  		'wait_zip',
+  		'processing',
+  		'wait_upload',
+  		'uploading',
+		  'wait_consult',
+		  'wait_dr_consult',
+		  'consult_expire',
+		  'wait_consult_ack',
+		  'wait_response_1',
+		  'wait_response_2',
+		  'wait_response_3',
+		  'wait_response_4',
+		  'wait_response_5',
+		  'wait_response_6',
+		  'wait_dr_key'
+		];
+		let filterIncidents = incidents.filter((item, ind) => {
+			if (caseStatusList.indexOf(item.status) >= 0) {
+				return item;
+			}
+		});
+		return doShowCaseList(filterIncidents);
+  }
+
+  function doShowRsCaseList(incidents) {
+  	const caseStatusList = ['wait_close', 'wait_close2', 'close'];
+		let filterIncidents = incidents.filter((item, ind) => {
+			if (caseStatusList.indexOf(item.status) >= 0) {
+				return item;
+			}
+		});
+		return doShowCaseList(filterIncidents);
+  }
+
+  function doShowCaseList(incidents) {
 		//console.log(incidents);
 		let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">ส่วนที่ Scan</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">&nbsp;</td>');
+		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">Study Desc. / Protocol Name</td><td width="10%" align="center">ประเภทความด่วน</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">&nbsp;</td>');
 		$(rwTable).append($(headRow));
 		$(headRow).append($(headColumns));
 		for (let i=0; i < incidents.length; i++) {
 			let dataRow = $('<tr></tr>');
 			let casedatetime = incidents[i].create_date.split(' ');
-			$(dataRow).append($('<td align="center"><div class="tooltip">'+ casedatetime[0] + '<span class="tooltiptext">' + casedatetime[1] + '</span></div></td>'));
+			let casedateSegment = casedatetime[0].split('-');
+			casedateSegment = casedateSegment.join('');
+			let casedate = util.formatStudyDate(casedateSegment);
+			$(dataRow).append($('<td align="center"><div class="tooltip">'+ casedate + '<span class="tooltiptext">' + casedatetime[1] + '</span></div></td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].patient + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].gender + '</td>'));
@@ -783,6 +854,7 @@ module.exports = function ( jq ) {
 				$(dataRow).append($('<td align="center">&nbsp;</td>'));
 			}
 			$(dataRow).append($('<td align="center">'+ incidents[i].scan_type + '</td>'));
+			$(dataRow).append($('<td align="center">'+ incidents[i].urgent + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].primary_dr + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].response_dr + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].status_name + '</td>'));
@@ -791,29 +863,39 @@ module.exports = function ( jq ) {
 			$(commandCol).appendTo($(dataRow));
 			$(rwTable).append($(dataRow));
 
+			let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
+			$(operationCmdButton).click(function() {
+				$('.case-operation-show').toggleClass('case-operation-hide');
+				$('#' + incidents[i].id).toggleClass('case-operation-show');
+			});
+			$(operationCmdButton).appendTo($(commandCol));
+			
+			let operationCmdBox = $('<div id="' + incidents[i].id + '" class="case-operation-hide"></div>');
+			$(operationCmdBox).appendTo($(commandCol));
+
 			let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
 			$(historyButton).click(function() {
 				doShowPopupHistory(incidents[i].pn_history);
 			});
-			$(historyButton).appendTo($(commandCol));
+			$(historyButton).appendTo($(operationCmdBox));
 
 			let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
 			$(editCaseButton).click(function() {
 				doCallEditCase(incidents[i].id);
 			});
-			$(editCaseButton).appendTo($(commandCol));
+			$(editCaseButton).appendTo($(operationCmdBox));
 
 			let changeCaseStatusButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/status-icon.png" title="Change Case\'s Status."/>');
 			$(changeCaseStatusButton).click(function() {
 				doShowPopupChangeCaseStatus(incidents[i].id, incidents[i].status);
 			});
-			$(changeCaseStatusButton).appendTo($(commandCol));
+			$(changeCaseStatusButton).appendTo($(operationCmdBox));
 
 			let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Change Case\'s Status."/>');
 			$(deleteCaseButton).click(function() {
 				doCallDeleteCase(incidents[i].id);
 			});
-			$(deleteCaseButton).appendTo($(commandCol));
+			$(deleteCaseButton).appendTo($(operationCmdBox));
 		}
 		return $(rwTable);
   }
@@ -885,14 +967,13 @@ module.exports = function ( jq ) {
     }
   }
 
-  const doSearchOrthanc = function() {
-		$('body').loading('start');  	
+  const doGetOrthancQueryFromFilter = function(limitControl) {
   	let modality = $('#modality').val();
   	let keyName = $('#Filter-Key-1').val();
   	let keyValue = $('#Filter-Value-1').val();
   	let studydate = $('#studydate').val();
   	let limit = $('#limit').val();
-  	console.log({modality, keyName, keyValue, studydate, limit});
+  	//console.log({modality, keyName, keyValue, studydate, limit});
   	//let queryStr = '{"Level": "Series", "Expand": true, "Query": {';
   	let queryStr = '{"Level": "Study", "Expand": true, "Query": {';
   	if (modality === 'ALL') {
@@ -924,50 +1005,122 @@ module.exports = function ( jq ) {
 
   	queryStr += '}';
 
-		if (limit !== 'ALL') {
-			queryStr += ', "Limit": ' + limit + '}';
+  	if (limitControl) {
+			if (limit !== 'ALL') {
+				queryStr += ', "Limit": ' + limit + '}';
+			} else {
+				queryStr += '}';
+			}
 		} else {
 			queryStr += '}';
 		}
 
-  	console.log(queryStr);
+		return queryStr;
+  }
 
-  	let orthancUri = '/tools/find';
-  	let params = {mothod: 'post', uri: orthancUri, body: queryStr};
-  	apiconnector.doCallOrthancApiByProxy(params).then((response) =>{
-  		//console.log(response);
-  		var promiseList = new Promise(function(resolve, reject){
-	  		response.forEach((study) => {
-	  			queryStr = '{"Level": "Series", "Expand": true, "Query": {"PatientName":"' + study.PatientMainDicomTags.PatientName + '"}}';
-	  			params = {mothod: 'post', uri: orthancUri, body: queryStr};
-	  			apiconnector.doCallOrthancApiByProxy(params).then((seriesList) =>{
-	  				//console.log(seriesList);
-	  				let samplingSrs = seriesList.find((srs) => {
-	  					return (srs.MainDicomTags.SeriesDate) || (srs.MainDicomTags.SeriesDescription);
-	  				})
-	  				if (samplingSrs) {
-	  					study.SamplingSeries = samplingSrs; 
-	  				} else {
-	  					study.SamplingSeries = seriesList[0]; 
-	  				}
-	  			});
+  const doCallSearhOrthanc = function(query) {
+  	return new Promise(function(resolve, reject) {
+	  	let orthancUri = '/tools/find';
+	  	let params = {mothod: 'post', uri: orthancUri, body: query};
+	  	apiconnector.doCallOrthancApiByProxy(params).then((response) =>{
+	  		//console.log(response);
+	  		var promiseList = new Promise(function(resolve, reject){
+		  		response.forEach((study) => {
+		  			let queryStr = '{"Level": "Series", "Expand": true, "Query": {"PatientName":"' + study.PatientMainDicomTags.PatientName + '"}}';
+		  			params = {mothod: 'post', uri: orthancUri, body: queryStr};
+		  			apiconnector.doCallOrthancApiByProxy(params).then((seriesList) =>{
+		  				//console.log(seriesList);
+		  				let samplingSrs = seriesList.find((srs) => {
+		  					return (srs.MainDicomTags.SeriesDate) || (srs.MainDicomTags.SeriesDescription);
+		  				})
+		  				if (samplingSrs) {
+		  					study.SamplingSeries = samplingSrs; 
+		  				} else {
+		  					study.SamplingSeries = seriesList[0]; 
+		  				}
+		  			});
+		  		});
+		  		setTimeout(()=> {
+						resolve(response);
+					}, 1200);
 	  		});
-	  		setTimeout(()=> {
-					resolve(response);
-				}, 1200);
-  		});
-			Promise.all([promiseList]).then((ob)=>{  
-				console.log('Final JSON =>', ob[0]);		
-	  		$("#Dicom-Result").empty();
-	  		let resultTable = doShowOrthancResult(ob[0]);
-	  		$("#Dicom-Result").append($(resultTable));
-	  		$('body').loading('stop');
-	  	}).catch((err) => {
-	  		console.log(err);
-	  		$('body').loading('stop');
-	  	});
+				Promise.all([promiseList]).then((ob)=>{  
+					//console.log('Final JSON =>', ob[0]);		
+					resolve(ob[0]);
+				}).catch((err)=>{
+					reject(err);
+				});
+			});
   	});
+  }
 
+  const doSearchOrthanc = function() {
+		$('body').loading('start');  	
+  	let queryStr;
+  	let limit = $('#limit').val();
+  	let orthancViewPage = $('#CurrentPage').val();
+  	if (limit !== 'ALL') {
+  		if (orthancViewPage === undefined){
+  			queryStr = doGetOrthancQueryFromFilter(true);
+  		} else if (orthancViewPage === 'first') {
+  			queryStr = doGetOrthancQueryFromFilter(false);
+  		} else {
+  			queryStr = doGetOrthancQueryFromFilter(true);
+  		}
+  	} else {
+  		queryStr = doGetOrthancQueryFromFilter(false);
+  	}
+  	doCallSearhOrthanc(queryStr).then(async (studies) => {
+  		//console.log('get studies',studies)
+  		$("#Dicom-Result").empty();
+  		
+  		let resultTable;
+
+			if (limit === 'ALL') {  		
+  			resultTable = doShowOrthancResult(studies);
+  			$("#Dicom-Result").append($(resultTable));
+  		} else {
+  			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 5px;"></div>');
+  			
+  			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
+	  			resultTable = doShowOrthancResult(studies);
+  				$("#Dicom-Result").append($(resultTable));
+  				if (studies.length > Number(limit)) {
+	  				let nextPageCmd = $('<button>Next</button>');
+	  				$(nextPageCmd).click(()=>{
+							doSearchOrthanc();
+	  				});
+	  				$(nextPageCmd).appendTo($(pageControlBox));
+	  				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="first"/>');
+	  				$(currentPageHidden).appendTo($(pageControlBox));
+	  				$("#Dicom-Result").append($(pageControlBox));
+	  			}
+  			} else if (orthancViewPage === 'first') {
+  				let filterStudies = await studies.filter((item, ind) => {
+  					if (ind >= Number(limit)) {
+  						return item;
+  					}
+  				});
+  				resultTable = doShowOrthancResult(filterStudies);
+	  			$("#Dicom-Result").append($(resultTable));
+
+  				let previousPageCmd = $('<button>Previous</button>');
+  				$(previousPageCmd).click(()=>{
+  					doSearchOrthanc();
+  				});
+  				$(previousPageCmd).appendTo($(pageControlBox));
+  				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="last"/>');
+  				$(currentPageHidden).appendTo($(pageControlBox));
+  				$("#Dicom-Result").append($(pageControlBox));
+
+  			}
+  		}
+  		
+  		$('body').loading('stop');
+  	}).catch((err) => {
+  		console.log(err);
+  		$('body').loading('stop');
+  	});
   }
 
   function doShowOrthancResult(dj){
@@ -982,7 +1135,13 @@ module.exports = function ( jq ) {
 			if ((dj[i].MainDicomTags) && (dj[i].SamplingSeries)){
 				if (dj[i].MainDicomTags.StudyDescription) {
 					desc = '<div class="study-desc">' + dj[i].MainDicomTags.StudyDescription + '</div>';
+					bdp = dj[i].MainDicomTags.StudyDescription;
 				} else {
+					if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
+						bdp = dj[i].SamplingSeries.MainDicomTags.ProtocolName;
+					} else {
+						bdp = '';
+					}
 					desc = '';
 				}
 				if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
@@ -1011,7 +1170,7 @@ module.exports = function ( jq ) {
 				} else {
 					sa = sa + '/-';
 				}
-				bdp = dj[i].SamplingSeries.MainDicomTags.BodyPartExamined;
+
 				let dataRow = $('<tr></tr>');
 				let dataColText = '';
 				dataColText += '<td align="center">'+ (i+1) + '</td>'
@@ -1192,15 +1351,19 @@ module.exports = function ( jq ) {
 					success: function(data){
 						console.log('Uploaded.', data);
 						var imageUrl = data.link;
+						var imageUrlArgs = imageUrl.split('/');
+						var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
 						$('#magic-box').show(); 
 						$('#magic-box').html('<div>อัพโหลดสำเร็จ</div>');
 						setTimeout(() => {
-							$('#magic-box').html('');
-							$('#magic-box').hide(); 
-							doAddHistory(imageUrl);
-							doRenderHistoryPreview();
-							$(fileBrowser).remove();
-							$("#sub-dialog").empty();
+							apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
+								$('#magic-box').html('');
+								$('#magic-box').hide(); 
+								doAddHistory(transferRef.cloud.link);
+								doRenderHistoryPreview();
+								$(fileBrowser).remove();
+								$("#sub-dialog").empty();
+							});
 						}, 1200);
 					},
 					error: function(error){
@@ -1297,9 +1460,13 @@ module.exports = function ( jq ) {
   	let params = {image: imageData};
     let uploadImageUrl = apiconnector.proxyRootUri + "/scannerupload";
 		$.post(uploadImageUrl, params, function(data){
-			doAddHistory(data.link);
-			doRenderHistoryPreview()
-		  //scanUploadForm.style.display = 'none';
+			var imageUrl = data.link;
+			var imageUrlArgs = imageUrl.split('/');
+			var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
+			apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
+				doAddHistory(transferRef.cloud.link);
+				doRenderHistoryPreview();
+			});
 		}).fail(function(error) { 
 			console.log(error); 
 			alert('Error:' + error);
@@ -1445,9 +1612,13 @@ module.exports = function ( jq ) {
 					$('#ManageImageCmdDiv').toggle();
 					$('#SaveEditCmdDiv').toggle();
 					$('#CaptureCanvasDiv').empty().hide();
-					let imgURL = e.link;
-					doAddHistory(imgURL);
-					doRenderHistoryPreview()
+					var imageUrl = e.link;
+					var imageUrlArgs = imageUrl.split('/');
+					var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
+					apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
+						doAddHistory(transferRef.cloud.link);
+						doRenderHistoryPreview();
+					});
 				}
 			);
 
@@ -1620,8 +1791,12 @@ module.exports = function ( jq ) {
 				console.log(response);
 				if (response.res.statusCode == 200) {
 					alert('บันทึกการแก้ไขเคสเข้าสู่ระบบเรียบร้อยแล้ว');
-					doCloseNewCaseBox();					
-					openRwCaseList();
+					doCloseNewCaseBox();	
+					if (currentTab === 'ReadWaitDiv') {		
+						openRwCaseList();
+					} else if (currentTab === 'ReadSuccessDiv') {		
+						openRsCaseList();
+					}
 					$('body').loading('stop');
 				} else if (response.res.statusCode == 500) {
 					alert('API Server ขัดข้อง');
@@ -1635,10 +1810,14 @@ module.exports = function ( jq ) {
 	}
 
   function doShowPopupChangeCaseStatus(id, currentStatus){
+  	const spacingBox = $('<span>&nbsp;</span>');
+  	const inputStyleClass = {"font-family": "THSarabunNew", "font-size": "24px"};
+
   	$('#HistoryDialogBox').empty();
 
   	let selectBox = $('<div></div>'); 
   	let statusSelect = $('<select id="newStatus"></select>');
+  	$(statusSelect).css(inputStyleClass);
 
   	apiconnector.RadConStatus.forEach((item) => {
   		let option = $('<option></option>');
@@ -1657,16 +1836,18 @@ module.exports = function ( jq ) {
 		$(cmdBox).css('padding','3px'); 		
 		$(cmdBox).css('clear','left'); 
  		$(cmdBox).css('text-align','center');
+ 		$(cmdBox).css('margin-top','10px');
   	let changeCmdBtn = $('<button>เปลี่ยน</button>');
+  	$(changeCmdBtn).css(inputStyleClass);
   	$(changeCmdBtn).click(()=>{
   		doCallUpdateCaseStatus();
   		$('#HistoryDialogBox').dialog('close');
   	});
   	$(changeCmdBtn).appendTo($(cmdBox));
 
-  	const spacingBox = $('<span>&nbsp;</span>');
   	$(spacingBox).appendTo($(cmdBox));
   	let cancelCmdBtn = $('<button>ยกเลิก</button>');
+  	$(cancelCmdBtn).css(inputStyleClass);
   	$(cancelCmdBtn).click(()=>{
   		$('#HistoryDialogBox').dialog('close');
   	});
@@ -1689,7 +1870,11 @@ module.exports = function ( jq ) {
 		console.log({caseID, newStatus});
 		doUpdateCaseStatus(caseID, newStatus).then((response) => {
 			console.log(response);
-			openRwCaseList();
+			if (currentTab === 'ReadWaitDiv') {		
+				openRwCaseList();
+			} else if (currentTab === 'ReadSuccessDiv') {		
+				openRsCaseList();
+			}
 			$('body').loading('stop');
 		}).catch((err) => {
 			console.log(err);
@@ -1705,7 +1890,11 @@ module.exports = function ( jq ) {
   		console.log({caseID, newStatus});
 			doUpdateCaseStatus(caseID, newStatus).then((response) => {
 				console.log(response);
-				openRwCaseList();
+				if (currentTab === 'ReadWaitDiv') {		
+					openRwCaseList();
+				} else if (currentTab === 'ReadSuccessDiv') {		
+					openRsCaseList();
+				}
 				$('body').loading('stop');
 			}).catch((err) => {
 				console.log(err);
@@ -1717,7 +1906,8 @@ module.exports = function ( jq ) {
 	function doUpdateCaseStatus(id, newStatus){
 		return new Promise(async function(resolve, reject) {
 			const main = require('../main.js');
-			let rqParams = { username: main.doGetCookie().username , id: id, update_status: newStatus};
+			let rqParams = { username: main.doGetCookie().username , inc_id: id, update_status: newStatus};
+			//console.log('rqParams', rqParams);
 			let apiName = 'update_incident';
 			try {
 				let response = await doCallApi(apiName, rqParams);

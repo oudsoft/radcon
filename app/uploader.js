@@ -7,8 +7,8 @@ const multer = require('multer');
 const base64Img = require('base64-img');
 const exec = require('child_process').exec;
 
-const DWLD = '/img/usr/upload';
-const USRUPLOAD_DIR = '/public' + DWLD;
+const DWLD = process.env.USRUPLOAD_PATH;
+const USRUPLOAD_DIR = process.env.USRUPLOAD_DIR;
 const currentDir = __dirname;
 const parentDir = path.normalize(currentDir + '/..');
 const usrUploadDir = parentDir + USRUPLOAD_DIR;

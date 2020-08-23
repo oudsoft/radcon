@@ -15,6 +15,7 @@ const currentDir = __dirname;
 const parentDir = path.normalize(currentDir + '/..');
 const usrPreviewDir = parentDir + process.env.USRPREVIEW_DIR;
 const usrArchiveDir = parentDir + process.env.USRARCHIVE_DIR;
+const usrUploadDir = parentDir + process.env.USRUPLOAD_DIR;
 
 const proxyRequest = function(rqParam) {
 	return new Promise(function(resolve, reject) {
@@ -86,6 +87,18 @@ const doTransferArchive = function(studyID) {
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
 			let link = 'https://radconnext.com/rad_test/inc_files/' + archiveFilename;
+			resolve({link: link});		
+		});
+	});
+}
+
+const doTransferHistory = function(fileName) {
+	return new Promise(function(resolve, reject) {
+		let filePath = usrUploadDir + '/' + fileName;
+		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + filePath + ' ftp://119.59.125.63/domains/radconnext.com/private_html/rad_test/inc_files/';
+		console.log('curl command >>', command);
+		runcommand(command).then((stdout) => {
+			let link = 'https://radconnext.com/rad_test/inc_files/' + fileName;
 			resolve({link: link});		
 		});
 	});
@@ -191,4 +204,13 @@ app.get('/deletedicom/(:studyID)', function(req, res) {
 	});
 });
 
+app.post('/transferhistory', function(req, res) {
+	var fileName = req.body.filename;
+	doTransferHistory(fileName).then((response) => {
+		let localLink = process.env.USRUPLOAD_DIR + '/' + fileName;
+		res.status(200).send({local: {link: localLink}, cloud: {link: response.link}});
+	}).catch((error) => {
+		res.status(500).send({error: {code: 502, detail: error}});
+	});
+});
 module.exports = app;
