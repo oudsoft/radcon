@@ -815,22 +815,38 @@ module.exports = function ( jq ) {
 		  'wait_response_6',
 		  'wait_dr_key'
 		];
-		let filterIncidents = incidents.filter((item, ind) => {
-			if (caseStatusList.indexOf(item.status) >= 0) {
-				return item;
+		if ((incidents) && (incidents.length > 0)) {
+			let filterIncidents = incidents.filter((item, ind) => {
+				if (caseStatusList.indexOf(item.status) >= 0) {
+					return item;
+				}
+			});
+			if (filterIncidents > 0) {
+				return doShowCaseList(filterIncidents);				
+			} else {
+				return $('<div>Cases not found.</div>');
 			}
-		});
-		return doShowCaseList(filterIncidents);
+		} else {
+			return $('<div>Cases not found.</div>');
+		}
   }
 
   function doShowRsCaseList(incidents) {
   	const caseStatusList = ['wait_close', 'wait_close2', 'close'];
-		let filterIncidents = incidents.filter((item, ind) => {
-			if (caseStatusList.indexOf(item.status) >= 0) {
-				return item;
+		if ((incidents) && (incidents.length > 0)) {
+			let filterIncidents = incidents.filter((item, ind) => {
+				if (caseStatusList.indexOf(item.status) >= 0) {
+					return item;
+				}
+			});
+			if (filterIncidents > 0) {
+				return doShowCaseList(filterIncidents);				
+			} else {
+				return $('<div>Cases not found.</div>');
 			}
-		});
-		return doShowCaseList(filterIncidents);
+		} else {
+			return $('<div>Cases not found.</div>');
+		}
   }
 
   function doShowCaseList(incidents) {
