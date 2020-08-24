@@ -14,27 +14,6 @@
           <td width="*" align="left"><input type="text" id="patient-name-th" size="20"/></td>
         </tr>
         <tr>
-          <!--
-          <td colspan="4">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="10%" align="left" class="input-label">HN</td>
-                <td width="15%" align="left"><input type="text" id="hn" size="10"/></td>
-                <td width="10%" align="left" class="input-label">ACC</td>
-                <td width="15%" align="left"><input type="text" id="acc" size="10"/></td>
-                <td width="10%" align="left" class="input-label">เพศ</td>
-                <td width="15%" align="left">
-                  <select id="patient-sex">
-                    <option value="ชาย">ชาย</option>
-                    <option value="หญิง">หญิง</option>
-                  </select>
-                </td>
-                <td width="10%" align="left" class="input-label">อายุ</td>
-                <td width="*" align="left"><input type="text" id="patient-age" size="10"/></td>
-              </tr>
-            </table>
-          </td>   
-          -->
           <td align="left">
             <span class="input-label-span">HN</span>
             <input type="text" id="hn" size="5"/>
@@ -82,9 +61,15 @@
           <td align="left" class="input-label">รูปประวัติ</td>
           <td align="left" style="vertical-align: top">
             <div id='ManageImageCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: block;">
+              <!--
               <input type="button" id="OpenScaner-Cmd" value="Scanner"/>
               <input type="button" id="OpenScreenCapture-Cmd" value="Capture"/>
               <input type="button" id="OpenFileDialog-Cmd" value="Attach File"/>
+              -->
+              
+              <button id="OpenScaner-Cmd" class="radcon-button button-bw">Scanner</button>
+              <button id="OOpenScreenCapture-Cmd" class="radcon-button button-bw">Capture</button>
+              <button id="OpenFileDialog-Cmd" class="radcon-button button-bw">Attach File</button>
             </div>
             <div id='SaveEditCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: none; float: left;">
               <input type="button" id="SaveEdit-Cmd" value="Save Image"/>
@@ -361,4 +346,29 @@
     content: "\00d7"; /* This will render the 'X' */
   }
 
+  .radcon-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 1px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    max-height: 30px;
+  }
+
+  .button-bw {
+    background-color: white;
+    color: black;
+    border: 2px solid #555555;
+  }
+
+  .button-bw:hover {
+    background-color: #555555;
+    color: white;
+  }  
 </style>

@@ -302,10 +302,14 @@ function doLoadMainPage(){
 	let rootname = paths[1];
 	let jqueryUiCssUrl = "/" + rootname + "/lib/jquery-ui.min.css";
 	let jqueryUiJsUrl = "/" + rootname + "/lib/jquery-ui.min.js";
+	let jqueryLoadingUrl = 'lib/jquery.loading.min.js';
+	let jqueryNotifyUrl = 'lib/notify.min.js';
 	$('head').append('<script src="' + jqueryUiJsUrl + '"></script>');
 	$('head').append('<link rel="stylesheet" href="' + jqueryUiCssUrl + '" type="text/css" />');
 	//https://carlosbonetti.github.io/jquery-loading/
-	$('head').append('<script src="lib/jquery.loading.min.js"></script>');
+	$('head').append('<script src="' + jqueryLoadingUrl + '"></script>');
+	//https://notifyjs.jpillora.com/
+	$('head').append('<script src="' + jqueryNotifyUrl + '"></script>');
 
   $('#HistoryDialogBox').dialog({ 
     modal: true, autoOpen: false, width: 350, resizable: false, title: 'ประวัติผู้ป่วย'
@@ -865,13 +869,26 @@ module.exports = function ( jq ) {
 
 			let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
 			$(operationCmdButton).click(function() {
-				$('.case-operation-show').toggleClass('case-operation-hide');
-				$('#' + incidents[i].id).toggleClass('case-operation-show');
+				$('.operation-row').each((index, child) => {
+					/*
+					if ($(child).css('display') === 'block') {
+						//$(child).slideToggle( "slow" );
+						$(child).hide();
+					}
+					*/
+					$(child).hide();
+				})
+				$('#' + incidents[i].id).slideToggle( "slow" );
 			});
 			$(operationCmdButton).appendTo($(commandCol));
 			
-			let operationCmdBox = $('<div id="' + incidents[i].id + '" class="case-operation-hide"></div>');
-			$(operationCmdBox).appendTo($(commandCol));
+			let commnandRow = $('<tr id="' + incidents[i].id + '" style="background-color: #828080; display: none;" class="operation-row"></tr>');
+			$(commnandRow).appendTo($(rwTable));
+			let operationCol = $('<td colspan="12" align="right"></td>');
+			$(operationCol).appendTo($(commnandRow));
+
+			let operationCmdBox = $('<div></div>');
+			$(operationCmdBox).appendTo($(operationCol));
 
 			let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
 			$(historyButton).click(function() {
@@ -1621,7 +1638,6 @@ module.exports = function ( jq ) {
 					});
 				}
 			);
-
 		});		
 	}
 
