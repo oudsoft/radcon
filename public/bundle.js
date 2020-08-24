@@ -1803,9 +1803,11 @@ module.exports = function ( jq ) {
 					alert('บันทึกการแก้ไขเคสเข้าสู่ระบบเรียบร้อยแล้ว');
 					doCloseNewCaseBox();	
 					if (currentTab === 'ReadWaitDiv') {		
-						openRwCaseList();
+						//openRwCaseList();
+						$("#ReadWaitTab").trigger("click");
 					} else if (currentTab === 'ReadSuccessDiv') {		
-						openRsCaseList();
+						//openRsCaseList();
+						$("#ReadSuccessTab").trigger("click");
 					}
 					$('body').loading('stop');
 				} else if (response.res.statusCode == 500) {
@@ -1881,9 +1883,11 @@ module.exports = function ( jq ) {
 		doUpdateCaseStatus(caseID, newStatus).then((response) => {
 			console.log(response);
 			if (currentTab === 'ReadWaitDiv') {		
-				openRwCaseList();
+				//openRwCaseList();
+				$("#ReadWaitTab").trigger("click");
 			} else if (currentTab === 'ReadSuccessDiv') {		
-				openRsCaseList();
+				//openRsCaseList();
+				$("#ReadSuccessTab").trigger("click");
 			}
 			$('body').loading('stop');
 		}).catch((err) => {
@@ -1901,9 +1905,11 @@ module.exports = function ( jq ) {
 			doUpdateCaseStatus(caseID, newStatus).then((response) => {
 				console.log(response);
 				if (currentTab === 'ReadWaitDiv') {		
-					openRwCaseList();
+					//openRwCaseList();
+					$("#ReadWaitTab").trigger("click");
 				} else if (currentTab === 'ReadSuccessDiv') {		
-					openRsCaseList();
+					//openRsCaseList();
+					$("#ReadSuccessTab").trigger("click");
 				}
 				$('body').loading('stop');
 			}).catch((err) => {
