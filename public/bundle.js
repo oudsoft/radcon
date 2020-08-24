@@ -870,12 +870,6 @@ module.exports = function ( jq ) {
 			let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
 			$(operationCmdButton).click(function() {
 				$('.operation-row').each((index, child) => {
-					/*
-					if ($(child).css('display') === 'block') {
-						//$(child).slideToggle( "slow" );
-						$(child).hide();
-					}
-					*/
 					$(child).hide();
 				})
 				$('#' + incidents[i].id).slideToggle( "slow" );
@@ -1094,15 +1088,15 @@ module.exports = function ( jq ) {
   		let resultTable;
 
 			if (limit === 'ALL') {  		
-  			resultTable = doShowOrthancResult(studies);
+  			resultTable = doShowOrthancResult(studies, 0);
   			$("#Dicom-Result").append($(resultTable));
   		} else {
   			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 5px;"></div>');
   			
   			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
-	  			resultTable = doShowOrthancResult(studies);
+	  			resultTable = doShowOrthancResult(studies, 0);
   				$("#Dicom-Result").append($(resultTable));
-  				if (studies.length > Number(limit)) {
+  				//if (studies.length > Number(limit)) {
 	  				let nextPageCmd = $('<button>Next</button>');
 	  				$(nextPageCmd).click(()=>{
 							doSearchOrthanc();
@@ -1111,14 +1105,14 @@ module.exports = function ( jq ) {
 	  				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="first"/>');
 	  				$(currentPageHidden).appendTo($(pageControlBox));
 	  				$("#Dicom-Result").append($(pageControlBox));
-	  			}
+	  			//}
   			} else if (orthancViewPage === 'first') {
   				let filterStudies = await studies.filter((item, ind) => {
   					if (ind >= Number(limit)) {
   						return item;
   					}
   				});
-  				resultTable = doShowOrthancResult(filterStudies);
+  				resultTable = doShowOrthancResult(filterStudies, Number(limit));
 	  			$("#Dicom-Result").append($(resultTable));
 
   				let previousPageCmd = $('<button>Previous</button>');
@@ -1140,7 +1134,7 @@ module.exports = function ( jq ) {
   	});
   }
 
-  function doShowOrthancResult(dj){
+  function doShowOrthancResult(dj, startRef){
 		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
 		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
@@ -1190,7 +1184,7 @@ module.exports = function ( jq ) {
 
 				let dataRow = $('<tr></tr>');
 				let dataColText = '';
-				dataColText += '<td align="center">'+ (i+1) + '</td>'
+				dataColText += '<td align="center">'+ (i + 1 + startRef) + '</td>'
 				dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientID + '</td>'
 				dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
 				dataColText += '<td align="left">' + sa + '</td>'
