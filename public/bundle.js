@@ -816,11 +816,13 @@ module.exports = function ( jq ) {
 		  'wait_dr_key'
 		];
 		if ((incidents) && (incidents.length > 0)) {
+			console.log(incidents);
 			let filterIncidents = incidents.filter((item, ind) => {
 				if (caseStatusList.indexOf(item.status) >= 0) {
 					return item;
 				}
 			});
+			console.log(filterIncidents);
 			if (filterIncidents > 0) {
 				return doShowCaseList(filterIncidents);				
 			} else {
@@ -892,9 +894,9 @@ module.exports = function ( jq ) {
 			});
 			$(operationCmdButton).appendTo($(commandCol));
 			
-			let commnandRow = $('<tr id="' + incidents[i].id + '" style="background-color: #828080; display: none;" class="operation-row"></tr>');
+			let commnandRow = $('<tr></tr>');
 			$(commnandRow).appendTo($(rwTable));
-			let operationCol = $('<td colspan="12" align="right"></td>');
+			let operationCol = $('<td id="' + incidents[i].id + '"colspan="12" align="right" style="background-color: #828080; display: none;" class="operation-row"></td>');
 			$(operationCol).appendTo($(commnandRow));
 
 			let operationCmdBox = $('<div></div>');
