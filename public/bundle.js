@@ -1508,6 +1508,7 @@ module.exports = function ( jq ) {
 		let video = document.getElementById('CaptureVideo');
 		let ctx =  canvas.getContext('2d');
 		let vw, vh;
+		$('#myModal').hide();
 		util.invokeGetDisplayMedia(function(screen) {
 			util.addStreamStopListener(screen, function() {
 				console.log('Stop Stream.');
@@ -1525,7 +1526,6 @@ module.exports = function ( jq ) {
 
 			video.srcObject = screen;
 			setTimeout(() => {
-				$('#myModal').hide();
 				$('#sub-dialog').show();
 				$('#SaveEdit-Cmd').hide();
 
