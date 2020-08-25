@@ -823,7 +823,7 @@ module.exports = function ( jq ) {
 				}
 			});
 			console.log(filterIncidents);
-			if (filterIncidents > 0) {
+			if (filterIncidents.length > 0) {
 				return doShowCaseList(filterIncidents);				
 			} else {
 				return $('<div>Cases not found.</div>');
@@ -841,7 +841,7 @@ module.exports = function ( jq ) {
 					return item;
 				}
 			});
-			if (filterIncidents > 0) {
+			if (filterIncidents.length > 0) {
 				return doShowCaseList(filterIncidents);				
 			} else {
 				return $('<div>Cases not found.</div>');
