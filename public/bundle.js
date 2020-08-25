@@ -1527,7 +1527,6 @@ module.exports = function ( jq ) {
 			setTimeout(() => {
 				$('#myModal').hide();
 				$('#sub-dialog').show();
-				$('#sub-dialog').css({'width': vw, 'height': vh});
 				$('#SaveEdit-Cmd').hide();
 
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -1610,48 +1609,51 @@ module.exports = function ( jq ) {
 			$('#CaptureCanvasDiv').css('height', Number(tuiCanvas.height) + 120);
 		},500);
 		//require('fabric');
-		console.log('keng');
+		let saveImageClickCount = 0;
 		$('#SaveEdit-Cmd').show();
 		$('#SaveEdit-Cmd').click(function(){
-			console.log('Krai Click?');
-			var paths = window.location.pathname.split('/');
-			var rootname = paths[1];
-			var url = "/" + rootname + "/editionupload";                
-			var tuiCanvas = imageEditor.editor._graphics.getCanvas();
-			
-			var dataURL = tuiCanvas.toDataURL("image/jpeg", 1.0);
+			console.log(saveImageClickCount);
+			if (saveImageClickCount == 0) {
+				saveImageClickCount++;
+				console.log('Krai Click?');
+				var paths = window.location.pathname.split('/');
+				var rootname = paths[1];
+				var url = "/" + rootname + "/editionupload";                
+				var tuiCanvas = imageEditor.editor._graphics.getCanvas();
+				
+				var dataURL = tuiCanvas.toDataURL("image/jpeg", 1.0);
 
-			var base64ImageContent = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
-			var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');           
+				var base64ImageContent = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+				var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');           
 
-			var formData = new FormData();
-			formData.append('picture', blob);
-			console.log(formData);
-			$.ajax({
-				url: url, 
-				type: "POST", 
-				cache: false,
-				contentType: false,
-				processData: false,
-				data: formData}).done(function(response){
-					console.log(response);
-					let context = tuiCanvas.getContext('2d');
-					//context.setTransform(1, 0, 0, 1, 0, 0);
-					context.clearRect(0, 0, tuiCanvas.width, tuiCanvas.height);
-					//context.restore();
+				var formData = new FormData();
+				formData.append('picture', blob);
+				$.ajax({
+					url: url, 
+					type: "POST", 
+					cache: false,
+					contentType: false,
+					processData: false,
+					data: formData}).done(function(response){
+						console.log(response);
+						let context = tuiCanvas.getContext('2d');
+						//context.setTransform(1, 0, 0, 1, 0, 0);
+						context.clearRect(0, 0, tuiCanvas.width, tuiCanvas.height);
+						//context.restore();
 
-					$('#CaptureCanvasDiv').empty();
-					$('#SaveEdit-Cmd').hide();
-					doCloseSubModal();
-					var imageUrl = response.link;
-					var imageUrlArgs = imageUrl.split('/');
-					var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
-					apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
-						doAddHistory(transferRef.cloud.link);
-						doRenderHistoryPreview();
-					});
-				}
-			);
+						$('#CaptureCanvasDiv').empty();
+						$('#SaveEdit-Cmd').hide();
+						doCloseSubModal();
+						var imageUrl = response.link;
+						var imageUrlArgs = imageUrl.split('/');
+						var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
+						apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
+							doAddHistory(transferRef.cloud.link);
+							doRenderHistoryPreview();
+						});
+					}
+				);
+			}
 		});		
 	}
 
