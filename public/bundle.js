@@ -209,11 +209,17 @@ $( document ).ready(function() {
 function doCallLoginApi(user) {
 	return new Promise(function(resolve, reject) {
 		const loginApiName = 'chk_login'
-
 		const body = { username: user.username, password: user.password };		
 		var realUrl = apiconnector.hostURL + '/' + loginApiName + apiconnector.apiExt;
 		var params = {method: 'post', body: body, url: realUrl, apiname: loginApiName};
+		/*
+		console.log('apiName', loginApiName);
+		console.log('body', body);
+		console.log('realUrl', realUrl);
+		console.log('params', params);
+		*/
 		apiconnector.doCallApiByProxy(loginApiName, params).then((response) => {
+			//console.log('response', response);
 			resolve(response);			
 		}).catch((err) => {
 			console.log(JSON.stringify(err));
@@ -482,8 +488,12 @@ const hostApiPort = '8080';
 const hostIP = '103.91.189.94';
 const hostOrthancApiPort = '8042';
 const hostName = hostIP + ':' + hostApiPort;
-//const hostURL = 'http://' + hostName + '/api';
-const hostURL = 'https://radconnext.com/rad_test/api';
+const domainName = 'radconnext.com';
+
+
+//const hostURL = 'https://radconnext.com/rad_test/api';
+const hostURL = 'https://radconnext.com/radconnext/api';
+
 const hostOrthancUrl = 'http://' + hostIP + ':' +  hostOrthancApiPort;
 const orthancProxyApi = '/orthancproxy';
 
@@ -677,8 +687,14 @@ module.exports = function ( jq ) {
 			const body = rqParams;		
 			var realUrl = apiconnector.hostURL + '/' + apiName + apiconnector.apiExt;
 			var params = {method: 'post', body: body, url: realUrl, apiname: apiName};
+			/*
+			console.log('apiName', apiName);
+			console.log('body', body);
+			console.log('realUrl', realUrl);			
+			console.log('params', params);
+			*/
 			apiconnector.doCallApiByProxy(apiName, params).then((response) => {
-				//resolve(JSON.stringify(response));	
+				//console.log('response', response);
 				resolve(response);
 			}).catch((err) => {
 				console.log(JSON.stringify(err));
