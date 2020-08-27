@@ -673,7 +673,7 @@ module.exports = function ( jq ) {
 	const apiconnector = require('./apiconnect.js')($);
 	const util = require('./utilmod.js');
 	require('jquery-simple-upload');
-	
+
 	const defualtPacsLimit = '30';
 	const defualtPacsStudyDate = 'ALL';
 
@@ -681,13 +681,13 @@ module.exports = function ( jq ) {
 
 	function doCallApi(apiName, rqParams) {
 		return new Promise(function(resolve, reject) {
-			const body = rqParams;		
+			const body = rqParams;
 			var realUrl = apiconnector.hostURL + '/' + apiName + apiconnector.apiExt;
 			var params = {method: 'post', body: body, url: realUrl, apiname: apiName};
 			/*
 			console.log('apiName', apiName);
 			console.log('body', body);
-			console.log('realUrl', realUrl);			
+			console.log('realUrl', realUrl);
 			console.log('params', params);
 			*/
 			apiconnector.doCallApiByProxy(apiName, params).then((response) => {
@@ -709,7 +709,7 @@ module.exports = function ( jq ) {
 		$(".mainfull").load('form/case.html', function(){
 			//$("#PACSTab").css("float", "right");
 			doEventManagment();
-			/*			
+			/*
 			doLoadCaseList(username);
 			$("#SendWaitTab").trigger("click");
 			$("#SendWaitTab").addClass('active');
@@ -720,7 +720,7 @@ module.exports = function ( jq ) {
 	}
 
 	async function doLoadCaseList(username) {
-		const main = require('../main.js'); 
+		const main = require('../main.js');
 		let rqParams = { username: main.doGetCookie().username }
 		let apiName = 'get_case_list';
 		try {
@@ -732,10 +732,10 @@ module.exports = function ( jq ) {
 	}
 
 	function doEventManagment() {
-		document.addEventListener("PACSDiv", openPACS);	
-		//document.addEventListener("SendWaitDiv", evtMng);	
-		document.addEventListener("ReadWaitDiv", openRwCaseList);	
-		document.addEventListener("ReadSuccessDiv", openRsCaseList);	
+		document.addEventListener("PACSDiv", openPACS);
+		//document.addEventListener("SendWaitDiv", evtMng);
+		document.addEventListener("ReadWaitDiv", openRwCaseList);
+		document.addEventListener("ReadSuccessDiv", openRsCaseList);
 		document.addEventListener("EditImageCmd", openImageEditor);
 	}
 
@@ -764,9 +764,9 @@ module.exports = function ( jq ) {
   }
 
   const openRwCaseList = async function(e) {
-		$('body').loading('start');  
-		currentTab = e.detail.eventname;	  	
-		const main = require('../main.js'); 
+		$('body').loading('start');
+		currentTab = e.detail.eventname;
+		const main = require('../main.js');
 		let rqParams = { username: main.doGetCookie().username }
 		let apiName = 'get_case_list';
 		try {
@@ -775,17 +775,17 @@ module.exports = function ( jq ) {
   		$("#ReadWaitDiv").empty();
   		let rwTable = doShowRwCaseList(resBody.incident);
   		$("#ReadWaitDiv").append($(rwTable));
-  		$('body').loading('stop');  	
+  		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
 	    $('body').loading('stop');
-    }	
+    }
   }
 
   const openRsCaseList = async function(e) {
-		$('body').loading('start');  
-		currentTab = e.detail.eventname;	  	
-		const main = require('../main.js'); 
+		$('body').loading('start');
+		currentTab = e.detail.eventname;
+		const main = require('../main.js');
 		let rqParams = { username: main.doGetCookie().username }
 		let apiName = 'get_case_list';
 		try {
@@ -794,11 +794,11 @@ module.exports = function ( jq ) {
   		$("#ReadSuccessDiv").empty();
   		let rwTable = doShowRsCaseList(resBody.incident);
   		$("#ReadSuccessDiv").append($(rwTable));
-  		$('body').loading('stop');  	
+  		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
 	    $('body').loading('stop');
-    }	
+    }
   }
 
   function doShowRwCaseList(incidents) {
@@ -820,15 +820,13 @@ module.exports = function ( jq ) {
 		  'wait_dr_key'
 		];
 		if ((incidents) && (incidents.length > 0)) {
-			console.log(incidents);
 			let filterIncidents = incidents.filter((item, ind) => {
 				if (caseStatusList.indexOf(item.status) >= 0) {
 					return item;
 				}
 			});
-			console.log(filterIncidents);
 			if (filterIncidents.length > 0) {
-				return doShowCaseList(filterIncidents);				
+				return doShowCaseList(filterIncidents);
 			} else {
 				return $('<div>Cases not found.</div>');
 			}
@@ -846,7 +844,7 @@ module.exports = function ( jq ) {
 				}
 			});
 			if (filterIncidents.length > 0) {
-				return doShowCaseList(filterIncidents);				
+				return doShowCaseList(filterIncidents);
 			} else {
 				return $('<div>Cases not found.</div>');
 			}
@@ -857,9 +855,9 @@ module.exports = function ( jq ) {
 
   function doShowCaseList(incidents) {
 		//console.log(incidents);
-		let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
+		let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">Study Desc. / Protocol Name</td><td width="10%" align="center">ประเภทความด่วน</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">&nbsp;</td>');
+		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">Study Desc. / Protocol Name</td><td width="10%" align="center">ประเภทความด่วน</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">Control Case</td>');
 		$(rwTable).append($(headRow));
 		$(headRow).append($(headColumns));
 		for (let i=0; i < incidents.length; i++) {
@@ -882,22 +880,34 @@ module.exports = function ( jq ) {
 			$(dataRow).append($('<td align="center">'+ incidents[i].scan_type + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].urgent + '</td>'));
 			$(dataRow).append($('<td align="center">'+ incidents[i].primary_dr + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].response_dr + '</td>'));
+			if (incidents[i].response_dr.indexOf('/') >= 0) {
+				let response_dr = incidents[i].response_dr.split('/');
+				$(dataRow).append($('<td align="center">'+ response_dr[1] + '</td>'));
+			} else {
+				$(dataRow).append($('<td align="center">'+ incidents[i].response_dr + '</td>'));
+			}
 			$(dataRow).append($('<td align="center">'+ incidents[i].status_name + '</td>'));
 			let commandCol = $('<td align="center"></td>');
-			$(commandCol).appendTo($(dataRow));			
+			$(commandCol).appendTo($(dataRow));
 			$(commandCol).appendTo($(dataRow));
 			$(rwTable).append($(dataRow));
 
 			let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
 			$(operationCmdButton).click(function() {
 				$('.operation-row').each((index, child) => {
-					$(child).hide();
-				})
-				$('#' + incidents[i].id).slideToggle( "slow" );
+					if ($(child).css('display') !== 'none') {
+						$(child).slideUp();
+					}
+				});
+				let operationVisible = $('#' + incidents[i].id).css('display');
+				if (operationVisible === 'none') {
+					$('#' + incidents[i].id).slideDown();
+				} else {
+					$('#' + incidents[i].id).slideUp();
+				}
 			});
 			$(operationCmdButton).appendTo($(commandCol));
-			
+
 			let commnandRow = $('<tr></tr>');
 			$(commnandRow).appendTo($(rwTable));
 			let operationCol = $('<td id="' + incidents[i].id + '"colspan="12" align="right" style="background-color: #828080; display: none;" class="operation-row"></td>');
@@ -957,10 +967,10 @@ module.exports = function ( jq ) {
 	  		$('#HistoryDialogBox').append($(hsBox));
 	  	}
   	});
-		let cmdBox = $('<div></div>'); 
+		let cmdBox = $('<div></div>');
  		$(cmdBox).css('width','100%');
-		$(cmdBox).css('padding','3px'); 		
-		$(cmdBox).css('clear','left'); 
+		$(cmdBox).css('padding','3px');
+		$(cmdBox).css('clear','left');
  		$(cmdBox).css('text-align','center');
   	let closeCmdBtn = $('<button>ปิด</button>');
   	$(closeCmdBtn).click(()=>{
@@ -974,7 +984,7 @@ module.exports = function ( jq ) {
 
   async function doCallEditCase(caseid) {
   	$('body').loading('start');
-  	const main = require('../main.js'); 
+  	const main = require('../main.js');
 		let rqParams = { username: main.doGetCookie().username, id: caseid }
 		let apiName = 'get_case_info';
 		try {
@@ -1067,9 +1077,9 @@ module.exports = function ( jq ) {
 		  					return (srs.MainDicomTags.SeriesDate) || (srs.MainDicomTags.SeriesDescription);
 		  				})
 		  				if (samplingSrs) {
-		  					study.SamplingSeries = samplingSrs; 
+		  					study.SamplingSeries = samplingSrs;
 		  				} else {
-		  					study.SamplingSeries = seriesList[0]; 
+		  					study.SamplingSeries = seriesList[0];
 		  				}
 		  			});
 		  		});
@@ -1077,8 +1087,8 @@ module.exports = function ( jq ) {
 						resolve(response);
 					}, 1200);
 	  		});
-				Promise.all([promiseList]).then((ob)=>{  
-					//console.log('Final JSON =>', ob[0]);		
+				Promise.all([promiseList]).then((ob)=>{
+					//console.log('Final JSON =>', ob[0]);
 					resolve(ob[0]);
 				}).catch((err)=>{
 					reject(err);
@@ -1088,7 +1098,7 @@ module.exports = function ( jq ) {
   }
 
   const doSearchOrthanc = function() {
-		$('body').loading('start');  	
+		$('body').loading('start');
   	let queryStr;
   	let limit = $('#limit').val();
   	let orthancViewPage = $('#CurrentPage').val();
@@ -1106,15 +1116,15 @@ module.exports = function ( jq ) {
   	doCallSearhOrthanc(queryStr).then(async (studies) => {
   		//console.log('get studies',studies)
   		$("#Dicom-Result").empty();
-  		
+
   		let resultTable;
 
-			if (limit === 'ALL') {  		
+			if (limit === 'ALL') {
   			resultTable = doShowOrthancResult(studies, 0);
   			$("#Dicom-Result").append($(resultTable));
   		} else {
   			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 5px;"></div>');
-  			
+
   			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
 	  			resultTable = doShowOrthancResult(studies, 0);
   				$("#Dicom-Result").append($(resultTable));
@@ -1148,7 +1158,7 @@ module.exports = function ( jq ) {
 
   			}
   		}
-  		
+
   		$('body').loading('stop');
   	}).catch((err) => {
   		console.log(err);
@@ -1157,7 +1167,7 @@ module.exports = function ( jq ) {
   }
 
   function doShowOrthancResult(dj, startRef){
-		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0" border="1"></table>');
+		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
 		let headRow = $('<tr style="background-color: green;"></tr>');
 		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
 		$(rsTable).append($(headRow));
@@ -1185,7 +1195,7 @@ module.exports = function ( jq ) {
 				if (dj[i].SamplingSeries.MainDicomTags.Modality) {
 					mld = dj[i].SamplingSeries.MainDicomTags.Modality;
 				} else {
-					mld = '';				
+					mld = '';
 				}
 				if (dj[i].MainDicomTags.StudyDate) {
 					studydate = dj[i].MainDicomTags.StudyDate;
@@ -1213,7 +1223,7 @@ module.exports = function ( jq ) {
 				dataColText += '<td align="left">' + mld + '</td>';
 				dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
 				dataColText += '<td align="left">' + desc +  protoname + '</td>'
-				let dataCol = $(dataColText);				
+				let dataCol = $(dataColText);
 				$(dataRow).append($(dataCol));
 				operatingCol = $('<td align="center"></td>');
 				$(dataRow).append($(operatingCol));
@@ -1270,15 +1280,15 @@ module.exports = function ( jq ) {
   		window.open(openLink, '_blank');
   	})
   }
-  
+
   function doOpenCreateNewCase(defualtValue) {
   	$('body').loading('start');
 		$("#dialog").load('form/newcase-dialog.html', async function(){
-			const main = require('../main.js'); 
+			const main = require('../main.js');
 
-		  let magicBox = document.getElementById('magic-box');  
-		  let imagesBox = document.getElementById('images');  
-		  //let scanUploadForm = document.getElementById('ScanUploadForm');  
+		  let magicBox = document.getElementById('magic-box');
+		  let imagesBox = document.getElementById('images');
+		  //let scanUploadForm = document.getElementById('ScanUploadForm');
 
 			await doPrepareOptionForm(defualtValue);
 
@@ -1303,10 +1313,10 @@ module.exports = function ( jq ) {
 				if (response.status.code == 200) {
 					alert('เดำเนินการลบข้อมูลเรียบร้อยแล้ว');
 					doSearchOrthanc();
-					$('body').loading('stop');					
+					$('body').loading('stop');
 				} else {
 					alert('เกิดความผิดพลาด ไม่สามารถลบรายการนี้ได้ในขณะนี้')
-					$('body').loading('stop');					
+					$('body').loading('stop');
 				}
 			}).catch((err) => {
 				console.log('Error on Delete dicom from orthanc', err);
@@ -1319,7 +1329,7 @@ module.exports = function ( jq ) {
   function doOpenEditCase(defualtValue) {
 		$("#dialog").load('form/newcase-dialog.html', async function(){
 			$('#dialog-title').text('แก้ไขเคส');
-			const main = require('../main.js'); 
+			const main = require('../main.js');
 
 			await doPrepareOptionForm(defualtValue);
 
@@ -1343,7 +1353,7 @@ module.exports = function ( jq ) {
 			$("#urgent-type").val(defualtValue.urgent);
 
 			$("#dr-reader").val(defualtValue.dr_id);
-			
+
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
 
@@ -1356,7 +1366,7 @@ module.exports = function ( jq ) {
 			$("#SaveNewCase-Cmd").click(function(){
 				doSaveEditCase(defualtValue.id);
 			});
-		}); 	
+		});
   }
 
   function doOpenSelectFile(){
@@ -1386,12 +1396,12 @@ module.exports = function ( jq ) {
 						var imageUrl = data.link;
 						var imageUrlArgs = imageUrl.split('/');
 						var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
-						$('#magic-box').show(); 
+						$('#magic-box').show();
 						$('#magic-box').html('<div>อัพโหลดสำเร็จ</div>');
 						setTimeout(() => {
 							apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
 								$('#magic-box').html('');
-								$('#magic-box').hide(); 
+								$('#magic-box').hide();
 								doAddHistory(transferRef.cloud.link);
 								doRenderHistoryPreview();
 								$(fileBrowser).remove();
@@ -1455,7 +1465,7 @@ module.exports = function ( jq ) {
   }
 
   function doRenderHistoryPreview() {
-		let imagesBox = document.getElementById('images');   	
+		let imagesBox = document.getElementById('images');
 		imagesBox.innerHTML = '';
   	let allHs = $('#patient-history').val();
   	let hss = allHs.split(',');
@@ -1500,8 +1510,8 @@ module.exports = function ( jq ) {
 				doAddHistory(transferRef.cloud.link);
 				doRenderHistoryPreview();
 			});
-		}).fail(function(error) { 
-			console.log(error); 
+		}).fail(function(error) {
+			console.log(error);
 			alert('Error:' + error);
 		});
   }
@@ -1523,7 +1533,7 @@ module.exports = function ( jq ) {
 				vh = this.videoHeight;
 				video.width = vw;
 				video,height = vh;
-				
+
 				ctx.canvas.width = vw;
 				ctx.canvas.height = vh;
 			}, false );
@@ -1542,7 +1552,7 @@ module.exports = function ( jq ) {
 			}, 500);
     });
     //util.windowMinimize();
-    //window.resizeTo(250, 250);		
+    //window.resizeTo(250, 250);
   }
 
 	function doClearStream(video){
@@ -1557,16 +1567,16 @@ module.exports = function ( jq ) {
 	function doUploadCaptureImage(canvas){
 		var paths = window.location.pathname.split('/');
 		var rootname = paths[1];
-		var url = "/" + rootname + "/captureupload";                
+		var url = "/" + rootname + "/captureupload";
 		var dataURL = canvas.toDataURL("image/jpeg", 1.0);
 		var base64ImageContent = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
-		var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');           
+		var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');
 		var formData = new FormData();
 		formData.append('picture', blob);
 
 		$.ajax({
-			url: url, 
-			type: "POST", 
+			url: url,
+			type: "POST",
 			cache: false,
 			contentType: false,
 			processData: false,
@@ -1622,19 +1632,19 @@ module.exports = function ( jq ) {
 				console.log('Krai Click?');
 				var paths = window.location.pathname.split('/');
 				var rootname = paths[1];
-				var url = "/" + rootname + "/editionupload";                
+				var url = "/" + rootname + "/editionupload";
 				var tuiCanvas = imageEditor.editor._graphics.getCanvas();
-				
+
 				var dataURL = tuiCanvas.toDataURL("image/jpeg", 1.0);
 
 				var base64ImageContent = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
-				var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');           
+				var blob = util.base64ToBlob(base64ImageContent, 'image/jpg');
 
 				var formData = new FormData();
 				formData.append('picture', blob);
 				$.ajax({
-					url: url, 
-					type: "POST", 
+					url: url,
+					type: "POST",
 					cache: false,
 					contentType: false,
 					processData: false,
@@ -1658,7 +1668,7 @@ module.exports = function ( jq ) {
 					}
 				);
 			}
-		});		
+		});
 	}
 
 	const ImageEditor = function(boxId) {
@@ -1753,7 +1763,7 @@ module.exports = function ( jq ) {
 		let newCaseData = doVerifyInputForm();
 		if (newCaseData) {
 			$('body').loading('start');
-			const main = require('../main.js');			
+			const main = require('../main.js');
 			newCaseData.username = main.doGetCookie().username;
 			newCaseData.curr_host_id = main.doGetCookie().org[0].id;
 			newCaseData.status = '';
@@ -1770,13 +1780,13 @@ module.exports = function ( jq ) {
 						console.log(transferRes.local.link);
 						console.log(transferRes.cloud.link);
 						alert('บันทึกเคสใหม่เข้าสู่ระบบเรียบร้อยแล้ว');
-						doCloseNewCaseBox();					
+						doCloseNewCaseBox();
 						$("#SendWaitTab").trigger("click");
 						$("#SendWaitTab").addClass('active');
 						$('body').loading('stop');
 					}else {
 						alert('Transfer Dicom File ขัดข้อง');
-						$('body').loading('stop');						
+						$('body').loading('stop');
 					}
 				} else if (response.res.statusCode == 500) {
 					alert('API Server ขัดข้อง');
@@ -1793,7 +1803,7 @@ module.exports = function ( jq ) {
 		let newCaseData = doVerifyInputForm();
 		if (newCaseData) {
 			$('body').loading('start');
-			const main = require('../main.js');			
+			const main = require('../main.js');
 			newCaseData.username = main.doGetCookie().username;
 			newCaseData.status = '';
 			let rqParams = doPrepareCaseParams(newCaseData);
@@ -1809,11 +1819,11 @@ module.exports = function ( jq ) {
 				console.log(response);
 				if (response.res.statusCode == 200) {
 					alert('บันทึกการแก้ไขเคสเข้าสู่ระบบเรียบร้อยแล้ว');
-					doCloseNewCaseBox();	
-					if (currentTab === 'ReadWaitDiv') {		
+					doCloseNewCaseBox();
+					if (currentTab === 'ReadWaitDiv') {
 						//openRwCaseList();
 						$("#ReadWaitTab").trigger("click");
-					} else if (currentTab === 'ReadSuccessDiv') {		
+					} else if (currentTab === 'ReadSuccessDiv') {
 						//openRsCaseList();
 						$("#ReadSuccessTab").trigger("click");
 					}
@@ -1835,7 +1845,7 @@ module.exports = function ( jq ) {
 
   	$('#HistoryDialogBox').empty();
 
-  	let selectBox = $('<div></div>'); 
+  	let selectBox = $('<div></div>');
   	let statusSelect = $('<select id="newStatus"></select>');
   	$(statusSelect).css(inputStyleClass);
 
@@ -1851,10 +1861,10 @@ module.exports = function ( jq ) {
   	$(selectBox).append($('<label>สถานะใหม่ที่ต้องการเปลี่ยน :</label>'));
   	$(selectBox).append($(statusSelect));
 
-		let cmdBox = $('<div></div>'); 
+		let cmdBox = $('<div></div>');
  		$(cmdBox).css('width','100%');
-		$(cmdBox).css('padding','3px'); 		
-		$(cmdBox).css('clear','left'); 
+		$(cmdBox).css('padding','3px');
+		$(cmdBox).css('clear','left');
  		$(cmdBox).css('text-align','center');
  		$(cmdBox).css('margin-top','10px');
   	let changeCmdBtn = $('<button>เปลี่ยน</button>');
@@ -1890,10 +1900,10 @@ module.exports = function ( jq ) {
 		console.log({caseID, newStatus});
 		doUpdateCaseStatus(caseID, newStatus).then((response) => {
 			console.log(response);
-			if (currentTab === 'ReadWaitDiv') {		
+			if (currentTab === 'ReadWaitDiv') {
 				//openRwCaseList();
 				$("#ReadWaitTab").trigger("click");
-			} else if (currentTab === 'ReadSuccessDiv') {		
+			} else if (currentTab === 'ReadSuccessDiv') {
 				//openRsCaseList();
 				$("#ReadSuccessTab").trigger("click");
 			}
@@ -1912,10 +1922,10 @@ module.exports = function ( jq ) {
   		console.log({caseID, newStatus});
 			doUpdateCaseStatus(caseID, newStatus).then((response) => {
 				console.log(response);
-				if (currentTab === 'ReadWaitDiv') {		
+				if (currentTab === 'ReadWaitDiv') {
 					//openRwCaseList();
 					$("#ReadWaitTab").trigger("click");
-				} else if (currentTab === 'ReadSuccessDiv') {		
+				} else if (currentTab === 'ReadSuccessDiv') {
 					//openRsCaseList();
 					$("#ReadSuccessTab").trigger("click");
 				}
@@ -1923,7 +1933,7 @@ module.exports = function ( jq ) {
 			}).catch((err) => {
 				console.log(err);
 				$('body').loading('stop');
-			});		
+			});
   	}
 	}
 
@@ -1931,11 +1941,12 @@ module.exports = function ( jq ) {
 		return new Promise(async function(resolve, reject) {
 			const main = require('../main.js');
 			let rqParams = { username: main.doGetCookie().username , inc_id: id, update_status: newStatus};
-			//console.log('rqParams', rqParams);
+			console.log('doUpdateCaseStatus => rqParams => ', rqParams);
 			let apiName = 'update_incident';
 			try {
 				let response = await doCallApi(apiName, rqParams);
 				let resO = JSON.parse(response.res.body);
+				console.log('doUpdateCaseStatus => response Object => ', resO);
 				resolve(resO);
 			} catch(e) {
 	      reject(e);
@@ -1948,7 +1959,8 @@ module.exports = function ( jq ) {
 		doEventManagment,
 		doLoadCaseList
 	}
-}		
+}
+
 },{"../main.js":2,"./apiconnect.js":3,"./utilmod.js":11,"jquery-simple-upload":12,"tui-image-editor":16}],5:[function(require,module,exports){
 /* doctor.js */
 module.exports = function ( jq ) {
