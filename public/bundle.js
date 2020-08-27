@@ -125,14 +125,14 @@
 //const $ = require('jquery');
 window.$ = window.jQuery = require('jquery');
 //require('jquery-ui-browserify');
-//$.mobile = require('jquery-mobile'); 
+//$.mobile = require('jquery-mobile');
 require('./lib/jquery.cookie.js');
 require('./mod/jquery-ex.js');
-const home = require('./mod/home.js')($); 
-const cases = require('./mod/case.js')($); 
-const doctor = require('./mod/doctor.js')($); 
-const hospital = require('./mod/hospital.js')($); 
-const urgent = require('./mod/urgent.js')($); 
+const home = require('./mod/home.js')($);
+const cases = require('./mod/case.js')($);
+const doctor = require('./mod/doctor.js')($);
+const hospital = require('./mod/hospital.js')($);
+const urgent = require('./mod/urgent.js')($);
 const apiconnector = require('./mod/apiconnect.js')($);
 
 /*
@@ -162,7 +162,7 @@ $( document ).ready(function() {
 		var cookieValue = $.cookie(cookieName);
 		if (cookieValue) {
 			cookie = JSON.parse(cookieValue);
-			if (cookie) {			
+			if (cookie) {
 				if ((cookie.id) && (cookie.username)) {
 					doLoadMainPage()
 				} else {
@@ -209,7 +209,7 @@ $( document ).ready(function() {
 function doCallLoginApi(user) {
 	return new Promise(function(resolve, reject) {
 		const loginApiName = 'chk_login'
-		const body = { username: user.username, password: user.password };		
+		const body = { username: user.username, password: user.password };
 		var realUrl = apiconnector.hostURL + '/' + loginApiName + apiconnector.apiExt;
 		var params = {method: 'post', body: body, url: realUrl, apiname: loginApiName};
 		/*
@@ -220,19 +220,10 @@ function doCallLoginApi(user) {
 		*/
 		apiconnector.doCallApiByProxy(loginApiName, params).then((response) => {
 			//console.log('response', response);
-			resolve(response);			
+			resolve(response);
 		}).catch((err) => {
 			console.log(JSON.stringify(err));
 		})
-		/*
-		const body = { username: user.username, password: user.password };		
-		var params = JSON.stringify(body);		
-		apiconnector.doCallApiDirect(loginApiName, params)=> {
-			resolve(response);			
-		}).catch((err) => {
-			console.log(JSON.stringify(err));
-		})
-		*/
 	});
 }
 
@@ -288,15 +279,15 @@ function doUserLogout() {
 		if (response.status.code == 200) {
 			$.removeCookie(cookieName);
 			doLoadLogin();
-		}			
+		}
 	}).catch((err) => {
 		console.log(JSON.stringify(err));
 		alert('Error form Api with message:\n' + JSON.stringify(err));
 	})
 	/*
-	var params = JSON.stringify(body);		
+	var params = JSON.stringify(body);
 	doCallApiDirect(logoutApiName, params)=> {
-		resolve(response);			
+		resolve(response);
 	}).catch((err) => {
 		console.log(JSON.stringify(err));
 	})
@@ -317,11 +308,15 @@ function doLoadMainPage(){
 	//https://notifyjs.jpillora.com/
 	$('head').append('<script src="' + jqueryNotifyUrl + '"></script>');
 
-  $('#HistoryDialogBox').dialog({ 
+  $('body').append($('<div id="overlay"><div class="loader"></div></div>'));
+  $('body').loading({overlay: $("#overlay")});
+
+  $('#HistoryDialogBox').dialog({
     modal: true, autoOpen: false, width: 350, resizable: false, title: 'ประวัติผู้ป่วย'
   });
-	
+
 	$('#app').load('form/main.html', function(){
+    $('body').loading('start');
 		var cookieValue = $.cookie(cookieName);
 		cookie = JSON.parse(cookieValue);
 		$("#User-Identify").text(cookie.name);
@@ -352,7 +347,8 @@ function doLoadMainPage(){
 		//doShowHome();
 		doShowCase();
 
-	});	
+    $('body').loading('stop');
+	});
 }
 
 function doShowHome(){
@@ -373,9 +369,9 @@ function doShowMainDoctor(){
 	$(".row").show();
 	$(".mainfull").hide();
 	$(".submenu").empty();
-	$(".submenu").show();		
+	$(".submenu").show();
 	$(".main").empty();
-	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="DoctorData-Cmd">ข้อมูลแพทย์</a></div>'));	
+	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="DoctorData-Cmd">ข้อมูลแพทย์</a></div>'));
 	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="DoctorSchedule-Cmd">ตารางเวร</a></div>'));
 	$("#DoctorData-Cmd").click(function(){
 		$(".main").empty();
@@ -387,7 +383,7 @@ function doShowMainDoctor(){
 	$("#DoctorSchedule-Cmd").click(function(){
 		alert('#DoctorSchedule');
 		$(".main").empty();
-	});	
+	});
 	$("#DoctorData-Cmd").trigger("click");
 }
 
@@ -395,9 +391,9 @@ function doShowMainHotpital() {
 	$(".row").show();
 	$(".mainfull").hide();
 	$(".submenu").empty();
-	$(".submenu").show();		
+	$(".submenu").show();
 	$(".main").empty();
-	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="HotpitalData-Cmd">ข้อมูลโรงพยาบาล</a></div>'));	
+	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="HotpitalData-Cmd">ข้อมูลโรงพยาบาล</a></div>'));
 	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="ReportForm-Cmd">Set Report Form</a></div>'));
 	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="UrgentLevel-Cmd">Urgent Level</a></div>'));
 	$("#HotpitalData-Cmd").click(function(){
@@ -410,15 +406,15 @@ function doShowMainHotpital() {
 	$("#ReportForm-Cmd").click(function(){
 		alert('#ReportForm');
 		$(".main").empty();
-	});		
+	});
 	$("#UrgentLevel-Cmd").click(function(){
 		$(".main").empty();
 		home.doCallUrgentData(cookie.username).then((response) => {
 			let urgentData = JSON.parse(response.res.body);
 			urgent.doShowUrgentData(urgentData.data, cookie.username);
 		});
-	});	
-	$("#HotpitalData-Cmd").trigger("click");	
+	});
+	$("#HotpitalData-Cmd").trigger("click");
 }
 
 function doShowSetting() {
@@ -461,8 +457,8 @@ function doSaveUserProfile(){
 	let comment = $("#Comment").val();
 	*/
 	alert('Now have not support yet.');
-	$("#myModal").css("display", "none");	
-};		
+	$("#myModal").css("display", "none");
+};
 
 function doSaveSetting() {
 	alert('Now have not support yet.');
@@ -475,6 +471,7 @@ function doGetCookie(){
 module.exports = {
 	doGetCookie
 }
+
 },{"./lib/jquery.cookie.js":1,"./mod/apiconnect.js":3,"./mod/case.js":4,"./mod/doctor.js":5,"./mod/home.js":6,"./mod/hospital.js":7,"./mod/jquery-ex.js":8,"./mod/notimod.js":9,"./mod/urgent.js":10,"jquery":13}],3:[function(require,module,exports){
 /* apiconnect.js */
 
@@ -699,15 +696,6 @@ module.exports = function ( jq ) {
 			}).catch((err) => {
 				console.log(JSON.stringify(err));
 			})
-			/*
-			const body = rqParams;		
-			var params = JSON.stringify(body);		
-			apiconnector.doCallApiDirect(apiName, params)=> {
-				resolve(response);			
-			}).catch((err) => {
-				console.log(JSON.stringify(err));
-			})
-			*/
 		});
 	}
 
