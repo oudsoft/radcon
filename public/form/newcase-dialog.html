@@ -20,7 +20,7 @@
           </td>
           <td align="left">
             <span class="input-label-span">ACC</span>
-            <input type="text" id="acc" size="10"/>       
+            <input type="text" id="acc" size="10"/>
           </td>
           <td align="left">
             <span class="input-label-span">เพศ</span>
@@ -68,8 +68,8 @@
             <!--
             <div id='SaveEditCmdDiv' style="width: 100%; text-align: left; padding: 5px; display: none; float: left;">
               <input type="button" id="SaveEdit-Cmd" value="Save Image"/>
-            </div>      
-            -->      
+            </div>
+            -->
             <div id="magic-box"></div>
             <div id="images"></div>
             <div id="ScanUploadForm">
@@ -117,7 +117,7 @@
       <input type="button" id="SaveEdit-Cmd" value=" Save Image " style="display: none;"/>
       <input type="Button" value=" Cancel " onclick="doCloseSubModal()"/>
     </div>
-  </div>    
+  </div>
 </div>
 
 <script>
@@ -140,7 +140,7 @@
   }
 
   modal.style.display = "block";
-  
+
   /** Images scanned so far. */
   var imagesScanned = [];
 
@@ -157,7 +157,7 @@
       return;
     }
 
-    let imagesBox = document.getElementById('images'); 
+    let imagesBox = document.getElementById('images');
     imagesBox.style.display = 'block';
 
     var scannedImages = scanner.getScannedImages(response, true, false); // returns an array of ScannedImage
@@ -166,9 +166,9 @@
       processScannedImage(scannedImage);
     }
 
-    //let scanUploadForm = document.getElementById('ScanUploadForm');  
+    //let scanUploadForm = document.getElementById('ScanUploadForm');
     //scanUploadForm.style.display = 'block';
-    let uploadScanCmd = document.getElementById('upload-scan-cmd');  
+    let uploadScanCmd = document.getElementById('upload-scan-cmd');
     uploadScanCmd.click();
   }
 
@@ -182,7 +182,7 @@
         'src': scannedImage.src
       }
     });
-    let imagesBox = document.getElementById('images'); 
+    let imagesBox = document.getElementById('images');
     imagesBox.appendChild(elementImg);
   }
 
@@ -236,9 +236,9 @@
   function doCloseNewCaseBox() {
     imagesScanned = [];
     /*
-    magicBox = null;  
-    imagesBox = null;  
-    scanUploadForm = null;  
+    magicBox = null;
+    imagesBox = null;
+    scanUploadForm = null;
     */
     modal.style.display = "none";
   }
@@ -272,9 +272,9 @@
     padding: 20px;
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
-    font-family: THSarabunNew; 
-    font-size: 24px; 
-    font-weight: normal;    
+    font-family: THSarabunNew;
+    font-size: 24px;
+    font-weight: normal;
   }
 
   /* The Close Button */
@@ -311,6 +311,7 @@
   table#MainTableForm, th, td {
     border: 1px solid black;
   }
+  tr {background-color: white;}
 
   .input-label {
     background-color: #5cb85c;
@@ -319,7 +320,7 @@
   .input-label-span {
     background-color: #5cb85c;
     padding: 3px;
-    border: 1px solid black;     
+    border: 1px solid black;
   }
 
   #magic-box {
@@ -373,12 +374,12 @@
 
   .button-bw {
     background-color: green; /* Green */
-    color: black;
+    color: white;
   }
 
   .button-bw:hover {
     background-color: white;
     color: black;
-    border: 2px solid #4CAF50;    
-  }  
+    border: 2px solid #4CAF50;
+  }
 </style>

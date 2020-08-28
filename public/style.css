@@ -6,6 +6,9 @@ input, select, textarea, button{
 	font-family:inherit;
 	font-size: 24px;
 }
+input[type='text'], input[type='number'], select, textarea {
+	border-radius: 4px;
+}
 
 .loader {
   position: relative;

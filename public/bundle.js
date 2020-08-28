@@ -473,7 +473,7 @@ module.exports = {
 }
 
 },{"./lib/jquery.cookie.js":1,"./mod/apiconnect.js":3,"./mod/case.js":4,"./mod/doctor.js":5,"./mod/home.js":6,"./mod/hospital.js":7,"./mod/jquery-ex.js":8,"./mod/notimod.js":9,"./mod/urgent.js":10,"jquery":13}],3:[function(require,module,exports){
-/* apiconnect.js */
+         /* apiconnect.js */
 
 const apiExt = ".php";
 const proxyRootUri = '/webapp';
@@ -482,7 +482,7 @@ const proxyEndPoint = "/callapi";
 const proxyUrl = proxyRootUri + proxyApi + proxyEndPoint;
 //const hostIP = '202.28.68.28';
 const hostApiPort = '8080';
-const hostIP = '103.91.189.94';
+const hostIP = 'localhost';
 const hostOrthancApiPort = '8042';
 const hostName = hostIP + ':' + hostApiPort;
 const domainName = 'radconnext.com';
@@ -495,28 +495,28 @@ const hostOrthancUrl = 'http://' + hostIP + ':' +  hostOrthancApiPort;
 const orthancProxyApi = '/orthancproxy';
 
 const RadConStatus = [
-  {id: 1, status_en: 'draft', status_th: "Draft"},
-  {id: 2, status_en: 'wait_edit', status_th: "รอแก้ไข"},
-  {id: 3, status_en: 'wait_start', status_th: "รอเริ่ม"},
-  {id: 4, status_en: 'wait_zip', status_th: "รอเตรียมไฟล์ภาพ"},
-  {id: 5, status_en: 'processing', status_th: "กำลังเตรียมไฟล์ภาพ"},
-  {id: 6, status_en: 'wait_upload', status_th: "รอส่งไฟล์ภาพ"},
-  {id: 7, status_en: 'uploading', status_th: "กำลังส่งไฟล์ภาพ"},
-  {id: 8, status_en: 'wait_consult', status_th: "รอหมอ Consult"},
-  {id: 9, status_en: 'wait_dr_consult', status_th: "รอหมอตอบ Consult"},
-  {id: 10, status_en: 'consult_expire', status_th: "หมอตอบ Consult ไม่ทันเวลา"},
-  {id: 11, status_en: 'wait_consult_ack', status_th: "ตอบ Consult แล้ว"},
-  {id: 12, status_en: 'wait_response_1', status_th: "รอหมอตอบรับ"},
-  {id: 13, status_en: 'wait_response_2', status_th: "รอหมอตอบรับ"},
-  {id: 14, status_en: 'wait_response_3', status_th: "รอหมอตอบรับ"},
-  {id: 15, status_en: 'wait_response_4', status_th: "รอหมอตอบรับ"},
-  {id: 16, status_en: 'wait_response_5', status_th: "รอหมอตอบรับ"},
-  {id: 17, status_en: 'wait_response_6', status_th: "รอหมอตอบรับ"},
-  {id: 18, status_en: 'wait_dr_key', status_th: "รออ่านผล"},
-  {id: 19, status_en: 'wait_close', status_th: "รอพิมพ์ผล"},
-  {id: 20, status_en: 'wait_close2', status_th: "รอพิมพ์ผลที่แก้ไข"},
-  {id: 21, status_en: 'close', status_th: "ดูผลแล้ว"},
-  {id: 22, status_en: 'cancel', status_th: "ยกเลิก"},
+  {id: 1, status_en: 'draft', status_th: "Draft", use: false},
+  {id: 2, status_en: 'wait_edit', status_th: "รอแก้ไข", use: false},
+  {id: 3, status_en: 'wait_start', status_th: "รอเริ่ม", use: false},
+  {id: 4, status_en: 'wait_zip', status_th: "รอเตรียมไฟล์ภาพ", use: false},
+  {id: 5, status_en: 'processing', status_th: "กำลังเตรียมไฟล์ภาพ", use: false},
+  {id: 6, status_en: 'wait_upload', status_th: "รอส่งไฟล์ภาพ", use: false},
+  {id: 7, status_en: 'uploading', status_th: "กำลังส่งไฟล์ภาพ", use: false},
+  {id: 8, status_en: 'wait_consult', status_th: "รอหมอ Consult", use: false},
+  {id: 9, status_en: 'wait_dr_consult', status_th: "รอหมอตอบ Consult", use: false},
+  {id: 10, status_en: 'consult_expire', status_th: "หมอตอบ Consult ไม่ทันเวลา", use: false},
+  {id: 11, status_en: 'wait_consult_ack', status_th: "ตอบ Consult แล้ว", use: false},
+  {id: 12, status_en: 'wait_response_1', status_th: "รอหมอตอบรับ", use: false},
+  {id: 13, status_en: 'wait_response_2', status_th: "รอหมอตอบรับ", use: false},
+  {id: 14, status_en: 'wait_response_3', status_th: "รอหมอตอบรับ", use: false},
+  {id: 15, status_en: 'wait_response_4', status_th: "รอหมอตอบรับ", use: false},
+  {id: 16, status_en: 'wait_response_5', status_th: "รอหมอตอบรับ", use: false},
+  {id: 17, status_en: 'wait_response_6', status_th: "รอหมอตอบรับ", use: false},
+  {id: 18, status_en: 'wait_dr_key', status_th: "รออ่านผล", use: true},
+  {id: 19, status_en: 'wait_close', status_th: "รอพิมพ์ผล", use: true},
+  {id: 20, status_en: 'wait_close2', status_th: "รอพิมพ์ผลที่แก้ไข", use: true},
+  {id: 21, status_en: 'close', status_th: "ดูผลแล้ว", use: true},
+  {id: 22, status_en: 'cancel', status_th: "ยกเลิก", use: true},
 ];
 
 const filterValue = (obj, key, value)=> obj.filter(v => v[key] === value);
@@ -529,12 +529,12 @@ module.exports = function ( jq ) {
 			let testURL = "../api/chk_login.php";
 			$.ajax({
 				type: 'POST',
-				url: testURL , 
+				url: testURL ,
 				dataType: 'json',
 				data: JSON.stringify({ username: "limparty", password: "Limparty" }) /*,
 				headers: {
 					authorization: localStorage.getItem('token')
-				} 
+				}
 				*/
 			}).then(function(httpdata) {
 				resolve(httpdata);
@@ -544,11 +544,11 @@ module.exports = function ( jq ) {
 
 	const doCallApiDirect = function (apiname, params) {
 		return new Promise(function(resolve, reject) {
-			var realUrl = '../api' + '/' + apiname + apiExt;		
+			var realUrl = '../api' + '/' + apiname + apiExt;
 			$.post(realUrl, params, function(data){
 				resolve(data);
-			}).fail(function(error) { 
-				reject(error); 
+			}).fail(function(error) {
+				reject(error);
 			});
 		});
 	}
@@ -557,8 +557,8 @@ module.exports = function ( jq ) {
 		return new Promise(function(resolve, reject) {
 			$.post(proxyUrl, params, function(data){
 				resolve(data);
-			}).fail(function(error) { 
-				reject(error); 
+			}).fail(function(error) {
+				reject(error);
 			});
 		});
 	}
@@ -568,8 +568,8 @@ module.exports = function ( jq ) {
 			let proxyEndPoint = proxyRootUri + proxyApi + '/getresource';
 			$.post(proxyEndPoint, params, function(data){
 				resolve(data);
-			}).fail(function(error) { 
-				reject(error); 
+			}).fail(function(error) {
+				reject(error);
 			});
 		});
 	}
@@ -579,8 +579,8 @@ module.exports = function ( jq ) {
 			let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/find';
 			$.post(orthancProxyEndPoint, params, function(data){
 				resolve(data);
-			}).fail(function(error) { 
-				reject(error); 
+			}).fail(function(error) {
+				reject(error);
 			});
 		});
 	}
@@ -665,6 +665,7 @@ module.exports = function ( jq ) {
 		doCallDeleteDicom
 	}
 }
+
 },{}],4:[function(require,module,exports){
 /* case.js */
 module.exports = function ( jq ) {
@@ -719,18 +720,6 @@ module.exports = function ( jq ) {
 		});
 	}
 
-	async function doLoadCaseList(username) {
-		const main = require('../main.js');
-		let rqParams = { username: main.doGetCookie().username }
-		let apiName = 'get_case_list';
-		try {
-			let response = await doCallApi(apiName, rqParams);
-			console.log(response);
-		} catch(e) {
-	    console.log('Unexpected error occurred =>', e);
-    }
-	}
-
 	function doEventManagment() {
 		document.addEventListener("PACSDiv", openPACS);
 		//document.addEventListener("SendWaitDiv", evtMng);
@@ -743,6 +732,18 @@ module.exports = function ( jq ) {
   	let eventCall = {name: e.detail.eventname};
   	console.log(eventCall);
   }
+
+	async function doLoadCaseList(username) {
+		const main = require('../main.js');
+		let rqParams = { username: main.doGetCookie().username }
+		let apiName = 'get_case_list';
+		try {
+			let response = await doCallApi(apiName, rqParams);
+			console.log(response);
+		} catch(e) {
+	    console.log('Unexpected error occurred =>', e);
+    }
+	}
 
 	const openPACS = function(e) {
 		currentTab = e.detail.eventname;
@@ -773,13 +774,14 @@ module.exports = function ( jq ) {
 			let response = await doCallApi(apiName, rqParams);
 			let resBody = JSON.parse(response.res.body);
   		$("#ReadWaitDiv").empty();
-  		let rwTable = doShowRwCaseList(resBody.incident);
+  		let rwTable = await doShowRwCaseList(resBody.incident);
   		$("#ReadWaitDiv").append($(rwTable));
   		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
 	    $('body').loading('stop');
     }
+		$('#CurrentPage').remove();
   }
 
   const openRsCaseList = async function(e) {
@@ -792,13 +794,14 @@ module.exports = function ( jq ) {
 			let response = await doCallApi(apiName, rqParams);
 			let resBody = JSON.parse(response.res.body);
   		$("#ReadSuccessDiv").empty();
-  		let rwTable = doShowRsCaseList(resBody.incident);
+  		let rwTable = await doShowRsCaseList(resBody.incident);
   		$("#ReadSuccessDiv").append($(rwTable));
   		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
 	    $('body').loading('stop');
     }
+		$('#CurrentPage').remove();
   }
 
   function doShowRwCaseList(incidents) {
@@ -807,6 +810,7 @@ module.exports = function ( jq ) {
   		'processing',
   		'wait_upload',
   		'uploading',
+			'finish_uploa',
 		  'wait_consult',
 		  'wait_dr_consult',
 		  'consult_expire',
@@ -819,128 +823,140 @@ module.exports = function ( jq ) {
 		  'wait_response_6',
 		  'wait_dr_key'
 		];
-		if ((incidents) && (incidents.length > 0)) {
-			let filterIncidents = incidents.filter((item, ind) => {
-				if (caseStatusList.indexOf(item.status) >= 0) {
-					return item;
+		console.log(incidents);
+		return new Promise(async function(resolve, reject) {
+			if ((incidents) && (incidents.length > 0)) {
+				let filterIncidents = incidents.filter((item, ind) => {
+					if (caseStatusList.indexOf(item.status) >= 0) {
+						return item;
+					}
+				});
+				console.log(filterIncidents);
+				if (filterIncidents.length > 0) {
+					let showTable = await doShowCaseList(filterIncidents);
+					resolve(showTable);
+				} else {
+					resolve($('<div>Cases not found.</div>'));
 				}
-			});
-			if (filterIncidents.length > 0) {
-				return doShowCaseList(filterIncidents);
 			} else {
-				return $('<div>Cases not found.</div>');
+				resolve($('<div>Cases not found.</div>'));
 			}
-		} else {
-			return $('<div>Cases not found.</div>');
-		}
+		});
   }
 
   function doShowRsCaseList(incidents) {
   	const caseStatusList = ['wait_close', 'wait_close2', 'close'];
-		if ((incidents) && (incidents.length > 0)) {
-			let filterIncidents = incidents.filter((item, ind) => {
-				if (caseStatusList.indexOf(item.status) >= 0) {
-					return item;
+		console.log(incidents);
+		return new Promise(async function(resolve, reject) {
+			if ((incidents) && (incidents.length > 0)) {
+				let filterIncidents = incidents.filter((item, ind) => {
+					if (caseStatusList.indexOf(item.status) >= 0) {
+						return item;
+					}
+				});
+				console.log(filterIncidents);
+				if (filterIncidents.length > 0) {
+					let showTable = await doShowCaseList(filterIncidents);
+					resolve(showTable);
+				} else {
+					resolve($('<div>Cases not found.</div>'));
 				}
-			});
-			if (filterIncidents.length > 0) {
-				return doShowCaseList(filterIncidents);
 			} else {
-				return $('<div>Cases not found.</div>');
+				resolve($('<div>Cases not found.</div>'));
 			}
-		} else {
-			return $('<div>Cases not found.</div>');
-		}
+		});
   }
 
   function doShowCaseList(incidents) {
 		//console.log(incidents);
-		let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
-		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">Study Desc. / Protocol Name</td><td width="10%" align="center">ประเภทความด่วน</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">Control Case</td>');
-		$(rwTable).append($(headRow));
-		$(headRow).append($(headColumns));
-		for (let i=0; i < incidents.length; i++) {
-			let dataRow = $('<tr></tr>');
-			let casedatetime = incidents[i].create_date.split(' ');
-			let casedateSegment = casedatetime[0].split('-');
-			casedateSegment = casedateSegment.join('');
-			let casedate = util.formatStudyDate(casedateSegment);
-			$(dataRow).append($('<td align="center"><div class="tooltip">'+ casedate + '<span class="tooltiptext">' + casedatetime[1] + '</span></div></td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].patient + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].gender + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].hn + '</td>'));
-			//$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
-			if (incidents[i].dicom_zip1[0] === '{') {
-				$(dataRow).append($('<td align="center">'+ (JSON.parse(incidents[i].dicom_zip1)).mdl + '</td>'));
-			} else {
-				$(dataRow).append($('<td align="center">&nbsp;</td>'));
-			}
-			$(dataRow).append($('<td align="center">'+ incidents[i].scan_type + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].urgent + '</td>'));
-			$(dataRow).append($('<td align="center">'+ incidents[i].primary_dr + '</td>'));
-			if (incidents[i].response_dr.indexOf('/') >= 0) {
-				let response_dr = incidents[i].response_dr.split('/');
-				$(dataRow).append($('<td align="center">'+ response_dr[1] + '</td>'));
-			} else {
-				$(dataRow).append($('<td align="center">'+ incidents[i].response_dr + '</td>'));
-			}
-			$(dataRow).append($('<td align="center">'+ incidents[i].status_name + '</td>'));
-			let commandCol = $('<td align="center"></td>');
-			$(commandCol).appendTo($(dataRow));
-			$(commandCol).appendTo($(dataRow));
-			$(rwTable).append($(dataRow));
+		return new Promise(function(resolve, reject) {
+			let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
+			let headRow = $('<tr style="background-color: green;"></tr>');
+			let headColumns = $('<td width="10%" align="center">วันที่</td><td width="10%" align="center">ชื่อ</td><td width="5%" align="center">อายุ</td><td width="5%" align="center">เพศ</td><td width="10%" align="center">HN</td><td width="5%" align="center">Modality</td><td width="10%" align="center">Study Desc. / Protocol Name</td><td width="10%" align="center">ประเภทความด่วน</td><td width="10%" align="center">แพทย์ผู้ส่ง</td><td width="10%" align="center">รังสีแพทย์</td><td width="10%" align="center">สถานะเคส</td><td width="*" align="center">Control Case</td>');
+			$(rwTable).append($(headRow));
+			$(headRow).append($(headColumns));
+			for (let i=0; i < incidents.length; i++) {
+				let dataRow = $('<tr class="case-row"></tr>');
+				let casedatetime = incidents[i].create_date.split(' ');
+				let casedateSegment = casedatetime[0].split('-');
+				casedateSegment = casedateSegment.join('');
+				let casedate = util.formatStudyDate(casedateSegment);
+				$(dataRow).append($('<td align="center"><div class="tooltip">'+ casedate + '<span class="tooltiptext">' + casedatetime[1] + '</span></div></td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].patient + '</td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].gender + '</td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].hn + '</td>'));
+				//$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
+				if (incidents[i].dicom_zip1[0] === '{') {
+					$(dataRow).append($('<td align="center">'+ (JSON.parse(incidents[i].dicom_zip1)).mdl + '</td>'));
+				} else {
+					$(dataRow).append($('<td align="center">&nbsp;</td>'));
+				}
+				$(dataRow).append($('<td align="center">'+ incidents[i].scan_type + '</td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].urgent + '</td>'));
+				$(dataRow).append($('<td align="center">'+ incidents[i].primary_dr + '</td>'));
+				if (incidents[i].response_dr.indexOf('/') >= 0) {
+					let response_dr = incidents[i].response_dr.split('/');
+					$(dataRow).append($('<td align="center">'+ response_dr[1] + '</td>'));
+				} else {
+					$(dataRow).append($('<td align="center">'+ incidents[i].response_dr + '</td>'));
+				}
+				$(dataRow).append($('<td align="center">'+ incidents[i].status_name + '</td>'));
+				let commandCol = $('<td align="center"></td>');
+				$(commandCol).appendTo($(dataRow));
+				$(commandCol).appendTo($(dataRow));
+				$(rwTable).append($(dataRow));
 
-			let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
-			$(operationCmdButton).click(function() {
-				$('.operation-row').each((index, child) => {
-					if ($(child).css('display') !== 'none') {
-						$(child).slideUp();
+				let operationCmdButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/operation-icon.png" title="Your command case processing."/>');
+				$(operationCmdButton).click(function() {
+					$('.operation-row').each((index, child) => {
+						if ($(child).css('display') !== 'none') {
+							$(child).slideUp();
+						}
+					});
+					let operationVisible = $('#' + incidents[i].id).css('display');
+					if (operationVisible === 'none') {
+						$('#' + incidents[i].id).slideDown();
+					} else {
+						$('#' + incidents[i].id).slideUp();
 					}
 				});
-				let operationVisible = $('#' + incidents[i].id).css('display');
-				if (operationVisible === 'none') {
-					$('#' + incidents[i].id).slideDown();
-				} else {
-					$('#' + incidents[i].id).slideUp();
-				}
-			});
-			$(operationCmdButton).appendTo($(commandCol));
+				$(operationCmdButton).appendTo($(commandCol));
 
-			let commnandRow = $('<tr></tr>');
-			$(commnandRow).appendTo($(rwTable));
-			let operationCol = $('<td id="' + incidents[i].id + '"colspan="12" align="right" style="background-color: #828080; display: none;" class="operation-row"></td>');
-			$(operationCol).appendTo($(commnandRow));
+				let commnandRow = $('<tr></tr>');
+				$(commnandRow).appendTo($(rwTable));
+				let operationCol = $('<td id="' + incidents[i].id + '"colspan="12" align="right" style="background-color: #828080; display: none;" class="operation-row"></td>');
+				$(operationCol).appendTo($(commnandRow));
 
-			let operationCmdBox = $('<div></div>');
-			$(operationCmdBox).appendTo($(operationCol));
+				let operationCmdBox = $('<div></div>');
+				$(operationCmdBox).appendTo($(operationCol));
 
-			let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
-			$(historyButton).click(function() {
-				doShowPopupHistory(incidents[i].pn_history);
-			});
-			$(historyButton).appendTo($(operationCmdBox));
+				let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
+				$(historyButton).click(function() {
+					doShowPopupHistory(incidents[i].pn_history);
+				});
+				$(historyButton).appendTo($(operationCmdBox));
 
-			let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
-			$(editCaseButton).click(function() {
-				doCallEditCase(incidents[i].id);
-			});
-			$(editCaseButton).appendTo($(operationCmdBox));
+				let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
+				$(editCaseButton).click(function() {
+					doCallEditCase(incidents[i].id);
+				});
+				$(editCaseButton).appendTo($(operationCmdBox));
 
-			let changeCaseStatusButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/status-icon.png" title="Change Case\'s Status."/>');
-			$(changeCaseStatusButton).click(function() {
-				doShowPopupChangeCaseStatus(incidents[i].id, incidents[i].status);
-			});
-			$(changeCaseStatusButton).appendTo($(operationCmdBox));
+				let changeCaseStatusButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/status-icon.png" title="Change Case\'s Status."/>');
+				$(changeCaseStatusButton).click(function() {
+					doShowPopupChangeCaseStatus(incidents[i].id, incidents[i].status);
+				});
+				$(changeCaseStatusButton).appendTo($(operationCmdBox));
 
-			let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Change Case\'s Status."/>');
-			$(deleteCaseButton).click(function() {
-				doCallDeleteCase(incidents[i].id);
-			});
-			$(deleteCaseButton).appendTo($(operationCmdBox));
-		}
-		return $(rwTable);
+				let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Change Case\'s Status."/>');
+				$(deleteCaseButton).click(function() {
+					doCallDeleteCase(incidents[i].id);
+				});
+				$(deleteCaseButton).appendTo($(operationCmdBox));
+			}
+			resolve($(rwTable));
+		});
   }
 
   function doShowPopupHistory(allUrl){
@@ -1102,6 +1118,7 @@ module.exports = function ( jq ) {
   	let queryStr;
   	let limit = $('#limit').val();
   	let orthancViewPage = $('#CurrentPage').val();
+		console.log(orthancViewPage);
   	if (limit !== 'ALL') {
   		if (orthancViewPage === undefined){
   			queryStr = doGetOrthancQueryFromFilter(true);
@@ -1113,6 +1130,7 @@ module.exports = function ( jq ) {
   	} else {
   		queryStr = doGetOrthancQueryFromFilter(false);
   	}
+		console.log(queryStr);
   	doCallSearhOrthanc(queryStr).then(async (studies) => {
   		//console.log('get studies',studies)
   		$("#Dicom-Result").empty();
@@ -1120,13 +1138,13 @@ module.exports = function ( jq ) {
   		let resultTable;
 
 			if (limit === 'ALL') {
-  			resultTable = doShowOrthancResult(studies, 0);
+  			resultTable = await doShowOrthancResult(studies, 0);
   			$("#Dicom-Result").append($(resultTable));
   		} else {
-  			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 5px;"></div>');
+  			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 10px;"></div>');
 
   			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
-	  			resultTable = doShowOrthancResult(studies, 0);
+	  			resultTable = await doShowOrthancResult(studies, 0);
   				$("#Dicom-Result").append($(resultTable));
   				//if (studies.length > Number(limit)) {
 	  				let nextPageCmd = $('<button>Next</button>');
@@ -1144,7 +1162,7 @@ module.exports = function ( jq ) {
   						return item;
   					}
   				});
-  				resultTable = doShowOrthancResult(filterStudies, Number(limit));
+  				resultTable = await doShowOrthancResult(filterStudies, Number(limit));
 	  			$("#Dicom-Result").append($(resultTable));
 
   				let previousPageCmd = $('<button>Previous</button>');
@@ -1167,109 +1185,113 @@ module.exports = function ( jq ) {
   }
 
   function doShowOrthancResult(dj, startRef){
-		let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
-		let headRow = $('<tr style="background-color: green;"></tr>');
-		let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
-		$(rsTable).append($(headRow));
-		$(headRow).append($(headColumns));
-		for (let i=0; i < dj.length; i++) {
-			const spacingBox = $('<span>&nbsp;</span>');
-			let desc, protoname, mld, sa, studydate, bdp;
-			if ((dj[i].MainDicomTags) && (dj[i].SamplingSeries)){
-				if (dj[i].MainDicomTags.StudyDescription) {
-					desc = '<div class="study-desc">' + dj[i].MainDicomTags.StudyDescription + '</div>';
-					bdp = dj[i].MainDicomTags.StudyDescription;
-				} else {
-					if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
-						bdp = dj[i].SamplingSeries.MainDicomTags.ProtocolName;
+		return new Promise(function(resolve, reject) {
+			let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
+			let headRow = $('<tr style="background-color: green;"></tr>');
+			let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
+			$(rsTable).append($(headRow));
+			$(headRow).append($(headColumns));
+			for (let i=0; i < dj.length; i++) {
+				const spacingBox = $('<span>&nbsp;</span>');
+				let desc, protoname, mld, sa, studydate, bdp;
+				if ((dj[i].MainDicomTags) && (dj[i].SamplingSeries)){
+					if (dj[i].MainDicomTags.StudyDescription) {
+						desc = '<div class="study-desc">' + dj[i].MainDicomTags.StudyDescription + '</div>';
+						bdp = dj[i].MainDicomTags.StudyDescription;
 					} else {
-						bdp = '';
+						if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
+							bdp = dj[i].SamplingSeries.MainDicomTags.ProtocolName;
+						} else {
+							bdp = '';
+						}
+						desc = '';
 					}
-					desc = '';
+					if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
+						protoname = '<div class="protoname">' + dj[i].SamplingSeries.MainDicomTags.ProtocolName + '</div>';
+					} else {
+						protoname = '';
+					}
+					if (dj[i].SamplingSeries.MainDicomTags.Modality) {
+						mld = dj[i].SamplingSeries.MainDicomTags.Modality;
+					} else {
+						mld = '';
+					}
+					if (dj[i].MainDicomTags.StudyDate) {
+						studydate = dj[i].MainDicomTags.StudyDate;
+						studydate = util.formatStudyDate(studydate);
+					} else {
+						studydate = '';
+					}
+					if (dj[i].PatientMainDicomTags.PatientSex) {
+						sa = dj[i].PatientMainDicomTags.PatientSex;
+					} else {
+						sa = '-';
+					}
+					if (dj[i].PatientMainDicomTags.PatientBirthDate) {
+						sa = sa + '/' + util.getAge(dj[i].PatientMainDicomTags.PatientBirthDate)
+					} else {
+						sa = sa + '/-';
+					}
+
+					let dataRow = $('<tr class="case-row"></tr>');
+					let dataColText = '';
+					dataColText += '<td align="center">'+ (i + 1 + startRef) + '</td>'
+					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientID + '</td>'
+					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
+					dataColText += '<td align="left">' + sa + '</td>'
+					dataColText += '<td align="left">' + mld + '</td>';
+					dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
+					dataColText += '<td align="left">' + desc +  protoname + '</td>'
+					let dataCol = $(dataColText);
+					$(dataRow).append($(dataCol));
+					operatingCol = $('<td align="center"></td>');
+					$(dataRow).append($(operatingCol));
+					let previewCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
+					let instancePreview = dj[i].SamplingSeries.Instances[0];
+					$(previewCmd).on('click', function(evt){
+						doOpenPreview(instancePreview, dj[i].Series[0]);
+					});
+					$(operatingCol).append($(previewCmd));
+
+					let patientProps = sa.split('/');
+					let defualtValue = {patient: {id: dj[i].PatientMainDicomTags.PatientID, name: dj[i].PatientMainDicomTags.PatientName, age: patientProps[1], sex: patientProps[0]}, bodypart: bdp, studyID: dj[i].ID, acc: dj[i].MainDicomTags.AccessionNumber, mdl: mld};
+					let creatwNewCaseCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/new-icon.png" title="Create New case."/>');
+					$(creatwNewCaseCmd).on('click', function(evt){
+						doOpenCreateNewCase(defualtValue);
+					});
+
+					$(operatingCol).append($(spacingBox));
+					$(operatingCol).append($(creatwNewCaseCmd));
+
+					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/download-icon.png" title="Download Dicom to zip file."/>');
+					$(downloadDicomCmd).on('click', function(evt){
+						doDownloadDicom(dj[i].ID);
+					});
+
+					$(operatingCol).append($(spacingBox));
+					$(operatingCol).append($(downloadDicomCmd));
+
+					let deleteDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Delete local file."/>');
+					$(deleteDicomCmd).on('click', function(evt){
+						doDeleteDicom(dj[i].ID);
+					});
+
+					$(operatingCol).append($(spacingBox));
+					$(operatingCol).append($(deleteDicomCmd));
+
+					$(rsTable).append($(dataRow));
 				}
-				if (dj[i].SamplingSeries.MainDicomTags.ProtocolName) {
-					protoname = '<div class="protoname">' + dj[i].SamplingSeries.MainDicomTags.ProtocolName + '</div>';
-				} else {
-					protoname = '';
-				}
-				if (dj[i].SamplingSeries.MainDicomTags.Modality) {
-					mld = dj[i].SamplingSeries.MainDicomTags.Modality;
-				} else {
-					mld = '';
-				}
-				if (dj[i].MainDicomTags.StudyDate) {
-					studydate = dj[i].MainDicomTags.StudyDate;
-					studydate = util.formatStudyDate(studydate);
-				} else {
-					studydate = '';
-				}
-				if (dj[i].PatientMainDicomTags.PatientSex) {
-					sa = dj[i].PatientMainDicomTags.PatientSex;
-				} else {
-					sa = '-';
-				}
-				if (dj[i].PatientMainDicomTags.PatientBirthDate) {
-					sa = sa + '/' + util.getAge(dj[i].PatientMainDicomTags.PatientBirthDate)
-				} else {
-					sa = sa + '/-';
-				}
-
-				let dataRow = $('<tr></tr>');
-				let dataColText = '';
-				dataColText += '<td align="center">'+ (i + 1 + startRef) + '</td>'
-				dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientID + '</td>'
-				dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
-				dataColText += '<td align="left">' + sa + '</td>'
-				dataColText += '<td align="left">' + mld + '</td>';
-				dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
-				dataColText += '<td align="left">' + desc +  protoname + '</td>'
-				let dataCol = $(dataColText);
-				$(dataRow).append($(dataCol));
-				operatingCol = $('<td align="center"></td>');
-				$(dataRow).append($(operatingCol));
-				let previewCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
-				let instancePreview = dj[i].SamplingSeries.Instances[0];
-				$(previewCmd).on('click', function(evt){
-					doOpenPreview(instancePreview);
-				});
-				$(operatingCol).append($(previewCmd));
-
-				let patientProps = sa.split('/');
-				let defualtValue = {patient: {id: dj[i].PatientMainDicomTags.PatientID, name: dj[i].PatientMainDicomTags.PatientName, age: patientProps[1], sex: patientProps[0]}, bodypart: bdp, studyID: dj[i].ID, acc: dj[i].MainDicomTags.AccessionNumber, mdl: mld};
-				let creatwNewCaseCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/new-icon.png" title="Create New case."/>');
-				$(creatwNewCaseCmd).on('click', function(evt){
-					doOpenCreateNewCase(defualtValue);
-				});
-
-				$(operatingCol).append($(spacingBox));
-				$(operatingCol).append($(creatwNewCaseCmd));
-
-				let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/download-icon.png" title="Download Dicom to zip file."/>');
-				$(downloadDicomCmd).on('click', function(evt){
-					doDownloadDicom(dj[i].ID);
-				});
-
-				$(operatingCol).append($(spacingBox));
-				$(operatingCol).append($(downloadDicomCmd));
-
-				let deleteDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Delete local file."/>');
-				$(deleteDicomCmd).on('click', function(evt){
-					doDeleteDicom(dj[i].ID);
-				});
-
-				$(operatingCol).append($(spacingBox));
-				$(operatingCol).append($(deleteDicomCmd));
-
-				$(rsTable).append($(dataRow));
 			}
-		}
-		return $(rsTable);
+			resolve($(rsTable));
+		});
   }
 
-  function doOpenPreview(instanceID) {
+  function doOpenPreview(instanceID, seriesID){
   	apiconnector.doCallDicomPreview(instanceID).then((response) => {
   		let openLink = response.preview.link;
   		window.open(openLink, '_blank');
+			let previewLink = apiconnector.hostOrthancUrl + '/web-viewer/app/viewer.html?series=' + seriesID;
+			console.log(previewLink);
   	})
   }
 
@@ -1772,18 +1794,28 @@ module.exports = function ( jq ) {
 			let apiName = 'save_new_inc';
 			try {
 				let response = await doCallApi(apiName, rqParams);
-				//console.log(response);
 				if (response.res.statusCode == 200) {
+					let resO = JSON.parse(response.res.body);
+					let newCaseIdStr = resO.message;
+					newCaseIdStr = newCaseIdStr.slice(newCaseIdStr.indexOf('('));
+					newCaseIdStr = newCaseIdStr.slice(1, newCaseIdStr.length - 1);
+					var obj = /[0-9]*$/.exec(newCaseIdStr);
+					let newCaseId = obj[0];
+					console.log(newCaseId);
 					let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID);
 					console.log(transferRes);
 					if (transferRes.cloud.link) {
 						console.log(transferRes.local.link);
 						console.log(transferRes.cloud.link);
-						alert('บันทึกเคสใหม่เข้าสู่ระบบเรียบร้อยแล้ว');
-						doCloseNewCaseBox();
-						$("#SendWaitTab").trigger("click");
-						$("#SendWaitTab").addClass('active');
-						$('body').loading('stop');
+						let newStatus = 'finish_upload';
+						doUpdateCaseStatus(newCaseId, newStatus).then((updateRes) => {
+							console.log(updateRes);
+							alert('บันทึกเคสใหม่เข้าสู่ระบบเรียบร้อยแล้ว');
+							doCloseNewCaseBox();
+							$("#SendWaitTab").trigger("click");
+							$("#SendWaitTab").addClass('active');
+							$('body').loading('stop');
+						});
 					}else {
 						alert('Transfer Dicom File ขัดข้อง');
 						$('body').loading('stop');
@@ -1805,7 +1837,7 @@ module.exports = function ( jq ) {
 			$('body').loading('start');
 			const main = require('../main.js');
 			newCaseData.username = main.doGetCookie().username;
-			newCaseData.status = '';
+			newCaseData.status = 'finish_upload';
 			let rqParams = doPrepareCaseParams(newCaseData);
 			rqParams.id = caseid;
 			rqParams.patient = rqParams.inc_patient;
@@ -1850,13 +1882,15 @@ module.exports = function ( jq ) {
   	$(statusSelect).css(inputStyleClass);
 
   	apiconnector.RadConStatus.forEach((item) => {
-  		let option = $('<option></option>');
-  		$(option).val(item.status_en);
-  		$(option).text(item.status_th);
-  		if (item.status_en === currentStatus) {
-  			$(option).attr('selected', true);
-  		}
-  		$(option).appendTo($(statusSelect));
+			if (item.use == true) {
+	  		let option = $('<option></option>');
+	  		$(option).val(item.status_en);
+	  		$(option).text(item.status_th);
+	  		if (item.status_en === currentStatus) {
+	  			$(option).attr('selected', true);
+	  		}
+	  		$(option).appendTo($(statusSelect));
+			}
   	});
   	$(selectBox).append($('<label>สถานะใหม่ที่ต้องการเปลี่ยน :</label>'));
   	$(selectBox).append($(statusSelect));
@@ -1897,9 +1931,7 @@ module.exports = function ( jq ) {
 		$('body').loading('start');
 		let caseID = $('#caseID').val();
 		let newStatus = $('#newStatus').val();
-		console.log({caseID, newStatus});
 		doUpdateCaseStatus(caseID, newStatus).then((response) => {
-			console.log(response);
 			if (currentTab === 'ReadWaitDiv') {
 				//openRwCaseList();
 				$("#ReadWaitTab").trigger("click");
@@ -1919,9 +1951,7 @@ module.exports = function ( jq ) {
   	if (userConfirm == true){
   		$('body').loading('start');
   		let newStatus = 'cancel';
-  		console.log({caseID, newStatus});
 			doUpdateCaseStatus(caseID, newStatus).then((response) => {
-				console.log(response);
 				if (currentTab === 'ReadWaitDiv') {
 					//openRwCaseList();
 					$("#ReadWaitTab").trigger("click");
@@ -1941,12 +1971,11 @@ module.exports = function ( jq ) {
 		return new Promise(async function(resolve, reject) {
 			const main = require('../main.js');
 			let rqParams = { username: main.doGetCookie().username , inc_id: id, update_status: newStatus};
-			console.log('doUpdateCaseStatus => rqParams => ', rqParams);
 			let apiName = 'update_incident';
 			try {
 				let response = await doCallApi(apiName, rqParams);
+				console.log(response);
 				let resO = JSON.parse(response.res.body);
-				console.log('doUpdateCaseStatus => response Object => ', resO);
 				resolve(resO);
 			} catch(e) {
 	      reject(e);
