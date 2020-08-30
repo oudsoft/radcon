@@ -8,6 +8,7 @@ const express = require('express');
 const app = express();
 
 const parentDir = path.normalize(__dirname + "/..");
+const grandParentDir = path.normalize(__dirname + "/../..");
 
 const serverPort = process.env.SERVER_PORT;
 //const serverPort = process.argv[3] || process.env.SERVER_PORT || 8080;

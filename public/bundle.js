@@ -1785,28 +1785,30 @@ module.exports = function ( jq ) {
 		let newCaseData = doVerifyInputForm();
 		if (newCaseData) {
 			$('body').loading('start');
-			const main = require('../main.js');
-			newCaseData.username = main.doGetCookie().username;
-			newCaseData.curr_host_id = main.doGetCookie().org[0].id;
-			newCaseData.status = '';
-			let rqParams = doPrepareCaseParams(newCaseData);
-			//console.log(rqParams);
-			let apiName = 'save_new_inc';
 			try {
-				let response = await doCallApi(apiName, rqParams);
-				if (response.res.statusCode == 200) {
-					let resO = JSON.parse(response.res.body);
-					let newCaseIdStr = resO.message;
-					newCaseIdStr = newCaseIdStr.slice(newCaseIdStr.indexOf('('));
-					newCaseIdStr = newCaseIdStr.slice(1, newCaseIdStr.length - 1);
-					var obj = /[0-9]*$/.exec(newCaseIdStr);
-					let newCaseId = obj[0];
-					console.log(newCaseId);
-					let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID);
-					console.log(transferRes);
-					if (transferRes.cloud.link) {
-						console.log(transferRes.local.link);
-						console.log(transferRes.cloud.link);
+				let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID);
+				console.log(transferRes);
+				if (transferRes.cloud.link) {
+					console.log(transferRes.local.link);
+					console.log(transferRes.cloud.link);
+					newCaseData.dicom_zip1 = transferRes.cloud.link;
+
+					const main = require('../main.js');
+					newCaseData.username = main.doGetCookie().username;
+					newCaseData.curr_host_id = main.doGetCookie().org[0].id;
+					newCaseData.status = '';
+					let rqParams = doPrepareCaseParams(newCaseData);
+					//console.log(rqParams);
+					let apiName = 'save_new_inc';
+					let response = await doCallApi(apiName, rqParams);
+					if (response.res.statusCode == 200) {
+						let resO = JSON.parse(response.res.body);
+						let newCaseIdStr = resO.message;
+						newCaseIdStr = newCaseIdStr.slice(newCaseIdStr.indexOf('('));
+						newCaseIdStr = newCaseIdStr.slice(1, newCaseIdStr.length - 1);
+						var obj = /[0-9]*$/.exec(newCaseIdStr);
+						let newCaseId = obj[0];
+						console.log(newCaseId);
 						let newStatus = 'finish_upload';
 						doUpdateCaseStatus(newCaseId, newStatus).then((updateRes) => {
 							console.log(updateRes);
@@ -1816,15 +1818,15 @@ module.exports = function ( jq ) {
 							$("#SendWaitTab").addClass('active');
 							$('body').loading('stop');
 						});
-					}else {
-						alert('Transfer Dicom File ขัดข้อง');
+					} else if (response.res.statusCode == 500) {
+						alert('API Server ขัดข้อง');
 						$('body').loading('stop');
 					}
-				} else if (response.res.statusCode == 500) {
-					alert('API Server ขัดข้อง');
+				}else {
+					alert('Transfer Dicom File ขัดข้อง');
 					$('body').loading('stop');
 				}
- 			} catch(e) {
+			} catch(e) {
         console.log('Unexpected error occurred =>', e);
         $('body').loading('stop');
     	}
