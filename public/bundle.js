@@ -772,6 +772,7 @@ module.exports = function ( jq ) {
 		let apiName = 'get_case_list';
 		try {
 			let response = await doCallApi(apiName, rqParams);
+			console.log(response);
 			let resBody = JSON.parse(response.res.body);
   		$("#ReadWaitDiv").empty();
   		let rwTable = await doShowRwCaseList(resBody.incident);
@@ -887,8 +888,10 @@ module.exports = function ( jq ) {
 				$(dataRow).append($('<td align="center">'+ incidents[i].gender + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].hn + '</td>'));
 				//$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
-				if (incidents[i].dicom_zip1[0] === '{') {
-					$(dataRow).append($('<td align="center">'+ (JSON.parse(incidents[i].dicom_zip1)).mdl + '</td>'));
+				if (incidents[i].dicom_zip2[0] === '{') {
+					console.log(incidents[i].dicom_zip2);
+					//$(dataRow).append($('<td align="center">&nbsp;</td>'));
+					$(dataRow).append($('<td align="center">' + incidents[i].dicom_folder2 + '</td>'));
 				} else {
 					$(dataRow).append($('<td align="center">&nbsp;</td>'));
 				}
@@ -936,6 +939,12 @@ module.exports = function ( jq ) {
 					doShowPopupHistory(incidents[i].pn_history);
 				});
 				$(historyButton).appendTo($(operationCmdBox));
+
+				let downlodDicomButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/>');
+				$(downlodDicomButton).click(function() {
+					doShowPopupDicomZip(incidents[i].dicom_zip1);
+				});
+				$(downlodDicomButton).appendTo($(operationCmdBox));
 
 				let editCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/edit-icon.png" title="Edit Case Detail."/>');
 				$(editCaseButton).click(function() {
@@ -1006,9 +1015,8 @@ module.exports = function ( jq ) {
 		try {
 			let response = await doCallApi(apiName, rqParams);
   		let resBody = JSON.parse(response.res.body);
-  		let dicom_ex = JSON.parse(resBody.inc_data.dicom_zip1);
-  		let patient = {id: resBody.inc_data.hn, name: dicom_ex.patientNameEN, name_th: resBody.inc_data.patient, age: resBody.inc_data.age, sex: resBody.inc_data.gender};
-			let defualtValue = {id: resBody.inc_data.id, patient: patient, bodypart: resBody.inc_data.inc_scan_type, studyID: resBody.inc_data.dicom_folder1, acc: resBody.inc_data.accession, mdl: dicom_ex.mdl};
+  		let patient = {id: resBody.inc_data.hn, name: resBody.inc_data.dicom_zip2, name_th: resBody.inc_data.patient, age: resBody.inc_data.age, sex: resBody.inc_data.gender};
+			let defualtValue = {id: resBody.inc_data.id, patient: patient, bodypart: resBody.inc_data.inc_scan_type, studyID: resBody.inc_data.dicom_folder1, acc: resBody.inc_data.accession, mdl: resBody.inc_data.dicom_folder2};
 			defualtValue.pn_history = resBody.inc_data.pn_history;
 			defualtValue.status = resBody.inc_data.status;
 			defualtValue.urgent = resBody.inc_data.urgent_id;
@@ -1018,6 +1026,7 @@ module.exports = function ( jq ) {
 			defualtValue.detail = resBody.inc_data.detail;
 			defualtValue.dept = resBody.inc_data.dept;
 			defualtValue.inc_price = resBody.inc_data.inc_price;
+			defualtValue.dicom_zip1 = resBody.inc_data.dicom_zip1;
   		doOpenEditCase(defualtValue);
   		$('body').loading('stop');
 		} catch(e) {
@@ -1286,6 +1295,10 @@ module.exports = function ( jq ) {
 		});
   }
 
+	function doShowPopupDicomZip(ziplink){
+		window.open(ziplink, '_blank');
+	}
+
   function doOpenPreview(instanceID, seriesID){
   	apiconnector.doCallDicomPreview(instanceID).then((response) => {
   		let openLink = response.preview.link;
@@ -1378,7 +1391,7 @@ module.exports = function ( jq ) {
 
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
-
+			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + defualtValue.dicom_zip1 + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a></td></tr>'))
 			$("#SaveNewCase-Cmd").val("บันทึก");
 
 			$("#upload-scan-cmd").click(function(){
@@ -1753,7 +1766,7 @@ module.exports = function ( jq ) {
 		});
 	}
 
-  function doPrepareCaseParams(newCaseData) {
+  function doPrepareCaseParams(newCaseData, ziplink) {
 		let rqParams = {};
 		//rqParams.status = 'wait_start';
 		//rqParams.status = 'finish_upload';
@@ -1776,8 +1789,10 @@ module.exports = function ( jq ) {
 		rqParams.inc_text = newCaseData.detail;
 		rqParams.inc_price = newCaseData.price;
 		rqParams.dicom_folder2 = newCaseData.mdl;
-		let dicom_ex = {patientNameEN: newCaseData.patientNameEN, mdl: newCaseData.mdl};
-		rqParams.dicom_zip1 = JSON.stringify(dicom_ex);
+		//let dicom_ex = {patientNameEN: newCaseData.patientNameEN/*, mdl: newCaseData.mdl */};
+		rqParams.dicom_zip1 = ziplink;
+		rqParams.dicom_zip2 = newCaseData.patientNameEN
+		/*JSON.stringify(dicom_ex) */;
 		return rqParams;
 	}
 
@@ -1791,14 +1806,13 @@ module.exports = function ( jq ) {
 				if (transferRes.cloud.link) {
 					console.log(transferRes.local.link);
 					console.log(transferRes.cloud.link);
-					newCaseData.dicom_zip1 = transferRes.cloud.link;
 
 					const main = require('../main.js');
 					newCaseData.username = main.doGetCookie().username;
 					newCaseData.curr_host_id = main.doGetCookie().org[0].id;
 					newCaseData.status = '';
-					let rqParams = doPrepareCaseParams(newCaseData);
-					//console.log(rqParams);
+					let rqParams = doPrepareCaseParams(newCaseData, transferRes.cloud.link);
+					console.log(rqParams);
 					let apiName = 'save_new_inc';
 					let response = await doCallApi(apiName, rqParams);
 					if (response.res.statusCode == 200) {
@@ -1840,7 +1854,7 @@ module.exports = function ( jq ) {
 			const main = require('../main.js');
 			newCaseData.username = main.doGetCookie().username;
 			newCaseData.status = 'finish_upload';
-			let rqParams = doPrepareCaseParams(newCaseData);
+			let rqParams = doPrepareCaseParams(newCaseData, '');
 			rqParams.id = caseid;
 			rqParams.patient = rqParams.inc_patient;
 			delete rqParams.inc_patient;
