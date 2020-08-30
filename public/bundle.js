@@ -887,14 +887,7 @@ module.exports = function ( jq ) {
 				$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].gender + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].hn + '</td>'));
-				//$(dataRow).append($('<td align="center">'+ incidents[i].age + '</td>'));
-				if (incidents[i].dicom_zip2[0] === '{') {
-					console.log(incidents[i].dicom_zip2);
-					//$(dataRow).append($('<td align="center">&nbsp;</td>'));
-					$(dataRow).append($('<td align="center">' + incidents[i].dicom_folder2 + '</td>'));
-				} else {
-					$(dataRow).append($('<td align="center">&nbsp;</td>'));
-				}
+				$(dataRow).append($('<td align="center">' + incidents[i].dicom_folder2 + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].scan_type + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].urgent + '</td>'));
 				$(dataRow).append($('<td align="center">'+ incidents[i].primary_dr + '</td>'));
