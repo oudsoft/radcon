@@ -1118,7 +1118,6 @@ module.exports = function ( jq ) {
   	let queryStr;
   	let limit = $('#limit').val();
   	let orthancViewPage = $('#CurrentPage').val();
-		console.log(orthancViewPage);
   	if (limit !== 'ALL') {
   		if (orthancViewPage === undefined){
   			queryStr = doGetOrthancQueryFromFilter(true);
@@ -1142,9 +1141,10 @@ module.exports = function ( jq ) {
   			$("#Dicom-Result").append($(resultTable));
   		} else {
   			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 10px;"></div>');
-
+				//console.log(orthancViewPage);
   			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
 	  			resultTable = await doShowOrthancResult(studies, 0);
+					//console.log(resultTable);
   				$("#Dicom-Result").append($(resultTable));
   				//if (studies.length > Number(limit)) {
 	  				let nextPageCmd = $('<button>Next</button>');
