@@ -30,6 +30,9 @@ var stopClipCommand = document.getElementById("StopClipCommand");
 playClipCommand.disabled = true;
 stopClipCommand.disabled = true;
 
+var localStream = undefined;
+var displayMediaStreamConstraints = undefined;
+
 var currentLocalStream = localStream;
 
 var _next = 0;
@@ -81,32 +84,19 @@ document.addEventListener("SwithBackMain", function(e) {
 });
 
 function doPlayClip() {
-  if (localStream)	{
-    let conf = confirm('โปรดยืนยันว่า "คุณต้องการเปลี่ยนสัญญาณจอภาพด้วยสัญญาณใหม่ที่เลือก?"\nยืนยันโดย ตกลง หรือ OK');
-    if (conf)	{
-      /*clear localstream */
-      localStream.getTracks().forEach((track) => {track.stop()});
-      let playIndex = fileList.selectedIndex;
-      if (playIndex < 0){
-        playIndex = 0;
-      }
-      next(playIndex);
+  if (displayMediaStreamConstraints){
+    let playIndex = fileList.selectedIndex;
+    if (playIndex < 0){
+      playIndex = 0;
     }
+    next(playIndex);
   } else {
-    if (displayMediaStreamConstraints){
-      let playIndex = fileList.selectedIndex;
-      if (playIndex < 0){
-        playIndex = 0;
-      }
-      next(playIndex);
-    } else {
-      displayMediaStreamConstraints = {video: {width: 1280, height: 720}};
-      let playIndex = fileList.selectedIndex;
-      if (playIndex < 0){
-        playIndex = 0;
-      }
-      next(playIndex);
+    displayMediaStreamConstraints = {video: {width: 1280, height: 720}};
+    let playIndex = fileList.selectedIndex;
+    if (playIndex < 0){
+      playIndex = 0;
     }
+    next(playIndex);
   }
 }
 

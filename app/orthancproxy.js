@@ -36,11 +36,11 @@ const proxyRequest = function(rqParam) {
 			},
 			body: rqBody
 		}, (err, res, body) => {
-			if (!err) {			
-				resolve({status: {code: 200}, res: res});								
+			if (!err) {
+				resolve({status: {code: 200}, res: res});
 			} else {
 				console.log(JSON.stringify(err));
-				reject({status: {code: 500}, err: err});	
+				reject({status: {code: 500}, err: err});
 			}
 		});
 	});
@@ -74,7 +74,7 @@ const doLoadArchive = function(studyID, rootname){
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
 			let link = '/' + rootname + process.env.USRARCHIVE_PATH + '/' + archiveFileName;
-			resolve({link: link});		
+			resolve({link: link});
 		});
 	});
 }
@@ -83,11 +83,11 @@ const doTransferArchive = function(studyID) {
 	return new Promise(function(resolve, reject) {
 		let archiveFilename = studyID + '.zip';
 		let archiveSrc = usrArchiveDir + '/' + archiveFilename;
-		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + archiveSrc + ' ftp://119.59.125.63/domains/radconnext.com/private_html/rad_test/inc_files/';
+		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + archiveSrc + ' ftp://119.59.125.63/domains/radconnext.com/private_html/radconnext/inc_files/';
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
-			let link = 'https://radconnext.com/rad_test/inc_files/' + archiveFilename;
-			resolve({link: link});		
+			let link = 'https://radconnext.com/radconnext/inc_files/' + archiveFilename;
+			resolve({link: link});
 		});
 	});
 }
@@ -95,11 +95,11 @@ const doTransferArchive = function(studyID) {
 const doTransferHistory = function(fileName) {
 	return new Promise(function(resolve, reject) {
 		let filePath = usrUploadDir + '/' + fileName;
-		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + filePath + ' ftp://119.59.125.63/domains/radconnext.com/private_html/rad_test/inc_files/';
+		var command = 'curl --list-only --user radconnext:A4AYitoDUB -T ' + filePath + ' ftp://119.59.125.63/domains/radconnext.com/private_html/radconnext/inc_files/';
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
-			let link = 'https://radconnext.com/rad_test/inc_files/' + fileName;
-			resolve({link: link});		
+			let link = 'https://radconnext.com/radconnext/inc_files/' + fileName;
+			resolve({link: link});
 		});
 	});
 }
@@ -109,7 +109,7 @@ const doDeleteStudy = function(studyID){
 		var command = 'curl -X DELETE --user ' + userpass + '  ' + ORTHANC_URL + '/studies/' + studyID;
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
-			resolve({response: {message: stdout}});		
+			resolve({response: {message: stdout}});
 		});
 	});
 }
@@ -119,13 +119,13 @@ const logger = require('./logger');
 app.get('/luatest', function(req, res) {
 	console.log('get luatest req.query>> ', req.query)
 	logger().info(new Date()  + " GET /luatest " + JSON.stringify(req.query));
-	res.status(200).send(req.query);		
+	res.status(200).send(req.query);
 });
 
 app.post('/luetest', function(req, res) {
 	console.log('post luatest req.body>> ', req.body)
 	logger().info(new Date()  + " POST /luatest " + JSON.stringify(req.body));
-	res.status(200).send(req.body);		
+	res.status(200).send(req.body);
 });
 
 app.post('/find', function(req, res) {
@@ -133,10 +133,10 @@ app.post('/find', function(req, res) {
 	let rqParam = {method: req.body.mothod, uri: req.body.uri, body: req.body.body};
 	proxyRequest(rqParam).then((response) => {
 		logger().info(new Date()  + " > " + rqParam + " > " + JSON.stringify(response));
-		res.status(200).send(response);		
+		res.status(200).send(response);
 	}).catch((err) => {
 		logger().error(new Date()  + " > " + rqParam + " > " + JSON.stringify(err));
-		res.status(500).send(err);		
+		res.status(500).send(err);
 	})*/
 	//let rqBody = JSON.stringify(req.body.body);
 	let rqBody = req.body.body;
@@ -154,12 +154,12 @@ app.post('/find', function(req, res) {
 		*/
 		let studyObj = JSON.parse(stdout);
 		//console.log('studyObj >>', studyObj);
-		res.status(200).send(studyObj);		
+		res.status(200).send(studyObj);
 	});
 });
 
 app.get('/preview/(:instanceID)', function(req, res) {
-	const rootname = req.originalUrl.split('/')[1];	
+	const rootname = req.originalUrl.split('/')[1];
 	var instanceID = req.params.instanceID;
 	var previewFileName = instanceID + '.png';
 	var command = 'curl --user ' + userpass + '  ' + ORTHANC_URL + '/instances/' + instanceID + '/preview > ' + usrPreviewDir + '/' + previewFileName;
@@ -167,12 +167,12 @@ app.get('/preview/(:instanceID)', function(req, res) {
 	runcommand(command).then((stdout) => {
 		//res.redirect('/' + rootname + USRPREVIEW_PATH + '/' + previewFileName);
 		let link = '/' + rootname + process.env.USRPREVIEW_PATH + '/' + previewFileName;
-		res.status(200).send({preview: {link: link}});		
+		res.status(200).send({preview: {link: link}});
 	});
 });
 
 app.get('/loadarchive/(:studyID)', function(req, res) {
-	const rootname = req.originalUrl.split('/')[1];	
+	const rootname = req.originalUrl.split('/')[1];
 	var studyID = req.params.studyID;
 	doLoadArchive(studyID).then((archive) => {
 		res.status(200).send({archive: {link: archive.link}});
@@ -180,7 +180,7 @@ app.get('/loadarchive/(:studyID)', function(req, res) {
 });
 
 app.get('/transferdicom/(:studyID)', function(req, res) {
-	const rootname = req.originalUrl.split('/')[1];	
+	const rootname = req.originalUrl.split('/')[1];
 	var studyID = req.params.studyID;
 	doLoadArchive(studyID, rootname).then((archive) => {
 		if (archive.link) {
