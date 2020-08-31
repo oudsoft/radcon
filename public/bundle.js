@@ -963,8 +963,8 @@ module.exports = function ( jq ) {
 
   function doShowPopupHistory(allUrl){
   	$('#HistoryDialogBox').empty();
-  	let urls = allUrl.split(',');
-  	urls.forEach((url) => {
+  	let files = allUrl.split(',');
+  	files.forEach((file) => {
   		if (url !== '') {
 	  		let hsBox = $('<div></div>');
 	  		$(hsBox).css('padding','3px');
@@ -975,11 +975,11 @@ module.exports = function ( jq ) {
 	  		let hsImg = $('<img/>');
 	  		$(hsImg).css('width','94px');
 	  		$(hsImg).css('height', 'auto');
-
 	  		$(hsImg).css('cursor', 'pointer');
-	  		$(hsImg).attr('src', url);
+				let imgLink = 'https://radconnext.com/radconnext/inc_files/' + file;
+	  		$(hsImg).attr('src', imgLink);
 	  		$(hsImg).click(()=>{
-	  			window.open(url, '_blank');
+	  			window.open(imgLink, '_blank');
 	  		})
 	  		$(hsImg).appendTo($(hsBox));
 	  		$('#HistoryDialogBox').append($(hsBox));
@@ -1288,7 +1288,8 @@ module.exports = function ( jq ) {
 		});
   }
 
-	function doShowPopupDicomZip(ziplink){
+	function doShowPopupDicomZip(zipfile){
+		let ziplink = 'https://radconnext.com/radconnext/inc_files/' + zipfile;
 		window.open(ziplink, '_blank');
 	}
 
@@ -1384,7 +1385,8 @@ module.exports = function ( jq ) {
 
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
-			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + defualtValue.dicom_zip1 + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a> ' + defualtValue.dicom_zip1 + '</td></tr>'))
+			let ziplink = 'https://radconnext.com/radconnext/inc_files/' + defualtValue.dicom_zip1;
+			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + ziplink + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a> ' + ziplink + '</td></tr>'));
 			$("#SaveNewCase-Cmd").val("บันทึก");
 
 			$("#upload-scan-cmd").click(function(){
@@ -1430,7 +1432,8 @@ module.exports = function ( jq ) {
 							apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
 								$('#magic-box').html('');
 								$('#magic-box').hide();
-								doAddHistory(transferRef.cloud.link);
+								//doAddHistory(transferRef.cloud.link);
+								doAddHistory(imageFileName);
 								doRenderHistoryPreview();
 								$(fileBrowser).remove();
 								$("#sub-dialog").empty();
@@ -1469,7 +1472,8 @@ module.exports = function ( jq ) {
 	  }
   }
 
-  function doAppendNewHistoryImage(imgBox, imgURL, ind) {
+  function doAppendNewHistoryImage(imgBox, imgFileName, ind) {
+		const imgURL = 'https://radconnext.com/radconnext/inc_files/' + imgFileName;
 		let imgDiv = document.createElement('div');
 		imgDiv.style.float = 'left';
 		let removeLink = document.createElement('a');
@@ -1535,7 +1539,8 @@ module.exports = function ( jq ) {
 			var imageUrlArgs = imageUrl.split('/');
 			var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
 			apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
-				doAddHistory(transferRef.cloud.link);
+				//doAddHistory(transferRef.cloud.link);
+				doAddHistory(imageFileName);
 				doRenderHistoryPreview();
 			});
 		}).fail(function(error) {
@@ -1690,7 +1695,8 @@ module.exports = function ( jq ) {
 						var imageUrlArgs = imageUrl.split('/');
 						var imageFileName =  imageUrlArgs[(imageUrlArgs.length - 1)];
 						apiconnector.doCallTransferHistory(imageFileName).then((transferRef) => {
-							doAddHistory(transferRef.cloud.link);
+							//doAddHistory(transferRef.cloud.link);
+							doAddHistory(imageFileName);
 							doRenderHistoryPreview();
 						});
 					}
@@ -1759,7 +1765,7 @@ module.exports = function ( jq ) {
 		});
 	}
 
-  function doPrepareCaseParams(newCaseData, ziplink) {
+  function doPrepareCaseParams(newCaseData, zipFileName) {
 		let rqParams = {};
 		//rqParams.status = 'wait_start';
 		//rqParams.status = 'finish_upload';
@@ -1783,7 +1789,7 @@ module.exports = function ( jq ) {
 		rqParams.inc_price = newCaseData.price;
 		rqParams.dicom_folder2 = newCaseData.mdl;
 		//let dicom_ex = {patientNameEN: newCaseData.patientNameEN/*, mdl: newCaseData.mdl */};
-		rqParams.dicom_zip1 = ziplink;
+		rqParams.dicom_zip1 = zipFileName;
 		rqParams.dicom_zip2 = newCaseData.patientNameEN
 		/*JSON.stringify(dicom_ex) */;
 		return rqParams;
@@ -1804,7 +1810,8 @@ module.exports = function ( jq ) {
 					newCaseData.username = main.doGetCookie().username;
 					newCaseData.curr_host_id = main.doGetCookie().org[0].id;
 					newCaseData.status = '';
-					let rqParams = doPrepareCaseParams(newCaseData, transferRes.cloud.link);
+					let zipFileName = newCaseData.studyID + '.zip';
+					let rqParams = doPrepareCaseParams(newCaseData, zipFileName);
 					console.log(rqParams);
 					let apiName = 'save_new_inc';
 					let response = await doCallApi(apiName, rqParams);
