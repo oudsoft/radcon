@@ -18,10 +18,6 @@ FileList.prototype.toArray = function () {
   })
 }
 /*********************************************/
-document.getElementById("OpenLocalFile-Cmd").addEventListener('click', () => {
-	doTestSubscribe();
-});
-
 var localClipFile = document.getElementById("LocalClipFile");
 var fileList = document.getElementById("filelist");
 var playClipCommand = document.getElementById("PlayClipCommand");
@@ -74,6 +70,7 @@ fileList.addEventListener('change', function() {
   next(playIndex);
 });
 */
+/*
 document.addEventListener("SwithBackMain", function(e) {
   _next += 1;
   next(_next);
@@ -82,7 +79,7 @@ document.addEventListener("SwithBackMain", function(e) {
     _next=-1;
   }
 });
-
+*/
 function doPlayClip() {
   if (displayMediaStreamConstraints){
     let playIndex = fileList.selectedIndex;
@@ -113,41 +110,41 @@ function doStopClip() {
     });
     localStream = currentLocalStream;
     localVideo.srcObject = localStream;
+    /*
     doReMixStream();
     setTimeout(() => {
       doUpdateStream(mixedStream, null);
     }, 2500);
+    */
   }
 }
 
 function doRemoveClipFromMain() {
   doStopClip();
-  srcMedia = null;
   localClipFile.files = null;
 }
 
 /*********************************************/
-let srcMedia = null;
+var localVideo = document.getElementById("YourVideo");
 function doPlayExternalVideo(URL) {
-  srcMedia = document.createElement("video");
-  srcMedia.controls = true;
-  srcMedia.autoplay = true;
-  srcMedia.crossorigin = "anonymous";
-  srcMedia.src = URL;
-  srcMedia.onended = e => {
-    let event = new CustomEvent("SwithBackMain", { "detail": {}});
-    document.dispatchEvent(event);
-    if (localStream)	{
-      localStream.onended = null;
-    }
-  };
-  srcMedia.addEventListener('StopPlayClip', function() {
+  localVideo.controls = true;
+  localVideo.autoplay = true;
+  localVideo.crossorigin = "anonymous";
+  localVideo.src = URL;
+  localVideo.addEventListener('StopPlayClip', function() {
     console.log('test');
-    srcMedia.src = '';
-    srcMedia.stop();
-    srcMedia = null;
+    localVideo.src = '';
+    localVideo.stop();
   });
-
+  localVideo.addEventListener("ended",  function() {
+    let currentIndex = fileList.selectedIndex;
+    if (currentIndex < len){
+      next(currentIndex+1);
+    } else {
+      next(0);
+    }
+  });
+  /*
   let webmstream = null;
   srcMedia.oncanplay = async function() {
     webmstream = srcMedia.captureStream();
@@ -159,7 +156,6 @@ function doPlayExternalVideo(URL) {
       doReMixStream();
       setTimeout(() => {
         doUpdateStream(mixedStream, function(){
-          /* send callback to client come back to room, if he/she is watching youtube */
           if (ws.readyState === 1) {
             //console.log(ws.isAlive);
             ws.send(JSON.stringify({
@@ -179,4 +175,5 @@ function doPlayExternalVideo(URL) {
       }, 2500);
     }
   }
+  */
 }

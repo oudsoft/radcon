@@ -316,7 +316,7 @@ function doLoadMainPage(){
   });
 
 	$('#app').load('form/main.html', function(){
-    $('body').loading('start');
+    //$('body').loading('start');
 		var cookieValue = $.cookie(cookieName);
 		cookie = JSON.parse(cookieValue);
 		$("#User-Identify").text(cookie.name);
@@ -347,7 +347,7 @@ function doLoadMainPage(){
 		//doShowHome();
 		doShowCase();
 
-    $('body').loading('stop');
+    //$('body').loading('stop');
 	});
 }
 

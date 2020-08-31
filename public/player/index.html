@@ -2,8 +2,8 @@
 <html>
   <head></head>
   <style>
-  	#YourControlDiv{width: 100%; height: auto; background-color: gray; padding: 4px;}
-  	#YourVideoDiv {background-color: yellow;}
+  	#YourControlDiv{width: 100%; min-height: 50px; background-color: gray; padding: 4px; text-align: center;}
+    #YourVideoDiv {text-align: center; /*background-color: yellow; */}
     #ControlClipPlayList, #SourceFile, #SourceFileList, #TargetCommand {padding: 5px; text-align: center; width: 100%;}
   	#SourceFile, #SourceFileList, #TargetCommand {margin-top: 10px;}
   </style>
@@ -12,8 +12,9 @@
       <video id="YourVideo" autoplay playsinline></video>
   	</div>
     <div id="YourControlDiv">
-  		<button id="OpenLocalFile-Cmd">Open</button>
+  		    <!--<button id="OpenLocalFile-Cmd">Open</button>    -->
   	</div>
+
     <div id="ControlClipPlayList">
     	<div id="SourceFile">
     		<label>เปิดคลิปไฟล์วิดีโอ</label>
