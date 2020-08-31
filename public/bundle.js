@@ -1141,23 +1141,22 @@ module.exports = function ( jq ) {
 			if (limit === 'ALL') {
   			resultTable = await doShowOrthancResult(studies, 0);
   			$("#Dicom-Result").append($(resultTable));
+				$('body').loading('stop');
   		} else {
   			let pageControlBox = $('<div style="width: 100%; text-align: right; padding: 10px;"></div>');
 				//console.log(orthancViewPage);
   			if ((orthancViewPage === undefined) || (orthancViewPage === 'last')) {
 	  			resultTable = await doShowOrthancResult(studies, 0);
-					//console.log(resultTable);
   				$("#Dicom-Result").append($(resultTable));
-  				//if (studies.length > Number(limit)) {
-	  				let nextPageCmd = $('<button>Next</button>');
-	  				$(nextPageCmd).click(()=>{
-							doSearchOrthanc();
-	  				});
-	  				$(nextPageCmd).appendTo($(pageControlBox));
-	  				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="first"/>');
-	  				$(currentPageHidden).appendTo($(pageControlBox));
-	  				$("#Dicom-Result").append($(pageControlBox));
-	  			//}
+  				let nextPageCmd = $('<button>Next</button>');
+  				$(nextPageCmd).click(()=>{
+						doSearchOrthanc();
+  				});
+  				$(nextPageCmd).appendTo($(pageControlBox));
+  				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="first"/>');
+  				$(currentPageHidden).appendTo($(pageControlBox));
+  				$("#Dicom-Result").append($(pageControlBox));
+  				$('body').loading('stop');
   			} else if (orthancViewPage === 'first') {
   				let filterStudies = await studies.filter((item, ind) => {
   					if (ind >= Number(limit)) {
@@ -1175,11 +1174,9 @@ module.exports = function ( jq ) {
   				let currentPageHidden = $('<input type="hidden" id="CurrentPage" value="last"/>');
   				$(currentPageHidden).appendTo($(pageControlBox));
   				$("#Dicom-Result").append($(pageControlBox));
-
-  			}
+  				$('body').loading('stop');
+				}
   		}
-
-  		$('body').loading('stop');
   	}).catch((err) => {
   		console.log(err);
   		$('body').loading('stop');
