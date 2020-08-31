@@ -266,6 +266,11 @@ function doLoadLogin() {
 		$("#login-cmd").click(function(){
 			doLogin();
 		});
+    $("#password").on('keypress',function(e) {
+      if(e.which == 13) {
+        doLogin();
+      };
+    });
 	});
 }
 
@@ -309,14 +314,15 @@ function doLoadMainPage(){
 	$('head').append('<script src="' + jqueryNotifyUrl + '"></script>');
 
   $('body').append($('<div id="overlay"><div class="loader"></div></div>'));
+
   $('body').loading({overlay: $("#overlay")});
+  $('body').loading('stop');
 
   $('#HistoryDialogBox').dialog({
     modal: true, autoOpen: false, width: 350, resizable: false, title: 'ประวัติผู้ป่วย'
   });
 
 	$('#app').load('form/main.html', function(){
-    //$('body').loading('start');
 		var cookieValue = $.cookie(cookieName);
 		cookie = JSON.parse(cookieValue);
 		$("#User-Identify").text(cookie.name);
@@ -347,7 +353,6 @@ function doLoadMainPage(){
 		//doShowHome();
 		doShowCase();
 
-    //$('body').loading('stop');
 	});
 }
 
@@ -1116,7 +1121,6 @@ module.exports = function ( jq ) {
   }
 
   const doSearchOrthanc = function() {
-		$('body').loading('start');
   	let queryStr;
   	let limit = $('#limit').val();
   	let orthancViewPage = $('#CurrentPage').val();
@@ -1132,10 +1136,9 @@ module.exports = function ( jq ) {
   		queryStr = doGetOrthancQueryFromFilter(false);
   	}
 		console.log(queryStr);
+		$("#Dicom-Result").empty();
+		$('body').loading('start');
   	doCallSearhOrthanc(queryStr).then(async (studies) => {
-  		//console.log('get studies',studies)
-  		$("#Dicom-Result").empty();
-
   		let resultTable;
 
 			if (limit === 'ALL') {

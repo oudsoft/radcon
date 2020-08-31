@@ -38,6 +38,7 @@ var len;
 const clipURL = window.URL;
 
 function next(n){
+  console.log(n);
   var fileURL = clipURL.createObjectURL(files[n]);
   doPlayExternalVideo(fileURL);
   fileList.selectedIndex = n;
@@ -137,6 +138,7 @@ function doPlayExternalVideo(URL) {
     localVideo.stop();
   });
   localVideo.addEventListener("ended",  function() {
+    console.log('ended');
     let currentIndex = fileList.selectedIndex;
     if (currentIndex < len){
       next(currentIndex+1);
