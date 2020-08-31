@@ -1384,7 +1384,7 @@ module.exports = function ( jq ) {
 
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
-			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + defualtValue.dicom_zip1 + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a></td></tr>'))
+			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + defualtValue.dicom_zip1 + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a> ' + defualtValue.dicom_zip1 + '</td></tr>'))
 			$("#SaveNewCase-Cmd").val("บันทึก");
 
 			$("#upload-scan-cmd").click(function(){
