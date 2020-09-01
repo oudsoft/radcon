@@ -1519,6 +1519,7 @@ module.exports = function ( jq ) {
 		$.cachedScript( scanerPluginUrl ).done(function( script, textStatus ) {
 		  console.log( textStatus );
       scanner.scan(displayImagesOnPage, {
+					"use_asprise_dialog": false,
           "output_settings": [
             {
               "type": "return-base64",

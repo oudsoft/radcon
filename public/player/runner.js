@@ -22,6 +22,7 @@ var localClipFile = document.getElementById("LocalClipFile");
 var fileList = document.getElementById("filelist");
 var playClipCommand = document.getElementById("PlayClipCommand");
 var stopClipCommand = document.getElementById("StopClipCommand");
+var localVideo = document.getElementById("YourVideo");
 
 playClipCommand.disabled = true;
 stopClipCommand.disabled = true;
@@ -51,9 +52,9 @@ localClipFile.addEventListener('change', function() {
   let filesArray = files.toArray();
   //console.log(files);
   fileList.innerHTML = '';
-  filesArray.forEach((item) => {
+  filesArray.forEach((item, index) => {
     let clipOption = document.createElement('option');
-    clipOption.textContent = item.name;
+    clipOption.textContent = index + '. ' + item.name;
     clipOption.value = item.name;
     fileList.appendChild(clipOption);
   });
@@ -65,12 +66,12 @@ localClipFile.addEventListener('change', function() {
   */
   playClipCommand.disabled = false;
 });
-/*
+
 fileList.addEventListener('change', function() {
   let playIndex = fileList.selectedIndex;
   next(playIndex);
 });
-*/
+
 /*
 document.addEventListener("SwithBackMain", function(e) {
   _next += 1;
@@ -82,42 +83,16 @@ document.addEventListener("SwithBackMain", function(e) {
 });
 */
 function doPlayClip() {
-  if (displayMediaStreamConstraints){
-    let playIndex = fileList.selectedIndex;
-    if (playIndex < 0){
-      playIndex = 0;
-    }
-    next(playIndex);
-  } else {
-    displayMediaStreamConstraints = {video: {width: 1280, height: 720}};
-    let playIndex = fileList.selectedIndex;
-    if (playIndex < 0){
-      playIndex = 0;
-    }
-    next(playIndex);
+  let playIndex = fileList.selectedIndex;
+  if (playIndex < 0){
+    playIndex = 0;
   }
+  next(playIndex);
 }
 
 function doStopClip() {
-  if (srcMedia){
-    srcMedia.src = '';
-  }
   playClipCommand.disabled = false;
   stopClipCommand.disabled = true;
-  if (localStream)	{
-    /*clear localstream */
-    localStream.getTracks().forEach((track) => {
-      localStream.removeTrack(track);
-    });
-    localStream = currentLocalStream;
-    localVideo.srcObject = localStream;
-    /*
-    doReMixStream();
-    setTimeout(() => {
-      doUpdateStream(mixedStream, null);
-    }, 2500);
-    */
-  }
 }
 
 function doRemoveClipFromMain() {
@@ -126,10 +101,10 @@ function doRemoveClipFromMain() {
 }
 
 /*********************************************/
-var localVideo = document.getElementById("YourVideo");
+
 function doPlayExternalVideo(URL) {
   localVideo.controls = true;
-  localVideo.autoplay = true;
+  //localVideo.autoplay = true;
   localVideo.crossorigin = "anonymous";
   localVideo.src = URL;
   localVideo.addEventListener('StopPlayClip', function() {
@@ -137,45 +112,21 @@ function doPlayExternalVideo(URL) {
     localVideo.src = '';
     localVideo.stop();
   });
+  localVideo.addEventListener("canplay",  function() {
+    console.log('canplay');
+    localVideo.play();
+  });
   localVideo.addEventListener("ended",  function() {
     console.log('ended');
-    let currentIndex = fileList.selectedIndex;
-    if (currentIndex < len){
-      next(currentIndex+1);
+    localVideo.src = '';
+    let playIndex = fileList.selectedIndex;
+    if (playIndex < len) {
+      playIndex++;
     } else {
-      next(0);
+      playIndex = 0;
     }
+    fileList.selectedIndex = playIndex;
+    var event = new Event('change');
+    fileList.dispatchEvent(event);
   });
-  /*
-  let webmstream = null;
-  srcMedia.oncanplay = async function() {
-    webmstream = srcMedia.captureStream();
-    //console.log(webmstream);
-    //console.log(webmstream.getTracks());
-    localStream = webmstream;
-    localVideo.srcObject = localStream;
-    if (mixedStream){
-      doReMixStream();
-      setTimeout(() => {
-        doUpdateStream(mixedStream, function(){
-          if (ws.readyState === 1) {
-            //console.log(ws.isAlive);
-            ws.send(JSON.stringify({
-              channel: "chat",
-              type: "message",
-              message: {msgtype: 'callback', msg: 'Come back, Please.', timestamp: new Date(), clientname: myname, fromId: screenno, toId: 'all', roomName: roomname, rootname: rootname},
-              name: myname,
-              sender: 'master',
-              sendto: 'all',
-              roomName: roomname,
-              rootname: rootname
-            }));
-          } else {
-            alert('Websocket Connection loss.!!');
-          }
-        });
-      }, 2500);
-    }
-  }
-  */
 }
