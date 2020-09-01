@@ -1529,7 +1529,8 @@ module.exports = function ( jq ) {
   }
 
   function doOpenScaner(){
-		let scanerPluginUrl = "https://asprise.azureedge.net/scannerjs/scanner.js";
+		//let scanerPluginUrl = "https://asprise.azureedge.net/scannerjs/scanner.js";
+		let scanerPluginUrl = "scanner/driver/scanner.js";
 		$.cachedScript( scanerPluginUrl ).done(function( script, textStatus ) {
 		  console.log( textStatus );
       scanner.scan(displayImagesOnPage, {
