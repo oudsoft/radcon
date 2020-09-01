@@ -103,30 +103,37 @@ function doRemoveClipFromMain() {
 /*********************************************/
 
 function doPlayExternalVideo(URL) {
-  localVideo.controls = true;
-  //localVideo.autoplay = true;
-  localVideo.crossorigin = "anonymous";
-  localVideo.src = URL;
-  localVideo.addEventListener('StopPlayClip', function() {
-    console.log('test');
-    localVideo.src = '';
-    localVideo.stop();
-  });
-  localVideo.addEventListener("canplay",  function() {
-    console.log('canplay');
-    localVideo.play();
-  });
-  localVideo.addEventListener("ended",  function() {
-    console.log('ended');
-    localVideo.src = '';
-    let playIndex = fileList.selectedIndex;
-    if (playIndex < len) {
-      playIndex++;
-    } else {
-      playIndex = 0;
-    }
-    fileList.selectedIndex = playIndex;
-    var event = new Event('change');
-    fileList.dispatchEvent(event);
-  });
+  if (URL !== null) {
+    localVideo.controls = true;
+    //localVideo.autoplay = true;
+    localVideo.crossorigin = "anonymous";
+    localVideo.src = URL;
+    setTimeout(() => {
+      localVideo.addEventListener('StopPlayClip', function() {
+        console.log('test');
+        localVideo.src = null;
+        localVideo.stop();
+      });
+      localVideo.addEventListener("canplay",  function() {
+        console.log('canplay');
+        localVideo.play();
+      });
+      localVideo.addEventListener("ended",  function() {
+        console.log('ended');
+        console.log(localVideo.src);
+        localVideo.src = null;
+        let playIndex = fileList.selectedIndex;
+        if (playIndex < len) {
+          playIndex++;
+        } else {
+          playIndex = 0;
+        }
+        fileList.selectedIndex = playIndex;
+        var event = new Event('change');
+        setTimeout(() => {
+          fileList.dispatchEvent(event);
+        }, 2900);
+      });
+    }, 2500)      
+  }
 }

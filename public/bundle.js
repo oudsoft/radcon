@@ -315,7 +315,7 @@ function doLoadMainPage(){
 
   $('body').append($('<div id="overlay"><div class="loader"></div></div>'));
 
-  $('body').loading({overlay: $("#overlay")});
+  $('body').loading({overlay: $("#overlay"), stoppable: true});
   $('body').loading('stop');
 
   $('#HistoryDialogBox').dialog({
@@ -839,7 +839,7 @@ module.exports = function ( jq ) {
 				});
 				console.log(filterIncidents);
 				if (filterIncidents.length > 0) {
-					let showTable = await doShowCaseList(filterIncidents);
+					let showTable = await doShowCaseList(filterIncidents, false);
 					resolve(showTable);
 				} else {
 					resolve($('<div>Cases not found.</div>'));
@@ -862,7 +862,7 @@ module.exports = function ( jq ) {
 				});
 				console.log(filterIncidents);
 				if (filterIncidents.length > 0) {
-					let showTable = await doShowCaseList(filterIncidents);
+					let showTable = await doShowCaseList(filterIncidents, true);
 					resolve(showTable);
 				} else {
 					resolve($('<div>Cases not found.</div>'));
@@ -873,7 +873,7 @@ module.exports = function ( jq ) {
 		});
   }
 
-  function doShowCaseList(incidents) {
+  function doShowCaseList(incidents, showReadResult) {
 		//console.log(incidents);
 		return new Promise(function(resolve, reject) {
 			let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
@@ -961,6 +961,16 @@ module.exports = function ( jq ) {
 					doCallDeleteCase(incidents[i].id);
 				});
 				$(deleteCaseButton).appendTo($(operationCmdBox));
+
+				if (showReadResult) {
+					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
+					$(printResultButton).click(function() {
+						console.log(incidents[i].re_url);
+						console.log(incidents[i].re_print);
+						doShowPopupReadResult(incidents[i].re_url);
+					});
+					$(printResultButton).appendTo($(operationCmdBox));
+				}
 			}
 			resolve($(rwTable));
 		});
@@ -1309,6 +1319,10 @@ module.exports = function ( jq ) {
   		window.open(openLink, '_blank');
   	})
   }
+
+	function doShowPopupReadResult(re_url) {
+		window.open(re_url, '_blank');
+	}
 
   function doOpenCreateNewCase(defualtValue) {
   	$('body').loading('start');
