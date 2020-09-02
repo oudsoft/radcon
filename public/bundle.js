@@ -640,14 +640,14 @@ module.exports = function ( jq ) {
   	});
 	}
 
-  const doCallOpenOrthancWeb = function(username) {
+  doGetOrthancPort = function() {
     return new Promise(function(resolve, reject) {
-  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/openorthancweb';
-  		let params = {username: username};
-  		$.post(orthancProxyEndPoint, params, function(data){
+      let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/orthancexternalport';
+      let params = {};
+      $.get(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
-  	});
+    });
   }
 
 	return {
@@ -678,7 +678,7 @@ module.exports = function ( jq ) {
 		doCallTransferDicom,
 		doCallTransferHistory,
 		doCallDeleteDicom,
-    doCallOpenOrthancWeb
+    doGetOrthancPort
 	}
 }
 
@@ -1328,9 +1328,11 @@ module.exports = function ( jq ) {
 
 	function doOpenStoneWebViewer(StudyInstanceUID) {
 		//const orthancWebviewerUrl = 'http://' + window.location.hostname + ':8042/web-viewer/app/viewer.html?series=';
-		const orthancStoneWebviewer = 'http://'+ window.location.hostname + ':8042/stone-webviewer/index.html?study=';
-		let orthancwebapplink = orthancStoneWebviewer + StudyInstanceUID;
-		window.open(orthancwebapplink, '_blank');
+		apiconnector.doGetOrthancPort().then((response) => {
+			const orthancStoneWebviewer = 'http://'+ window.location.hostname + ':' + response.port + '/stone-webviewer/index.html?study=';
+			let orthancwebapplink = orthancStoneWebviewer + StudyInstanceUID;
+			window.open(orthancwebapplink, '_blank');
+		});
 	}
 
   function doDownloadDicom(studyID){

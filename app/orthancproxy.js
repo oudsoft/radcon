@@ -220,11 +220,8 @@ app.post('/transferhistory', function(req, res) {
 	});
 });
 
-app.post('/openorthancweb', function(req, res) {
-	var username = req.body.username;
-	res.header('user', username);
-	res.redirect('http://localhost:8042');
-	//res.status(200).send({status: {code: 200}});
+app.get('/orthancexternalport', function(req, res) {
+	res.status(200).send({port: process.env.ORTHANC_REST_PORT_EX});
 });
 
 module.exports = app;
