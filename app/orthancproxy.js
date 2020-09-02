@@ -67,10 +67,10 @@ const parseStr = function (str) {
   return str.replace(/%s/g, () => args[i++]);
 }
 
-const doLoadArchive = function(studyID, rootname){
+const doLoadArchive = function(studyID, rootname, username){
 	return new Promise(function(resolve, reject) {
 		var archiveFileName = studyID + '.zip';
-		var command = 'curl --user ' + userpass + '  ' + ORTHANC_URL + '/studies/' + studyID + '/archive > ' + usrArchiveDir + '/' + archiveFileName;
+		var command = 'curl --user ' + userpass + ' -H "user: ' + username + '" ' + ORTHANC_URL + '/studies/' + studyID + '/archive > ' + usrArchiveDir + '/' + archiveFileName;
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
 			let link = '/' + rootname + process.env.USRARCHIVE_PATH + '/' + archiveFileName;
@@ -104,9 +104,9 @@ const doTransferHistory = function(fileName) {
 	});
 }
 
-const doDeleteStudy = function(studyID){
+const doDeleteStudy = function(studyID, username){
 	return new Promise(function(resolve, reject) {
-		var command = 'curl -X DELETE --user ' + userpass + '  ' + ORTHANC_URL + '/studies/' + studyID;
+		var command = 'curl -X DELETE --user ' + userpass + ' -H "user: ' + username + '" ' + ORTHANC_URL + '/studies/' + studyID;
 		console.log('curl command >>', command);
 		runcommand(command).then((stdout) => {
 			resolve({response: {message: stdout}});
@@ -122,7 +122,7 @@ app.get('/luatest', function(req, res) {
 	res.status(200).send(req.query);
 });
 
-app.post('/luetest', function(req, res) {
+app.post('/luatest', function(req, res) {
 	console.log('post luatest req.body>> ', req.body)
 	logger().info(new Date()  + " POST /luatest " + JSON.stringify(req.body));
 	res.status(200).send(req.body);
@@ -140,10 +140,12 @@ app.post('/find', function(req, res) {
 	})*/
 	//let rqBody = JSON.stringify(req.body.body);
 	let rqBody = req.body.body;
+	let username = req.body.username;
 	//console.log('rqBody >>', rqBody);
 
 	// console.log('userpass >>', userpass);
-	var command = 'curl -X POST --user ' + userpass + ' -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
+	//var command = 'curl -X POST --user ' + userpass + ' -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
+	var command = 'curl -X POST --user ' + userpass + ' -H "user: ' + username + '" -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
 	console.log('curl command >>', command);
 
 	runcommand(command).then((stdout) => {
@@ -158,11 +160,12 @@ app.post('/find', function(req, res) {
 	});
 });
 
-app.get('/preview/(:instanceID)', function(req, res) {
+app.post('/preview/(:instanceID)', function(req, res) {
 	const rootname = req.originalUrl.split('/')[1];
 	var instanceID = req.params.instanceID;
+	var username = req.body.username;
 	var previewFileName = instanceID + '.png';
-	var command = 'curl --user ' + userpass + '  ' + ORTHANC_URL + '/instances/' + instanceID + '/preview > ' + usrPreviewDir + '/' + previewFileName;
+	var command = 'curl --user ' + userpass + ' -H "user: ' + username + '" ' + ORTHANC_URL + '/instances/' + instanceID + '/preview > ' + usrPreviewDir + '/' + previewFileName;
 	console.log('curl command >>', command);
 	runcommand(command).then((stdout) => {
 		//res.redirect('/' + rootname + USRPREVIEW_PATH + '/' + previewFileName);
@@ -171,18 +174,20 @@ app.get('/preview/(:instanceID)', function(req, res) {
 	});
 });
 
-app.get('/loadarchive/(:studyID)', function(req, res) {
+app.post('/loadarchive/(:studyID)', function(req, res) {
 	const rootname = req.originalUrl.split('/')[1];
 	var studyID = req.params.studyID;
-	doLoadArchive(studyID).then((archive) => {
+	var username = req.body.username;
+	doLoadArchive(studyID, rootname, username).then((archive) => {
 		res.status(200).send({archive: {link: archive.link}});
 	});
 });
 
-app.get('/transferdicom/(:studyID)', function(req, res) {
+app.post('/transferdicom/(:studyID)', function(req, res) {
 	const rootname = req.originalUrl.split('/')[1];
 	var studyID = req.params.studyID;
-	doLoadArchive(studyID, rootname).then((archive) => {
+	var username = req.body.username;
+	doLoadArchive(studyID, rootname, username).then((archive) => {
 		if (archive.link) {
 			doTransferArchive(studyID).then((response) => {
 				res.status(200).send({local: {link: archive.link}, cloud: {link: response.link}});
@@ -197,9 +202,10 @@ app.get('/transferdicom/(:studyID)', function(req, res) {
 	});
 });
 
-app.get('/deletedicom/(:studyID)', function(req, res) {
+app.post('/deletedicom/(:studyID)', function(req, res) {
 	var studyID = req.params.studyID;
-	doDeleteStudy(studyID).then((response) => {
+	var username = req.body.username;
+	doDeleteStudy(studyID, username).then((response) => {
 		res.status(200).send({status: {code: 200}, response: response});
 	});
 });
@@ -213,4 +219,12 @@ app.post('/transferhistory', function(req, res) {
 		res.status(500).send({error: {code: 502, detail: error}});
 	});
 });
+
+app.post('/openorthancweb', function(req, res) {
+	var username = req.body.username;
+	res.header('user', username);
+	res.redirect('http://localhost:8042');
+	//res.status(200).send({status: {code: 200}});
+});
+
 module.exports = app;

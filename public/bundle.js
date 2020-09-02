@@ -478,7 +478,7 @@ module.exports = {
 }
 
 },{"./lib/jquery.cookie.js":1,"./mod/apiconnect.js":3,"./mod/case.js":4,"./mod/doctor.js":5,"./mod/home.js":6,"./mod/hospital.js":7,"./mod/jquery-ex.js":8,"./mod/notimod.js":9,"./mod/urgent.js":10,"jquery":13}],3:[function(require,module,exports){
-         /* apiconnect.js */
+/* apiconnect.js */
 
 const apiExt = ".php";
 const proxyRootUri = '/webapp';
@@ -590,31 +590,31 @@ module.exports = function ( jq ) {
 		});
 	}
 
-	const doCallDicomPreview = function(instanceID){
+	const doCallDicomPreview = function(instanceID, username){
 		return new Promise(function(resolve, reject) {
   		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/preview/' + instanceID;
-  		let params = {};
-  		$.get(orthancProxyEndPoint, params, function(data){
+  		let params = {username: username};
+  		$.post(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
   	});
 	}
 
-	const doCallDownloadDicom = function(studyID){
+	const doCallDownloadDicom = function(studyID, username){
 		return new Promise(function(resolve, reject) {
   		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/loadarchive/' + studyID;
-  		let params = {};
-  		$.get(orthancProxyEndPoint, params, function(data){
+  		let params = {username: username};
+  		$.post(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
   	});
 	}
 
-	const doCallTransferDicom = function(studyID){
+	const doCallTransferDicom = function(studyID, username){
 		return new Promise(function(resolve, reject) {
   		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/transferdicom/' + studyID;
-  		let params = {};
-  		$.get(orthancProxyEndPoint, params, function(data){
+  		let params = {username: username};
+  		$.post(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
   	});
@@ -630,15 +630,25 @@ module.exports = function ( jq ) {
 		});
 	}
 
-	const doCallDeleteDicom = function (studyID) {
+	const doCallDeleteDicom = function (studyID, username) {
 		return new Promise(function(resolve, reject) {
   		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/deletedicom/' + studyID;
-  		let params = {};
-  		$.get(orthancProxyEndPoint, params, function(data){
+  		let params = {username: username};
+  		$.post(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
   	});
 	}
+
+  const doCallOpenOrthancWeb = function(username) {
+    return new Promise(function(resolve, reject) {
+  		let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/openorthancweb';
+  		let params = {username: username};
+  		$.post(orthancProxyEndPoint, params, function(data){
+				resolve(data);
+			})
+  	});
+  }
 
 	return {
 		/* const */
@@ -667,7 +677,8 @@ module.exports = function ( jq ) {
 		doCallDownloadDicom,
 		doCallTransferDicom,
 		doCallTransferHistory,
-		doCallDeleteDicom
+		doCallDeleteDicom,
+    doCallOpenOrthancWeb
 	}
 }
 
@@ -1096,14 +1107,15 @@ module.exports = function ( jq ) {
 
   const doCallSearhOrthanc = function(query) {
   	return new Promise(function(resolve, reject) {
+			const main = require('../main.js');
 	  	let orthancUri = '/tools/find';
-	  	let params = {mothod: 'post', uri: orthancUri, body: query};
+	  	let params = {mothod: 'post', uri: orthancUri, body: query, username: main.doGetCookie().username};
 	  	apiconnector.doCallOrthancApiByProxy(params).then((response) =>{
 	  		//console.log(response);
 	  		var promiseList = new Promise(function(resolve, reject){
 		  		response.forEach((study) => {
 		  			let queryStr = '{"Level": "Series", "Expand": true, "Query": {"PatientName":"' + study.PatientMainDicomTags.PatientName + '"}}';
-		  			params = {mothod: 'post', uri: orthancUri, body: queryStr};
+		  			params = {mothod: 'post', uri: orthancUri, body: queryStr, username: main.doGetCookie().username};
 		  			apiconnector.doCallOrthancApiByProxy(params).then((seriesList) =>{
 		  				//console.log(seriesList);
 		  				let samplingSrs = seriesList.find((srs) => {
@@ -1121,7 +1133,7 @@ module.exports = function ( jq ) {
 					}, 1200);
 	  		});
 				Promise.all([promiseList]).then((ob)=>{
-					//console.log('Final JSON =>', ob[0]);
+					console.log('Final JSON =>', ob[0]);
 					resolve(ob[0]);
 				}).catch((err)=>{
 					reject(err);
@@ -1256,12 +1268,14 @@ module.exports = function ( jq ) {
 					dataColText += '<td align="left">' + desc +  protoname + '</td>'
 					let dataCol = $(dataColText);
 					$(dataRow).append($(dataCol));
+
 					operatingCol = $('<td align="center"></td>');
 					$(dataRow).append($(operatingCol));
 					let previewCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
 					let instancePreview = dj[i].SamplingSeries.Instances[0];
 					$(previewCmd).on('click', function(evt){
-						doOpenPreview(instancePreview, dj[i].Series[0]);
+						//doOpenPreview(instancePreview, dj[i].Series[0]);
+						doOpenStoneWebViewer(dj[i].MainDicomTags.StudyInstanceUID);
 					});
 					$(operatingCol).append($(previewCmd));
 
@@ -1304,16 +1318,25 @@ module.exports = function ( jq ) {
 	}
 
   function doOpenPreview(instanceID, seriesID){
-  	apiconnector.doCallDicomPreview(instanceID).then((response) => {
+		const main = require('../main.js');
+		const username = main.doGetCookie().username;
+  	apiconnector.doCallDicomPreview(instanceID, username).then((response) => {
   		let openLink = response.preview.link;
   		window.open(openLink, '_blank');
-			let previewLink = apiconnector.hostOrthancUrl + '/web-viewer/app/viewer.html?series=' + seriesID;
-			console.log(previewLink);
   	})
   }
 
+	function doOpenStoneWebViewer(StudyInstanceUID) {
+		//const orthancWebviewerUrl = 'http://' + window.location.hostname + ':8042/web-viewer/app/viewer.html?series=';
+		const orthancStoneWebviewer = 'http://'+ window.location.hostname + ':8042/stone-webviewer/index.html?study=';
+		let orthancwebapplink = orthancStoneWebviewer + StudyInstanceUID;
+		window.open(orthancwebapplink, '_blank');
+	}
+
   function doDownloadDicom(studyID){
-  	apiconnector.doCallDownloadDicom(studyID).then((response) => {
+		const main = require('../main.js');
+		const username = main.doGetCookie().username;
+  	apiconnector.doCallDownloadDicom(studyID, username).then((response) => {
   		console.log(response);
   		let openLink = response.archive.link;
   		window.open(openLink, '_blank');
@@ -1351,9 +1374,12 @@ module.exports = function ( jq ) {
   	let userConfirm = confirm('โปรดยืนยันเพื่อลบรายการนี้ โดยคลิกปุ่ม ตกลง หรือ OK');
   	if (userConfirm == true){
   		$('body').loading('start');
-			apiconnector.doCallDeleteDicom(studyID).then((response) => {
+			const main = require('../main.js');
+			const username = main.doGetCookie().username;
+			apiconnector.doCallDeleteDicom(studyID, username).then((response) => {
 				console.log(response);
 				if (response.status.code == 200) {
+					$('#CurrentPage').remove();
 					alert('เดำเนินการลบข้อมูลเรียบร้อยแล้ว');
 					doSearchOrthanc();
 					$('body').loading('stop');
@@ -1816,7 +1842,9 @@ module.exports = function ( jq ) {
 		if (newCaseData) {
 			$('body').loading('start');
 			try {
-				let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID);
+				const main = require('../main.js');
+				const username = main.doGetCookie().username;
+				let transferRes = await apiconnector.doCallTransferDicom(newCaseData.studyID, username);
 				console.log(transferRes);
 				if (transferRes.cloud.link) {
 					console.log(transferRes.local.link);

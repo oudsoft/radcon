@@ -12,7 +12,7 @@ webApp.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 //webApp.use(bodyParser.json({ limit: "50MB", type:'application/json'}));
 //webApp.use(express.urlencoded({limit: '50mb'}));
 
-const bushPath = '/mnt/e/Final Release/Revise';
+const bushPath = '/home/oodsoft/share/topsecrete';
 
 const geegee = require('./geegee.js');
 const apiproxy = require('./apiproxy.js');
@@ -42,7 +42,7 @@ webApp.get('/bush/(:collection)/(:allabum)/(:filename)', (req, res) => {
 	res.status(200).sendFile(bushPath + '/' + req.params.collection + '/' + req.params.allabum + '/' + req.params.filename);
 });
 
-module.exports = ( /* httpsServer*/ httpServer ) => {
+module.exports = ( httpsServer ) => {
 	const uploader = require('./uploader.js')(webApp);
 	return {webApp};
 }
