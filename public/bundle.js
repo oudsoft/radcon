@@ -1428,7 +1428,7 @@ module.exports = function ( jq ) {
 			$("#detail").val(defualtValue.detail);
 			$("#caseID").val(defualtValue.id);
 			let ziplink = 'https://radconnext.com/radconnext/inc_files/' + defualtValue.dicom_zip1;
-			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + ziplink + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a> ' + ziplink + '</td></tr>'));
+			$('#MainTableForm').append($('<tr><td class="input-label">Dicom Zip File</td><td colspan="3"><a href="' + ziplink + '" target="_blank"><img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/></a></td></tr>'));
 			$("#SaveNewCase-Cmd").val("บันทึก");
 
 			$("#upload-scan-cmd").click(function(){
