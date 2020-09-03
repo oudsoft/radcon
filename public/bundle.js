@@ -942,13 +942,13 @@ module.exports = function ( jq ) {
 
 				let operationCmdBox = $('<div></div>');
 				$(operationCmdBox).appendTo($(operationCol));
-
+				/*
 				let historyButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/history-icon.png" title="Open Patient History."/>');
 				$(historyButton).click(function() {
 					doShowPopupHistory(incidents[i].pn_history);
 				});
 				$(historyButton).appendTo($(operationCmdBox));
-
+				*/
 				let downlodDicomButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/>');
 				$(downlodDicomButton).click(function() {
 					doShowPopupDicomZip(incidents[i].dicom_zip1);
@@ -991,7 +991,7 @@ module.exports = function ( jq ) {
   	$('#HistoryDialogBox').empty();
   	let files = allUrl.split(',');
   	files.forEach((file) => {
-  		if (url !== '') {
+  		if (file !== '') {
 	  		let hsBox = $('<div></div>');
 	  		$(hsBox).css('padding','3px');
 	  		//$(hsBox).css('border','1px solid red');
