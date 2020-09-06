@@ -14,7 +14,7 @@ File.prototype.toObject = function () {
 
 FileList.prototype.toArray = function () {
   return Array.from(this).map(function (file) {
-  return file.toObject()
+    return file.toObject()
   })
 }
 /*********************************************/
@@ -22,7 +22,7 @@ var localClipFile = document.getElementById("LocalClipFile");
 var fileList = document.getElementById("filelist");
 var playClipCommand = document.getElementById("PlayClipCommand");
 var stopClipCommand = document.getElementById("StopClipCommand");
-var localVideo = document.getElementById("YourVideo");
+var yourVideoDiv = document.getElementById("YourVideoDiv");
 
 playClipCommand.disabled = true;
 stopClipCommand.disabled = true;
@@ -40,6 +40,7 @@ const clipURL = window.URL;
 
 function next(n){
   console.log(n);
+  console.log(files[n]);
   var fileURL = clipURL.createObjectURL(files[n]);
   doPlayExternalVideo(fileURL);
   fileList.selectedIndex = n;
@@ -68,6 +69,7 @@ localClipFile.addEventListener('change', function() {
 });
 
 fileList.addEventListener('change', function() {
+  yourVideoDiv.innerHTML = '';
   let playIndex = fileList.selectedIndex;
   next(playIndex);
 });
@@ -103,9 +105,12 @@ function doRemoveClipFromMain() {
 /*********************************************/
 
 function doPlayExternalVideo(URL) {
+  console.log(URL);
   if (URL !== null) {
+    let localVideo = document.createElement('video');
+    yourVideoDiv.appendChild(localVideo);
     localVideo.controls = true;
-    //localVideo.autoplay = true;
+    localVideo.autoplay = true;
     localVideo.crossorigin = "anonymous";
     localVideo.src = URL;
     setTimeout(() => {
@@ -129,11 +134,12 @@ function doPlayExternalVideo(URL) {
           playIndex = 0;
         }
         fileList.selectedIndex = playIndex;
+        yourVideoDiv.innerHTML = '';
         var event = new Event('change');
         setTimeout(() => {
           fileList.dispatchEvent(event);
         }, 2900);
       });
-    }, 2500)      
+    }, 2500)
   }
 }

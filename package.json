@@ -12,12 +12,14 @@
     "base64-img": "^1.0.4",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "html-pdf": "^2.2.0",
     "multer": "^1.4.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "serve-index": "^1.9.1",
     "web-push": "^3.4.4",
     "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.0"
+    "winston-daily-rotate-file": "^4.5.0",
+    "wkhtmltopdf": "^0.3.4"
   }
 }

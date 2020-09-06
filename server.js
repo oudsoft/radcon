@@ -14,8 +14,8 @@ const serverPort = process.env.SERVER_PORT;
 //const serverPort = process.argv[3] || process.env.SERVER_PORT || 8080;
 //const serverPort = process.argv[3] || process.env.SERVER_PORT || 8443;
 
-const privateKey = fs.readFileSync(__dirname + '/ssl-cert/server.pem', 'utf8');
-const certificate = fs.readFileSync(__dirname + '/ssl-cert/server.crt', 'utf8');
+const privateKey = fs.readFileSync(__dirname + '/ssl-cert/key.pem', 'utf8');
+const certificate = fs.readFileSync(__dirname + '/ssl-cert/key.crt', 'utf8');
 
 const credentials = { key: privateKey, cert: certificate /* , passphrase: '' */ };
 

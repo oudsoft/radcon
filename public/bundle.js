@@ -640,13 +640,37 @@ module.exports = function ( jq ) {
   	});
 	}
 
-  doGetOrthancPort = function() {
+  const doGetOrthancPort = function() {
     return new Promise(function(resolve, reject) {
       let orthancProxyEndPoint = proxyRootUri + orthancProxyApi + '/orthancexternalport';
       let params = {};
       $.get(orthancProxyEndPoint, params, function(data){
 				resolve(data);
 			})
+    });
+  }
+
+  const doConvertPageToPdf = function(pageUrl){
+    return new Promise(function(resolve, reject) {
+      let convertorEndPoint = proxyRootUri + "/convertfromurl";;
+      let params = {url: pageUrl};
+			$.post(convertorEndPoint, params, function(data){
+				resolve(data);
+			}).fail(function(error) {
+				reject(error);
+			});
+    });
+  }
+
+  const doConvertPdfToDicom = function(pdfFileName, studyID, modality){
+    return new Promise(function(resolve, reject) {
+      let convertorEndPoint = proxyRootUri + "/converttodicom";;
+      let params = {pdfFileName, studyID, modality};
+			$.post(convertorEndPoint, params, function(data){
+				resolve(data);
+			}).fail(function(error) {
+				reject(error);
+			});
     });
   }
 
@@ -678,7 +702,9 @@ module.exports = function ( jq ) {
 		doCallTransferDicom,
 		doCallTransferHistory,
 		doCallDeleteDicom,
-    doGetOrthancPort
+    doGetOrthancPort,
+    doConvertPageToPdf,
+    doConvertPdfToDicom
 	}
 }
 
@@ -733,6 +759,7 @@ module.exports = function ( jq ) {
 			*/
 			$("#PACSTab").trigger("click");
 			$("#PACSTab").addClass('active');
+			$('body').loading('stop');
 		});
 	}
 
@@ -976,11 +1003,15 @@ module.exports = function ( jq ) {
 				if (showReadResult) {
 					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
 					$(printResultButton).click(function() {
-						console.log(incidents[i].re_url);
-						console.log(incidents[i].re_print);
 						doShowPopupReadResult(incidents[i].re_url);
 					});
 					$(printResultButton).appendTo($(operationCmdBox));
+
+					let convertResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/convert-icon.png" title="Convert Result to Study Case."/>');
+					$(convertResultButton).click(function() {
+						doConvertResultToDicom(incidents[i].re_url, incidents[i].dicom_folder1, incidents[i].dicom_folder2);
+					});
+					$(convertResultButton).appendTo($(operationCmdBox));
 				}
 			}
 			resolve($(rwTable));
@@ -1347,6 +1378,18 @@ module.exports = function ( jq ) {
 
 	function doShowPopupReadResult(re_url) {
 		window.open(re_url, '_blank');
+	}
+
+	function doConvertResultToDicom(reportUrl, studyID, modality) {
+		let tmpUrl = 'https://radconnext.com/radconnext/inc_report.php?id=11440&name=limparty';
+		apiconnector.doConvertPageToPdf(/*reportUrl*/ tmpUrl).then((convRes) => {
+			apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicom) => {
+				console.log(dicom);
+				if (dicom.status == 200) {
+					alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+				}
+			})
+		});
 	}
 
   function doOpenCreateNewCase(defualtValue) {
