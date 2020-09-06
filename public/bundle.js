@@ -1383,9 +1383,9 @@ module.exports = function ( jq ) {
 	function doConvertResultToDicom(reportUrl, studyID, modality) {
 		let tmpUrl = 'https://radconnext.com/radconnext/inc_report.php?id=11440&name=limparty';
 		apiconnector.doConvertPageToPdf(/*reportUrl*/ tmpUrl).then((convRes) => {
-			apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicom) => {
-				console.log(dicom);
-				if (dicom.status == 200) {
+			apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicomRes) => {
+				console.log(dicomRes);
+				if (dicomRes.status.code == 200) {
 					alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
 				}
 			})
