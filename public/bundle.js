@@ -1381,14 +1381,21 @@ module.exports = function ( jq ) {
 	}
 
 	function doConvertResultToDicom(reportUrl, studyID, modality) {
-		let tmpUrl = 'https://radconnext.com/radconnext/inc_report.php?id=11440&name=limparty';
-		apiconnector.doConvertPageToPdf(/*reportUrl*/ tmpUrl).then((convRes) => {
+		$('body').loading('start');
+		apiconnector.doConvertPageToPdf(reportUrl).then((convRes) => {
 			apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicomRes) => {
 				console.log(dicomRes);
 				if (dicomRes.status.code == 200) {
 					alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+					$('body').loading('stop');
 				}
-			})
+			}).catch((err) => {
+				alert('ERROR: \n' +JSON.stringify(err));
+				$('body').loading('stop');
+			});
+		}).catch((err) => {
+			alert('ERROR: \n' +JSON.stringify(err));
+			$('body').loading('stop');
 		});
 	}
 
