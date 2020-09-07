@@ -816,13 +816,13 @@ module.exports = function ( jq ) {
 		try {
 			let response = await doCallApi(apiName, rqParams);
 			console.log(response);
-			if (response.res.body.success == true) {
-				let resBody = JSON.parse(response.res.body);
+			let resBody = JSON.parse(response.res.body);
+			if (resBody.incident) {
 	  		$("#ReadWaitDiv").empty();
 	  		let rwTable = await doShowRwCaseList(resBody.incident);
 	  		$("#ReadWaitDiv").append($(rwTable));
-			} else {
-				alert('Your Session on API server had expire.\nPlease Logout and Login back gain.');
+			} else if (resBody.success == false){
+				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
 			}
   		$('body').loading('stop');
 		} catch(e) {
