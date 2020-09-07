@@ -816,10 +816,14 @@ module.exports = function ( jq ) {
 		try {
 			let response = await doCallApi(apiName, rqParams);
 			console.log(response);
-			let resBody = JSON.parse(response.res.body);
-  		$("#ReadWaitDiv").empty();
-  		let rwTable = await doShowRwCaseList(resBody.incident);
-  		$("#ReadWaitDiv").append($(rwTable));
+			if (response.res.body.success == true) {
+				let resBody = JSON.parse(response.res.body);
+	  		$("#ReadWaitDiv").empty();
+	  		let rwTable = await doShowRwCaseList(resBody.incident);
+	  		$("#ReadWaitDiv").append($(rwTable));
+			} else {
+				alert('Your Session on API server had expire.\nPlease Logout and Login back gain.');
+			}
   		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
