@@ -994,12 +994,6 @@ module.exports = function ( jq ) {
 				});
 				$(changeCaseStatusButton).appendTo($(operationCmdBox));
 
-				let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Change Case\'s Status."/>');
-				$(deleteCaseButton).click(function() {
-					doCallDeleteCase(incidents[i].id);
-				});
-				$(deleteCaseButton).appendTo($(operationCmdBox));
-
 				if (showReadResult) {
 					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
 					$(printResultButton).click(function() {
@@ -1007,12 +1001,19 @@ module.exports = function ( jq ) {
 					});
 					$(printResultButton).appendTo($(operationCmdBox));
 
-					let convertResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/convert-icon.png" title="Convert Result to Study Case."/>');
+					let convertResultButton = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/convert-icon.png" title="Convert Result to Dicom."/>');
 					$(convertResultButton).click(function() {
 						doConvertResultToDicom(incidents[i].re_url, incidents[i].dicom_folder1, incidents[i].dicom_folder2);
 					});
 					$(convertResultButton).appendTo($(operationCmdBox));
 				}
+
+				let deleteCaseButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Delete Case."/>');
+				$(deleteCaseButton).click(function() {
+					doCallDeleteCase(incidents[i].id);
+				});
+				$(deleteCaseButton).appendTo($(operationCmdBox));
+
 			}
 			resolve($(rwTable));
 		});
@@ -1302,7 +1303,7 @@ module.exports = function ( jq ) {
 
 					operatingCol = $('<td align="center"></td>');
 					$(dataRow).append($(operatingCol));
-					let previewCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
+					let previewCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
 					let instancePreview = dj[i].SamplingSeries.Instances[0];
 					$(previewCmd).on('click', function(evt){
 						//doOpenPreview(instancePreview, dj[i].Series[0]);
@@ -1312,7 +1313,7 @@ module.exports = function ( jq ) {
 
 					let patientProps = sa.split('/');
 					let defualtValue = {patient: {id: dj[i].PatientMainDicomTags.PatientID, name: dj[i].PatientMainDicomTags.PatientName, age: patientProps[1], sex: patientProps[0]}, bodypart: bdp, studyID: dj[i].ID, acc: dj[i].MainDicomTags.AccessionNumber, mdl: mld};
-					let creatwNewCaseCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/new-icon.png" title="Create New case."/>');
+					let creatwNewCaseCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/doctor-icon.png" title="Create New case."/>');
 					$(creatwNewCaseCmd).on('click', function(evt){
 						doOpenCreateNewCase(defualtValue);
 					});
@@ -1320,7 +1321,7 @@ module.exports = function ( jq ) {
 					$(operatingCol).append($(spacingBox));
 					$(operatingCol).append($(creatwNewCaseCmd));
 
-					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/download-icon.png" title="Download Dicom to zip file."/>');
+					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom to zip file."/>');
 					$(downloadDicomCmd).on('click', function(evt){
 						doDownloadDicom(dj[i].ID);
 					});
