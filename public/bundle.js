@@ -1250,7 +1250,18 @@ module.exports = function ( jq ) {
   }
 
   function doShowOrthancResult(dj, startRef){
-		return new Promise(function(resolve, reject) {
+		return new Promise(async function(resolve, reject) {
+			/* sort dj by studydatetime */
+			await dj.sort((a,b) => {
+				let av = util.getDatetimeValue(a.MainDicomTags.StudyDate, a.MainDicomTags.StudyTime);
+				let bv = util.getDatetimeValue(b.MainDicomTags.StudyDate, b.MainDicomTags.StudyTime);
+				if (av && bv) {
+					return bv - av;
+				} else {
+					return 0;
+				}
+			});
+			/* ================== */
 			let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
 			let headRow = $('<tr style="background-color: green;"></tr>');
 			let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">Study Date</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
@@ -2634,9 +2645,9 @@ const formatDateStr = function(d) {
 		mm = '' + (d.getMonth() + 1);
 	}
 	if (d.getDate() < 10) {
-		dd = '0' + d.getDate();		
+		dd = '0' + d.getDate();
 	} else {
-		dd = '' + d.getDate();		
+		dd = '' + d.getDate();
 	}
 	var td = `${yy}-${mm}-${dd}`;
 	return td;
@@ -2651,12 +2662,12 @@ const formatDate = function(dateStr) {
 		mm = '' + (fdate.getMonth() + 1);
 	}
 	if (fdate.getDate() < 10) {
-		dd = '0' + fdate.getDate();	
+		dd = '0' + fdate.getDate();
 	} else {
 		dd = '' + fdate.getDate();
-	}	
-	var date = fdate.getFullYear() + (mm) + dd;  
-	return date;	 	
+	}
+	var date = fdate.getFullYear() + (mm) + dd;
+	return date;
 }
 
 const videoConstraints = {video: {displaySurface: "application", height: 1080, width: 1920 }};
@@ -2692,7 +2703,7 @@ exports.getToday = function(){
 
 exports.getYesterday = function() {
 	var d = new Date();
-	d.setDate(d.getDate() - 1);  
+	d.setDate(d.getDate() - 1);
 	var td = formatDateStr(d);
 	return formatDate(td);
 }
@@ -2700,28 +2711,28 @@ exports.getYesterday = function() {
 exports.getDateLastWeek = function(){
 	var days = 7;
 	var d = new Date();
-	var last = new Date(d.getTime() - (days * 24 * 60 * 60 * 1000));		
+	var last = new Date(d.getTime() - (days * 24 * 60 * 60 * 1000));
 	var td = formatDateStr(last);
 	return formatDate(td);
 }
 
 exports.getDateLastMonth = function(){
 	var d = new Date();
-	d.setDate(d.getDate() - 31);  
+	d.setDate(d.getDate() - 31);
 	var td = formatDateStr(d);
 	return formatDate(td);
 }
 
 exports.getDateLast3Month = function(){
 	var d = new Date();
-	d.setMonth(d.getMonth() - 3);  
+	d.setMonth(d.getMonth() - 3);
 	var td = formatDateStr(d);
 	return formatDate(td);
 }
 
 exports.getDateLastYear = function(){
 	var d = new Date();
-	d.setFullYear(d.getFullYear() - 1);  
+	d.setFullYear(d.getFullYear() - 1);
 	var td = formatDateStr(d);
 	return formatDate(td);
 }
@@ -2765,7 +2776,19 @@ exports.formatStudyDate = function(studydateStr){
 		return studydateStr;
 	}
 }
-
+exports.getDatetimeValue = function(studydateStr, studytimeStr){
+	if ((studydateStr.length >= 8) && (studytimeStr.length >= 6)) {
+		var yy = studydateStr.substr(0, 4);
+		var mo = studydateStr.substr(4, 2);
+		var dd = studydateStr.substr(6, 2);
+		var hh = studytimeStr.substr(0, 2);
+		var mn = studytimeStr.substr(2, 2);
+		var ss = studytimeStr.substr(4, 2);
+		var stddf = yy + '-' + mo + '-' + dd + ' ' + hh + ':' + mn + ':' + ss;
+		var stdDate = new Date(stddf);
+		return stdDate.getTime();
+	}
+}
 exports.invokeGetDisplayMedia = function(success) {
 	if(navigator.mediaDevices.getDisplayMedia) {
     navigator.mediaDevices.getDisplayMedia(videoConstraints).then(success).catch(doGetScreenSignalError);
@@ -2818,6 +2841,7 @@ exports.windowMaximize = function () {
 	window.screenY = 0;
 	alwaysLowered = false;
 }
+
 },{}],12:[function(require,module,exports){
 /*
  * simpleUpload.js v.1.1
