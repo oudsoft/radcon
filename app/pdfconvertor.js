@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const exec = require('child_process').exec;
+const cron = require('node-cron');
 
 const PDF_PATH = process.env.USRPDF_PATH;
 const PDF_DIR = process.env.USRPDF_DIR;
@@ -70,6 +71,27 @@ const convertor = function (pageCodeFile) {
   });
 }
 
+const removeTempFile = function(fileCode) {
+  const removeAfter = 10; /*minutes */
+  const startDate = new Date();
+  let endDate = new Date(startDate.getTime() + (removeAfter * 60 * 1000));
+  let endMM = endDate.getMonth() + 1;
+  let endDD = endDate.getDate();
+  let endHH = endDate.getHours();
+  let endMN = endDate.getMinutes();
+  let endSS = endDate.getSeconds();
+  let scheduleRemove = endSS + ' ' + endMN + ' ' + endHH + ' ' + endDD + ' ' + endMM + ' *';
+	let task = cron.schedule(scheduleRemove, function(){
+    var command = parseStr('rm %s/%s.*', parentDir + PDF_DIR, fileCode);
+    console.log(command);
+    runcommand(command).then((stdout) => {
+      console.log(stdout);
+    }).catch((err) => {
+      console.log('err: 500 >>', err);
+    });
+  });
+}
+
 module.exports = function (app) {
 
   app.post('/convertfromurl', function(req, res) {
@@ -124,6 +146,7 @@ module.exports = function (app) {
 
       runcommand(command).then((cmdout) => {
         console.log(cmdout);
+        removeTempFile(fileCode);
         res.status(200).send({status: {code: 200}, dicom : {filename: dcmFile}, studyObj: studyObj});
       }).catch((cmderr) => {
         console.log('cmderr: 500 >>', cmderr);

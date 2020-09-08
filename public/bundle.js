@@ -817,10 +817,10 @@ module.exports = function ( jq ) {
 			let response = await doCallApi(apiName, rqParams);
 			console.log(response);
 			let resBody = JSON.parse(response.res.body);
-			if (resBody.incident) {
-	  		$("#ReadWaitDiv").empty();
+			if ((resBody.incident) || (resBody.success == true)){
+	  		$("#ReadWaitDiv-Content").empty();
 	  		let rwTable = await doShowRwCaseList(resBody.incident);
-	  		$("#ReadWaitDiv").append($(rwTable));
+	  		$("#ReadWaitDiv-Content").append($(rwTable));
 			} else if (resBody.success == false){
 				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
 			}
@@ -840,10 +840,15 @@ module.exports = function ( jq ) {
 		let apiName = 'get_case_list';
 		try {
 			let response = await doCallApi(apiName, rqParams);
+			console.log(response);
 			let resBody = JSON.parse(response.res.body);
-  		$("#ReadSuccessDiv").empty();
-  		let rwTable = await doShowRsCaseList(resBody.incident);
-  		$("#ReadSuccessDiv").append($(rwTable));
+			if ((resBody.incident) || (resBody.success == true)){
+	  		$("#ReadSuccessDiv-Content").empty();
+	  		let rwTable = await doShowRsCaseList(resBody.incident);
+	  		$("#ReadSuccessDiv-Content").append($(rwTable));
+			} else if (resBody.success == false){
+				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
+			}
   		$('body').loading('stop');
 		} catch(e) {
 	    console.log('Unexpected error occurred =>', e);
@@ -1386,22 +1391,26 @@ module.exports = function ( jq ) {
 	}
 
 	function doConvertResultToDicom(reportUrl, studyID, modality) {
-		$('body').loading('start');
-		apiconnector.doConvertPageToPdf(reportUrl).then((convRes) => {
-			apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicomRes) => {
-				console.log(dicomRes);
-				if (dicomRes.status.code == 200) {
-					alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+		if (reportUrl) {
+			$('body').loading('start');
+			apiconnector.doConvertPageToPdf(reportUrl).then((convRes) => {
+				apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicomRes) => {
+					console.log(dicomRes);
+					if (dicomRes.status.code == 200) {
+						alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+						$('body').loading('stop');
+					}
+				}).catch((err) => {
+					alert('ERROR: \n' +JSON.stringify(err));
 					$('body').loading('stop');
-				}
+				});
 			}).catch((err) => {
 				alert('ERROR: \n' +JSON.stringify(err));
 				$('body').loading('stop');
 			});
-		}).catch((err) => {
-			alert('ERROR: \n' +JSON.stringify(err));
-			$('body').loading('stop');
-		});
+		} else {
+			alert('ระบบยังไม่พบลิงค์ผลอ่านจากหมอ');
+		}
 	}
 
   function doOpenCreateNewCase(defualtValue) {
