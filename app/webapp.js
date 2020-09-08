@@ -45,6 +45,8 @@ webApp.get('/bush/(:collection)/(:allabum)/(:filename)', (req, res) => {
 */
 module.exports = ( httpsServer ) => {
 	const uploader = require('./uploader.js')(webApp);
-	const pdfconvertor = require('./pdfconvertor.js')(webApp)
-	return {webApp};
+	const pdfconvertor = require('./pdfconvertor.js')(webApp);
+	//const wsServerUrl = 'ws://172.17.0.4:8000';
+	//const { webSocketServer, webSocketClient } = require('./websocket.js')(httpsServer, wsServerUrl);
+	return { webApp };
 }

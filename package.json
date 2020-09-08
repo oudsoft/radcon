@@ -19,6 +19,7 @@
     "request-promise": "^4.2.5",
     "serve-index": "^1.9.1",
     "web-push": "^3.4.4",
+    "websocket": "^1.0.32",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0",
     "wkhtmltopdf": "^0.3.4"

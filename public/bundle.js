@@ -1253,7 +1253,7 @@ module.exports = function ( jq ) {
 		return new Promise(function(resolve, reject) {
 			let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
 			let headRow = $('<tr style="background-color: green;"></tr>');
-			let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="10%" align="left">Study Date</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
+			let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">Study Date</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
 			$(rsTable).append($(headRow));
 			$(headRow).append($(headColumns));
 			for (let i=0; i < dj.length; i++) {
@@ -1301,11 +1301,11 @@ module.exports = function ( jq ) {
 					let dataRow = $('<tr class="case-row"></tr>');
 					let dataColText = '';
 					dataColText += '<td align="center">'+ (i + 1 + startRef) + '</td>'
+					dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
 					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientID + '</td>'
 					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
 					dataColText += '<td align="left">' + sa + '</td>'
 					dataColText += '<td align="left">' + mld + '</td>';
-					dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
 					dataColText += '<td align="left">' + desc +  protoname + '</td>'
 					let dataCol = $(dataColText);
 					$(dataRow).append($(dataCol));
