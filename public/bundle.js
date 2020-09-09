@@ -839,20 +839,24 @@ module.exports = function ( jq ) {
 			console.log(response);
 			let resBody = JSON.parse(response.res.body);
 			if ((resBody.incident) || (resBody.success == true)){
-	  		$("#ReadWaitDiv-Content").empty();
 				let rwTable;
 				switch(currentTab) {
 					case "ReadWaitDiv":
+	  				$("#ReadWaitDiv-Content").empty();
 						rwTable = await doShowRwCaseList(resBody.incident);
+	  				$("#ReadWaitDiv-Content").append($(rwTable));
 					break;
 					case "ReadSuccessDiv":
+	  				$("#ReadSuccessDiv-Content").empty();
 						rwTable = await doShowRsCaseList(resBody.incident);
+	  				$("#ReadSuccessDiv-Content").append($(rwTable));
 					break;
 					case "AllCasesDiv":
+	  				$("#AllCasesDiv-Content").empty();
 						rwTable = await doShowAllCaseList(resBody.incident);
+	  				$("#AllCasesDiv-Content").append($(rwTable));
 					break;
 				}
-	  		$("#ReadWaitDiv-Content").append($(rwTable));
 			} else if (resBody.success == false){
 				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
 			}
