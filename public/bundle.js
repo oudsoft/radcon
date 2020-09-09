@@ -720,6 +720,26 @@ module.exports = function ( jq ) {
 	const defualtPacsLimit = '30';
 	const defualtPacsStudyDate = 'ALL';
 
+	const caseReadWaitStatus = ['draft',
+		'wait_zip',
+		'processing',
+		'wait_upload',
+		'uploading',
+		'finish_uploa',
+		'wait_consult',
+		'wait_dr_consult',
+		'consult_expire',
+		'wait_consult_ack',
+		'wait_response_1',
+		'wait_response_2',
+		'wait_response_3',
+		'wait_response_4',
+		'wait_response_5',
+		'wait_response_6',
+		'wait_dr_key'
+	];
+	const caseReadSuccessStatus = ['wait_close', 'wait_close2', 'close'];
+
 	/*******************************************************/
 
 	function doCallApi(apiName, rqParams) {
@@ -766,8 +786,9 @@ module.exports = function ( jq ) {
 	function doEventManagment() {
 		document.addEventListener("PACSDiv", openPACS);
 		//document.addEventListener("SendWaitDiv", evtMng);
-		document.addEventListener("ReadWaitDiv", openRwCaseList);
-		document.addEventListener("ReadSuccessDiv", openRsCaseList);
+		document.addEventListener("ReadWaitDiv", openCaseList);
+		document.addEventListener("ReadSuccessDiv", openCaseList);
+		document.addEventListener("AllCasesDiv", openCaseList);
 		document.addEventListener("EditImageCmd", openImageEditor);
 	}
 
@@ -807,7 +828,7 @@ module.exports = function ( jq ) {
 	  });
   }
 
-  const openRwCaseList = async function(e) {
+  const openCaseList = async function(e) {
 		$('body').loading('start');
 		currentTab = e.detail.eventname;
 		const main = require('../main.js');
@@ -819,7 +840,18 @@ module.exports = function ( jq ) {
 			let resBody = JSON.parse(response.res.body);
 			if ((resBody.incident) || (resBody.success == true)){
 	  		$("#ReadWaitDiv-Content").empty();
-	  		let rwTable = await doShowRwCaseList(resBody.incident);
+				let rwTable;
+				switch(currentTab) {
+					case "ReadWaitDiv":
+						rwTable = await doShowRwCaseList(resBody.incident);
+					break;
+					case "ReadSuccessDiv":
+						rwTable = await doShowRsCaseList(resBody.incident);
+					break;
+					case "AllCasesDiv":
+						rwTable = await doShowAllCaseList(resBody.incident);
+					break;
+				}
 	  		$("#ReadWaitDiv-Content").append($(rwTable));
 			} else if (resBody.success == false){
 				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
@@ -832,61 +864,18 @@ module.exports = function ( jq ) {
 		$('#CurrentPage').remove();
   }
 
-  const openRsCaseList = async function(e) {
-		$('body').loading('start');
-		currentTab = e.detail.eventname;
-		const main = require('../main.js');
-		let rqParams = { username: main.doGetCookie().username }
-		let apiName = 'get_case_list';
-		try {
-			let response = await doCallApi(apiName, rqParams);
-			console.log(response);
-			let resBody = JSON.parse(response.res.body);
-			if ((resBody.incident) || (resBody.success == true)){
-	  		$("#ReadSuccessDiv-Content").empty();
-	  		let rwTable = await doShowRsCaseList(resBody.incident);
-	  		$("#ReadSuccessDiv-Content").append($(rwTable));
-			} else if (resBody.success == false){
-				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
-			}
-  		$('body').loading('stop');
-		} catch(e) {
-	    console.log('Unexpected error occurred =>', e);
-	    $('body').loading('stop');
-    }
-		$('#CurrentPage').remove();
-  }
-
-  function doShowRwCaseList(incidents) {
-  	const caseStatusList = ['draft',
-  		'wait_zip',
-  		'processing',
-  		'wait_upload',
-  		'uploading',
-			'finish_uploa',
-		  'wait_consult',
-		  'wait_dr_consult',
-		  'consult_expire',
-		  'wait_consult_ack',
-		  'wait_response_1',
-		  'wait_response_2',
-		  'wait_response_3',
-		  'wait_response_4',
-		  'wait_response_5',
-		  'wait_response_6',
-		  'wait_dr_key'
-		];
-		console.log(incidents);
+	function doShowRwCaseList(incidents) {
+  	console.log(incidents);
 		return new Promise(async function(resolve, reject) {
 			if ((incidents) && (incidents.length > 0)) {
 				let filterIncidents = incidents.filter((item, ind) => {
-					if (caseStatusList.indexOf(item.status) >= 0) {
+					if (caseReadWaitStatus.indexOf(item.status) >= 0) {
 						return item;
 					}
 				});
 				console.log(filterIncidents);
 				if (filterIncidents.length > 0) {
-					let showTable = await doShowCaseList(filterIncidents, false);
+					let showTable = await doShowCaseList(filterIncidents);
 					resolve(showTable);
 				} else {
 					resolve($('<div>Cases not found.</div>'));
@@ -898,18 +887,17 @@ module.exports = function ( jq ) {
   }
 
   function doShowRsCaseList(incidents) {
-  	const caseStatusList = ['wait_close', 'wait_close2', 'close'];
 		console.log(incidents);
 		return new Promise(async function(resolve, reject) {
 			if ((incidents) && (incidents.length > 0)) {
 				let filterIncidents = incidents.filter((item, ind) => {
-					if (caseStatusList.indexOf(item.status) >= 0) {
+					if (caseReadSuccessStatus.indexOf(item.status) >= 0) {
 						return item;
 					}
 				});
 				console.log(filterIncidents);
 				if (filterIncidents.length > 0) {
-					let showTable = await doShowCaseList(filterIncidents, true);
+					let showTable = await doShowCaseList(filterIncidents);
 					resolve(showTable);
 				} else {
 					resolve($('<div>Cases not found.</div>'));
@@ -920,7 +908,23 @@ module.exports = function ( jq ) {
 		});
   }
 
-  function doShowCaseList(incidents, showReadResult) {
+	function doShowAllCaseList(incidents) {
+		console.log(incidents);
+		return new Promise(async function(resolve, reject) {
+			if ((incidents) && (incidents.length > 0)) {
+				if (incidents.length > 0) {
+					let showTable = await doShowCaseList(incidents);
+					resolve(showTable);
+				} else {
+					resolve($('<div>Cases not found.</div>'));
+				}
+			} else {
+				resolve($('<div>Cases not found.</div>'));
+			}
+		});
+	}
+
+  function doShowCaseList(incidents) {
 		//console.log(incidents);
 		return new Promise(function(resolve, reject) {
 			let rwTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
@@ -1003,7 +1007,8 @@ module.exports = function ( jq ) {
 				});
 				$(changeCaseStatusButton).appendTo($(operationCmdBox));
 
-				if (showReadResult) {
+
+				if (caseReadSuccessStatus.indexOf(incidents[i].status) >= 0) {
 					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
 					$(printResultButton).click(function() {
 						doShowPopupReadResult(incidents[i].re_url);
