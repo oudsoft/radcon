@@ -662,6 +662,18 @@ module.exports = function ( jq ) {
     });
   }
 
+  const doDownloadResult = function(pageUrl, patient, casedate){
+    return new Promise(function(resolve, reject) {
+      let convertorEndPoint = proxyRootUri + "/convertpdffile";;
+      let params = {url: pageUrl, name: patient, date: casedate};
+			$.post(convertorEndPoint, params, function(data){
+				resolve(data);
+			}).fail(function(error) {
+				reject(error);
+			});
+    });
+  }
+
   const doConvertPdfToDicom = function(pdfFileName, studyID, modality){
     return new Promise(function(resolve, reject) {
       let convertorEndPoint = proxyRootUri + "/converttodicom";;
@@ -704,6 +716,7 @@ module.exports = function ( jq ) {
 		doCallDeleteDicom,
     doGetOrthancPort,
     doConvertPageToPdf,
+    doDownloadResult,
     doConvertPdfToDicom
 	}
 }
@@ -788,7 +801,7 @@ module.exports = function ( jq ) {
 		//document.addEventListener("SendWaitDiv", evtMng);
 		document.addEventListener("ReadWaitDiv", openCaseList);
 		document.addEventListener("ReadSuccessDiv", openCaseList);
-		document.addEventListener("AllCasesDiv", openCaseList);
+		document.addEventListener("AllCasesDiv", /*openCaseList*/ openUploadList);
 		document.addEventListener("EditImageCmd", openImageEditor);
 	}
 
@@ -826,6 +839,20 @@ module.exports = function ( jq ) {
 	  	*/
 	  	$("#search-cmd").trigger('click');
 	  });
+  }
+
+	const openUploadList = async function(e) {
+		const main = require('../main.js');
+		let rqParams = { username: main.doGetCookie().username }
+		let apiName = 'get_upload_list';
+		try {
+			let response = await doCallApi(apiName, rqParams);
+			console.log(response);
+			let resBody = JSON.parse(response.res.body);
+			console.log(resBody);
+		} catch(e) {
+	    console.log('Unexpected error occurred =>', e);
+    }
   }
 
   const openCaseList = async function(e) {
@@ -995,7 +1022,10 @@ module.exports = function ( jq ) {
 				*/
 				let downlodDicomButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom in zip file."/>');
 				$(downlodDicomButton).click(function() {
-					doShowPopupDicomZip(incidents[i].dicom_zip1);
+					let patientNameEN = incidents[i].patient.split(' ');
+					patientNameEN = patientNameEN.join('_');
+					let savefile = patientNameEN + '-' + casedateSegment + '.zip';
+					doDownloadDicom(incidents[i].dicom_folder1, savefile);
 				});
 				$(downlodDicomButton).appendTo($(operationCmdBox));
 
@@ -1015,7 +1045,9 @@ module.exports = function ( jq ) {
 				if (caseReadSuccessStatus.indexOf(incidents[i].status) >= 0) {
 					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
 					$(printResultButton).click(function() {
-						doShowPopupReadResult(incidents[i].re_url);
+						let patientNameEN = incidents[i].patient.split(' ');
+						patientNameEN = patientNameEN.join('_');
+						doShowPopupReadResult(incidents[i].re_url, patientNameEN, casedateSegment);
 					});
 					$(printResultButton).appendTo($(operationCmdBox));
 
@@ -1352,7 +1384,10 @@ module.exports = function ( jq ) {
 
 					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom to zip file."/>');
 					$(downloadDicomCmd).on('click', function(evt){
-						doDownloadDicom(dj[i].ID);
+						let dicomFilename = dj[i].PatientMainDicomTags.PatientName.split(' ');
+						dicomFilename = dicomFilename.join('_');
+						dicomFilename = dicomFilename + '-' + dj[i].MainDicomTags.StudyDate + '.zip';
+						doDownloadDicom(dj[i].ID, dicomFilename);
 					});
 
 					$(operatingCol).append($(spacingBox));
@@ -1373,11 +1408,6 @@ module.exports = function ( jq ) {
 		});
   }
 
-	function doShowPopupDicomZip(zipfile){
-		let ziplink = 'https://radconnext.com/radconnext/inc_files/' + zipfile;
-		window.open(ziplink, '_blank');
-	}
-
   function doOpenPreview(instanceID, seriesID){
 		const main = require('../main.js');
 		const username = main.doGetCookie().username;
@@ -1396,18 +1426,33 @@ module.exports = function ( jq ) {
 		});
 	}
 
-  function doDownloadDicom(studyID){
+  function doDownloadDicom(studyID, dicomFilename){
+		$('body').loading('start');
 		const main = require('../main.js');
 		const username = main.doGetCookie().username;
   	apiconnector.doCallDownloadDicom(studyID, username).then((response) => {
   		console.log(response);
-  		let openLink = response.archive.link;
-  		window.open(openLink, '_blank');
+  		//let openLink = response.archive.link;
+  		//window.open(openLink, '_blank');
+			var pom = document.createElement('a');
+			pom.setAttribute('href', response.archive.link);
+			pom.setAttribute('download', dicomFilename);
+			pom.click();
+			$('body').loading('stop');
   	})
   }
 
-	function doShowPopupReadResult(re_url) {
-		window.open(re_url, '_blank');
+	function doShowPopupReadResult(re_url, patient, casedate) {
+		//window.open(re_url, '_blank');
+		$('body').loading('start');
+		apiconnector.doDownloadResult(re_url, patient, casedate).then((pdfurl) => {
+			console.log(pdfurl);
+			var pom = document.createElement('a');
+			pom.setAttribute('href', pdfurl.pdf.link);
+			pom.setAttribute('download', pdfurl.pdf.filename);
+			pom.click();
+			$('body').loading('stop');
+		});
 	}
 
 	function doConvertResultToDicom(reportUrl, studyID, modality) {

@@ -38,9 +38,14 @@ const runcommand = function (command) {
 	});
 }
 
-const downloader = function (url) {
+const downloader = function (url, pdffilename) {
 	return new Promise(function(resolve, reject) {
-    var newCodeFile = genUniqueID();
+    var newCodeFile;
+    if (pdffilename) {
+      newCodeFile = pdffilename;
+    } else {
+      newCodeFile = genUniqueID();
+    }
     var newFileName = newCodeFile + '.html';
     var newPath = parentDir + PDF_DIR + '/'  + newFileName;
     var command = parseStr('curl -o %s %s', newPath, url);
@@ -99,6 +104,18 @@ module.exports = function (app) {
 		var body = req.body;
     var pageUrl = body.url;
     downloader(pageUrl).then((pageFileCode) => {
+      convertor(pageFileCode).then((pdfUrl) => {
+        res.status(200).send({status: {code: 200}, text: 'ok pdf.', pdf: {link: '/' + rootname + pdfUrl, filename: pageFileCode + '.pdf'}});
+      });
+    });
+  });
+
+  app.post('/convertpdffile', function(req, res) {
+    const rootname = req.originalUrl.split('/')[1];
+		var body = req.body;
+    var pageUrl = body.url;
+    var filename = body.name + '-' + body.date;
+    downloader(pageUrl, filename).then((pageFileCode) => {
       convertor(pageFileCode).then((pdfUrl) => {
         res.status(200).send({status: {code: 200}, text: 'ok pdf.', pdf: {link: '/' + rootname + pdfUrl, filename: pageFileCode + '.pdf'}});
       });
