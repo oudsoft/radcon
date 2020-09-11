@@ -2931,7 +2931,7 @@ exports.formatStudyDate = function(studydateStr){
 		var stddf = yy + '-' + mo + '-' + dd;
 		var stdDate = new Date(stddf);
 		var month = stdDate.toLocaleString('default', { month: 'short' });
-		return dd + ' ' + month + ' ' + yy;
+		return Number(dd) + ' ' + month + ' ' + yy;
 	}else {
 		return studydateStr;
 	}
