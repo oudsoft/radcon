@@ -801,7 +801,7 @@ module.exports = function ( jq ) {
 		//document.addEventListener("SendWaitDiv", evtMng);
 		document.addEventListener("ReadWaitDiv", openCaseList);
 		document.addEventListener("ReadSuccessDiv", openCaseList);
-		document.addEventListener("AllCasesDiv", /*openCaseList*/ openUploadList);
+		document.addEventListener("AllCasesDiv", openCaseList);
 		document.addEventListener("EditImageCmd", openImageEditor);
 	}
 
@@ -841,26 +841,21 @@ module.exports = function ( jq ) {
 	  });
   }
 
-	const openUploadList = async function(e) {
-		const main = require('../main.js');
-		let rqParams = { username: main.doGetCookie().username }
-		let apiName = 'get_upload_list';
-		try {
-			let response = await doCallApi(apiName, rqParams);
-			console.log(response);
-			let resBody = JSON.parse(response.res.body);
-			console.log(resBody);
-		} catch(e) {
-	    console.log('Unexpected error occurred =>', e);
-    }
-  }
-
   const openCaseList = async function(e) {
 		$('body').loading('start');
 		currentTab = e.detail.eventname;
 		const main = require('../main.js');
-		let rqParams = { username: main.doGetCookie().username }
+		let rqParams, today;
 		let apiName = 'get_case_list';
+		if (currentTab === 'AllCasesDiv') {
+			today = util.getTodayDevFormat();
+			rqParams = { username: main.doGetCookie().username, search_start_date: today };
+			today = util.getToday();
+			today = util.formatStudyDate(today);
+		} else {
+			rqParams = { username: main.doGetCookie().username };
+		}
+
 		try {
 			let response = await doCallApi(apiName, rqParams);
 			console.log(response);
@@ -879,6 +874,14 @@ module.exports = function ( jq ) {
 	  				$("#ReadSuccessDiv-Content").append($(rwTable));
 					break;
 					case "AllCasesDiv":
+						$("#AllCasesDiv-Control").empty();
+						let dateRange = $('<div style="float: left;"><h3>เคสทั้งหมด ของวันที่ ' + today + '</h3></div>');
+						$("#AllCasesDiv-Control").append($(dateRange));
+						let dateRangeSearchCmd = $('<div style="margin-top: 25px; left: 15px;"><button class="radcon-button button-bw">เก่ากว่า ...</button></div>');
+						$(dateRangeSearchCmd).click(function() {
+							doShowCaseCalendar();
+						});
+						$("#AllCasesDiv-Control").append($(dateRangeSearchCmd));
 	  				$("#AllCasesDiv-Content").empty();
 						rwTable = await doShowAllCaseList(resBody.incident);
 	  				$("#AllCasesDiv-Content").append($(rwTable));
@@ -894,6 +897,40 @@ module.exports = function ( jq ) {
     }
 		$('#CurrentPage').remove();
   }
+
+	async function doCallSearchCasebyDate(startDate) {
+		$('body').loading('start');
+		const main = require('../main.js');
+		let apiName = 'get_case_list';
+		let rqParams = { username: main.doGetCookie().username, search_start_date: startDate };
+		let fromDate = startDate.split('-');
+		fromDate = fromDate.join('');
+		fromDate = util.formatStudyDate(fromDate);
+		try {
+			let response = await doCallApi(apiName, rqParams);
+			console.log(response);
+			let resBody = JSON.parse(response.res.body);
+			if ((resBody.incident) || (resBody.success == true)){
+				$("#AllCasesDiv-Control").empty();
+				let dateRange = $('<div style="float: left;"><h3>เคสทั้งหมด จากวันที่ ' + fromDate + '</h3></div>');
+				$("#AllCasesDiv-Control").append($(dateRange));
+				let dateRangeSearchCmd = $('<div style="margin-top: 25px; left: 15px;"><button class="radcon-button button-bw">เก่ากว่า ...</button></div>');
+				$(dateRangeSearchCmd).click(function() {
+					doShowCaseCalendar();
+				});
+				$("#AllCasesDiv-Control").append($(dateRangeSearchCmd));
+				$("#AllCasesDiv-Content").empty();
+				rwTable = await doShowAllCaseList(resBody.incident);
+				$("#AllCasesDiv-Content").append($(rwTable));
+			} else if (resBody.success == false){
+				alert('Your Session on API server had expired.\nPlease Logout and Login back gain.');
+			}
+  		$('body').loading('stop');
+		} catch(e) {
+	    console.log('Unexpected error occurred =>', e);
+	    $('body').loading('stop');
+    }
+	}
 
 	function doShowRwCaseList(incidents) {
   	console.log(incidents);
@@ -2062,6 +2099,71 @@ module.exports = function ( jq ) {
 		}
 	}
 
+	function doShowCaseCalendar() {
+		const spacingBox = $('<span>&nbsp;</span>');
+  	const inputStyleClass = {"font-family": "THSarabunNew", "font-size": "24px"};
+
+  	$('#HistoryDialogBox').empty();
+
+  	let selectBox = $('<div></div>');
+  	let statusSelect = $('<select id="startDate"></select>');
+  	$(statusSelect).css(inputStyleClass);
+		$(statusSelect).append($('<option value="TODAY">Today</option>'));
+		$(statusSelect).append($('<option value="YESTERDAY">Yesterday</option>'));
+		$(statusSelect).append($('<option value="WEEK">Last 7 days</option>'));
+		$(statusSelect).append($('<option value="MONTH">Last 31 days</option>'));
+		$(statusSelect).append($('<option value="3MONTH">Last 3 months</option>'));
+		$(statusSelect).append($('<option value="YEAR">Last year</option>'));
+
+		$(selectBox).append($('<label>ค้นหาเคสเริ่มจาก :</label>'));
+  	$(selectBox).append($(statusSelect));
+
+		let cmdBox = $('<div></div>');
+ 		$(cmdBox).css('width','100%');
+		$(cmdBox).css('padding','3px');
+		$(cmdBox).css('clear','left');
+ 		$(cmdBox).css('text-align','center');
+ 		$(cmdBox).css('margin-top','10px');
+  	let changeCmdBtn = $('<button> ค้นหา </button>');
+  	$(changeCmdBtn).css(inputStyleClass);
+  	$(changeCmdBtn).click(()=>{
+			let startDate = $('#startDate').val();
+			if (startDate === 'TODAY') {
+				startDate = util.getToday();
+			} else if (startDate === 'YESTERDAY') {
+				startDate = util.getYesterday();
+			} else if (startDate === 'WEEK') {
+				startDate = util.getDateLastWeek();
+			} else if (startDate === 'MONTH') {
+				startDate = util.getDateLastMonth();
+			} else if (startDate === '3MONTH') {
+				startDate = util.getDateLast3Month();
+			} else if (startDate === 'YEAR') {
+				startDate = util.getDateLastYear();
+			} else {
+				startDate = util.getToday();
+			}
+			startDate = util.formatDateDev(startDate);
+  		doCallSearchCasebyDate(startDate);
+  		$('#HistoryDialogBox').dialog('close');
+  	});
+  	$(changeCmdBtn).appendTo($(cmdBox));
+
+  	$(spacingBox).appendTo($(cmdBox));
+  	let cancelCmdBtn = $('<button> ยกเลิก </button>');
+  	$(cancelCmdBtn).css(inputStyleClass);
+  	$(cancelCmdBtn).click(()=>{
+  		$('#HistoryDialogBox').dialog('close');
+  	});
+		$(cancelCmdBtn).appendTo($(cmdBox));
+
+  	$('#HistoryDialogBox').append($(selectBox));
+  	$('#HistoryDialogBox').append($(cmdBox));
+
+  	$('#HistoryDialogBox').dialog('option', 'title', 'ค้นหาเคส');
+  	$('#HistoryDialogBox').dialog('open');
+	}
+
   function doShowPopupChangeCaseStatus(id, currentStatus){
   	const spacingBox = $('<span>&nbsp;</span>');
   	const inputStyleClass = {"font-family": "THSarabunNew", "font-size": "24px"};
@@ -2092,7 +2194,7 @@ module.exports = function ( jq ) {
 		$(cmdBox).css('clear','left');
  		$(cmdBox).css('text-align','center');
  		$(cmdBox).css('margin-top','10px');
-  	let changeCmdBtn = $('<button>เปลี่ยน</button>');
+  	let changeCmdBtn = $('<button> เปลี่ยน </button>');
   	$(changeCmdBtn).css(inputStyleClass);
   	$(changeCmdBtn).click(()=>{
   		doCallUpdateCaseStatus();
@@ -2101,7 +2203,7 @@ module.exports = function ( jq ) {
   	$(changeCmdBtn).appendTo($(cmdBox));
 
   	$(spacingBox).appendTo($(cmdBox));
-  	let cancelCmdBtn = $('<button>ยกเลิก</button>');
+  	let cancelCmdBtn = $('<button> ยกเลิก </button>');
   	$(cancelCmdBtn).css(inputStyleClass);
   	$(cancelCmdBtn).click(()=>{
   		$('#HistoryDialogBox').dialog('close');
@@ -2748,6 +2850,10 @@ const doGetScreenSignalError = function(e) {
 }
 
 /* export function */
+exports.getTodayDevFormat = function(){
+	var d = new Date();
+	return formatDateStr(d);
+}
 
 exports.getToday = function(){
 	var d = new Date();
@@ -2841,6 +2947,17 @@ exports.getDatetimeValue = function(studydateStr, studytimeStr){
 		var stddf = yy + '-' + mo + '-' + dd + ' ' + hh + ':' + mn + ':' + ss;
 		var stdDate = new Date(stddf);
 		return stdDate.getTime();
+	}
+}
+exports.formatDateDev = function(dateStr) {
+	if (dateStr.length >= 8) {
+		var yy = dateStr.substr(0, 4);
+		var mo = dateStr.substr(4, 2);
+		var dd = dateStr.substr(6, 2);
+		var stddf = yy + '-' + mo + '-' + dd;
+		return stddf;
+	} else {
+		return;
 	}
 }
 exports.invokeGetDisplayMedia = function(success) {
