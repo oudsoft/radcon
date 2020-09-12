@@ -2659,9 +2659,9 @@ module.exports = function ( jq ) {
 		let headRow = $('<tr style="background-color: green;"></tr>');
 		let headColumns = $('<td width="30%" align="center"><b>Name</b></td><td width="20%" align="center"><b>ระยะเวลาตอบรับเคส</b></td><td width="20%" align="center"><b>ระยะเวลาอ่านผล</b></td><td width="20%" align="center"><b>แจ้งเตือนครั้ง 2 เมื่อเวลาอ่านผลน้อยกว่า</b></td><td width="*" align="center"><b>&nbsp;</b></td>');
 		$(headRow).append($(headColumns));
-		$(urgentTable).append($(headRow));	
+		$(urgentTable).append($(headRow));
 		for (let i=0; i < urgentList.length; i++) {
-			let dataRow = $('<tr></tr>');			
+			let dataRow = $('<tr></tr>');
 			$(urgentTable).append($(dataRow));
 			let nameCol = $('<td align="center">' + urgentList[i].name + '</td>');
 			$(dataRow).append($(nameCol));
@@ -2671,14 +2671,14 @@ module.exports = function ( jq ) {
 			$(dataRow).append($(readingCol));
 			let second_alertCol = $('<td align="center">' + urgentList[i].second_alert + '</td>');
 			$(dataRow).append($(second_alertCol));
-			let editImg = $('<img src="images/edit_icon.png" width="30" height="auto"/>');
+			let editImg = $('<img src="images/edit-icon.png" width="30" height="auto"/>');
 			$(editImg).css('cursor', 'pointer');
 			$(editImg).on('click', function(){
 				doShowUrgentEdit(urgentList[i], username);
 			})
 			let editComCol = $('<td align="center"></td>');
-			$(editComCol).append($(editImg));			
-			$(dataRow).append($(editComCol));			
+			$(editComCol).append($(editImg));
+			$(dataRow).append($(editComCol));
 		}
 
 		$(".main").append($('<div style="min-height: 10px;"></div>'));
@@ -2713,7 +2713,7 @@ module.exports = function ( jq ) {
 			$("#Alive").css("border", "solid 2px red");
 			$("#Alive").focus();
 			return false;
-		} else if (reading.trim() === '') {	
+		} else if (reading.trim() === '') {
 			$("#Name").css("border", "");
 			$("#Alive").css("border", "");
 			$("#Reading").css("border", "solid 2px red");
@@ -2740,19 +2740,19 @@ module.exports = function ( jq ) {
 		return new Promise(function(resolve, reject) {
 			const update_urgentApiName = 'update_urgent'
 
-			const body = urgent;		
+			const body = urgent;
 			var realUrl = apiconnector.hostURL + '/' + update_urgentApiName + apiconnector.apiExt;
 			var params = {method: 'post', body: body, url: realUrl, apiname: update_urgentApiName};
 			apiconnector.doCallApiByProxy(update_urgentApiName, params).then((response) => {
-				resolve(response);			
+				resolve(response);
 			}).catch((err) => {
 				console.log(JSON.stringify(err));
 			})
 			/*
-			const body = { username: user.username, password: user.password };		
-			var params = JSON.stringify(body);		
+			const body = { username: user.username, password: user.password };
+			var params = JSON.stringify(body);
 			apiconnector.doCallApiDirect(update_urgentApiName, params)=> {
-				resolve(response);			
+				resolve(response);
 			}).catch((err) => {
 				console.log(JSON.stringify(err));
 			})
@@ -2773,11 +2773,11 @@ module.exports = function ( jq ) {
 				let resBody = JSON.parse(response.res.body);
 				let success = resBody.success;
 				if ((code === 200) && (success === true)) {
-					$("#UrgentLevel-Cmd").trigger("click");	
+					$("#UrgentLevel-Cmd").trigger("click");
 				}	else {
 					alert('ไม่สามารถแก้ไข Urgent Lvel ได้ในขณะนี้\nโปรดลองใหม่อีกครั้งภายหลัง')
 				}
-				$("#myModal").css("display", "none");					
+				$("#myModal").css("display", "none");
 			})
 		}
 	}
@@ -2787,7 +2787,8 @@ module.exports = function ( jq ) {
 		doShowUrgentEdit,
 		doSaveUserProfile
 	}
-}		
+}
+
 },{"./apiconnect.js":3}],11:[function(require,module,exports){
 /* utilmod.js */
 
