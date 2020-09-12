@@ -206,31 +206,47 @@
     let studyID = $('#studyID').val();
     let mdl = $('#mdl').val();
 
-    if (!(Number(price) >= 0 )) {
-      $('#price').css("border","2px solid red");
-      $('#price').focus();
+    console.log(/^[a-zA-Z]\w{1,65}$/.test(patientNameEN));
+    resetFieldValidate();
+
+    if (!(/^[a-zA-Z]\w{1,65}$/.test(patientNameEN))) {
+      $('#patient-name-en').css("border","4px solid red");
+      $("#patient-name-en").notify("ชื่อผู้ป่วยภาษาอังกฤษ ต้องไม่มีอักษรภาษาไทย หรือ ช่องว่าง", "error");
+      $('#patient-name-en').focus();
       return false;
     } else if (patientRights === '0') {
-      $('#price').css("border","");
-      $('#patient-rights').css("border","2px solid red");
+      $('#patient-rights').css("border","4px solid red");
+      $("#patient-rights").notify("โปรดเลือกสิทธิ์ผู้ป่วย", "error");
       $('#patient-rights').focus();
       return false;
-    } else if (drReader === '-1') {
-      $('#patient-rights').css("border","");
-      $('#dr-reader').css("border","2px solid red");
-      $('#dr-reader').focus();
+    } else if (!(Number(price) >= 0 )) {
+      $('#price').css("border","4px solid red");
+      $("#price").notify("โปรดระบุราครเป็นตัวเลข", "error");
+      $('#price').focus();
       return false;
     } else if (urgentType === '0') {
-      $('#dr-reader').css("border","");
-      $('#urgent-type').css("border","2px solid red");
+      $('#urgent-type').css("border","4px solid red");
+      $("#urgent-type").notify("โปรดเลือกความเร่งด่วน", "error");
       $('#urgent-type').focus();
       return false;
+    } else if (drReader === '-1') {
+      $('#dr-reader').css("border","4px solid red");
+      $("#dr-reader").notify("โปรดเลือกรังสีแพทย์", "error");
+      $('#dr-reader').focus();
+      return false;
     } else {
-      $('#urgent-type').css("border","");
       let newCase = {patientNameTH, patientNameEN, patientHistory, studyID, patientSex, patientAge, patientRights, price, hn, acc, department, drOwner, bodyPart, drReader, urgentType, detail, mdl};
       //console.log(newCase);
       return newCase;
     }
+  }
+
+  function resetFieldValidate() {
+    $('#patient-name-en').css("border","");
+    $('#patient-rights').css("border","");
+    $('#price').css("border","");
+    $('#dr-reader').css("border","");
+    $('#urgent-type').css("border","");
   }
 
   function doCloseNewCaseBox() {
