@@ -1,5 +1,5 @@
 //logger.js
-require('dotenv').config();
+//require('dotenv').config();
 const winston = require('winston');
 require('winston-daily-rotate-file');
 
@@ -15,6 +15,6 @@ const logger =  (module) => {
 		transports: [transport],
 	});
 	return logger;
-}  
+}
 
 module.exports = logger;

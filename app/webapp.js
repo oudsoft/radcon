@@ -1,4 +1,4 @@
-require('dotenv').config();
+//require('dotenv').config();
 const os = require('os');
 const fs = require('fs');
 const path = require("path");

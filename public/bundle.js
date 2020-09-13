@@ -380,9 +380,11 @@ function doShowMainDoctor(){
 	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="DoctorSchedule-Cmd">ตารางเวร</a></div>'));
 	$("#DoctorData-Cmd").click(function(){
 		$(".main").empty();
+    $('body').loading('start');
 		home.doCallSummaryDoctor(cookie.username).then((response) => {
 			let drList = JSON.parse(response.res.body);
 			doctor.doShowAllDoctor(drList, cookie.username, cookie.org[0].id);
+      $('body').loading('stop');
 		})
 	});
 	$("#DoctorSchedule-Cmd").click(function(){
@@ -403,9 +405,11 @@ function doShowMainHotpital() {
 	$(".submenu").append($('<div class="sub-menu-item"><a href="#" id="UrgentLevel-Cmd">Urgent Level</a></div>'));
 	$("#HotpitalData-Cmd").click(function(){
 		$(".main").empty();
+    $('body').loading('start');
 		home.doCallHospitalData(cookie.username).then((response) => {
 			let hospData = JSON.parse(response.res.body);
 			hospital.doShowHospitalData(hospData);
+      $('body').loading('stop');
 		});
 	});
 	$("#ReportForm-Cmd").click(function(){
@@ -414,9 +418,11 @@ function doShowMainHotpital() {
 	});
 	$("#UrgentLevel-Cmd").click(function(){
 		$(".main").empty();
+    $('body').loading('start');
 		home.doCallUrgentData(cookie.username).then((response) => {
 			let urgentData = JSON.parse(response.res.body);
 			urgent.doShowUrgentData(urgentData.data, cookie.username);
+      $('body').loading('stop');
 		});
 	});
 	$("#HotpitalData-Cmd").trigger("click");

@@ -1,5 +1,5 @@
 /* apiproxy.js */
-require('dotenv').config();
+//require('dotenv').config();
 const fs = require('fs');
 const util = require("util");
 const path = require('path');
@@ -18,20 +18,20 @@ const proxyRequest = function(rqParam) {
 			url: rqParam.url,
 			body: JSON.stringify(rqParam.body)
 		}, (err, res, body) => {
-			if (!err) {			
-				resolve({status: {code: 200}, res: res});								
+			if (!err) {
+				resolve({status: {code: 200}, res: res});
 			} else {
-				reject({status: {code: 500}, err: err});	
+				reject({status: {code: 500}, err: err});
 			}
 		});
 	});
 }
 
-const API_NAME_LIST = ["chk_login", 
-						"logout", 
-						"get_dr_list", 
-						"get_case_list", 
-						"get_dr_work_schedule", 
+const API_NAME_LIST = ["chk_login",
+						"logout",
+						"get_dr_list",
+						"get_case_list",
+						"get_dr_work_schedule",
 						"get_hospital_detail",
 						"get_urgent",
 						"update_urgent",
@@ -43,7 +43,7 @@ const API_NAME_LIST = ["chk_login",
 						"update_incident"];
 
 app.get('/callapi', function(req, res) {
-	res.status(200).send(req.query);		
+	res.status(200).send(req.query);
 });
 
 app.post('/callapi', async function(req, res) {
@@ -56,23 +56,23 @@ app.post('/callapi', async function(req, res) {
 		proxyRequest(rqParam).then((response) => {
 			console.log('call success');
 			//console.log(response);
-			res.status(200).send(response);		
+			res.status(200).send(response);
 		}).catch ((err) => {
 			console.log('call error');
 			//console.log(err);
-			res.status(500).send(err);		
+			res.status(500).send(err);
 		})
 	} else {
 		console.log('error: api out of bound.');
-		res.status(500).send({status: 500, error: 'api out of bound.'});	
+		res.status(500).send({status: 500, error: 'api out of bound.'});
 	}
 })
 
 app.post('/getresource', function(req, res) {
 	let rqParam = {url: req.body.url, method: 'get'};
 	proxyRequest(rqParam).then((response) => {
-		res.status(200).send(response.res);	
-	});	
+		res.status(200).send(response.res);
+	});
 });
 
 module.exports = app;
