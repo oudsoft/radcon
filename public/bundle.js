@@ -1747,7 +1747,7 @@ module.exports = function ( jq ) {
   }
 
   function doUploadSacanedImage() {
-  	let imageData = imagesScanned[0].src;
+  	let imageData = imagesScanned[imagesScanned.length - 1].src;
   	let params = {image: imageData};
     let uploadImageUrl = apiconnector.proxyRootUri + "/scannerupload";
 		$.post(uploadImageUrl, params, function(data){
