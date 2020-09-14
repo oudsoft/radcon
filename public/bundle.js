@@ -1088,7 +1088,7 @@ module.exports = function ( jq ) {
 				if (caseReadSuccessStatus.indexOf(incidents[i].status) >= 0) {
 					let printResultButton = $('<img class="pacs-command" data-toggle="tooltip" src="images/print-icon.png" title="Print Read Result."/>');
 					$(printResultButton).click(function() {
-						let patientNameEN = incidents[i].patient.split(' ');
+						let patientNameEN = incidents[i].dicom_zip2.split(' ');
 						patientNameEN = patientNameEN.join('_');
 						doShowPopupReadResult(incidents[i].re_url, patientNameEN, casedateSegment);
 					});
@@ -1234,16 +1234,16 @@ module.exports = function ( jq ) {
   	return new Promise(function(resolve, reject) {
 			const main = require('../main.js');
 	  	let orthancUri = '/tools/find';
-	  	let params = {mothod: 'post', uri: orthancUri, body: query, username: main.doGetCookie().username};
+	  	let params = {method: 'post', uri: orthancUri, body: query, username: main.doGetCookie().username};
 	  	apiconnector.doCallOrthancApiByProxy(params).then((response) =>{
 	  		//console.log(response);
 	  		var promiseList = new Promise(function(resolve, reject){
 		  		response.forEach((study) => {
 		  			let queryStr = '{"Level": "Series", "Expand": true, "Query": {"PatientName":"' + study.PatientMainDicomTags.PatientName + '"}}';
-		  			params = {mothod: 'post', uri: orthancUri, body: queryStr, username: main.doGetCookie().username};
-		  			apiconnector.doCallOrthancApiByProxy(params).then((seriesList) =>{
+		  			params = {method: 'post', uri: orthancUri, body: queryStr, username: main.doGetCookie().username};
+		  			apiconnector.doCallOrthancApiByProxy(params).then(async (seriesList) =>{
 		  				//console.log(seriesList);
-		  				let samplingSrs = seriesList.find((srs) => {
+		  				let samplingSrs = await seriesList.find((srs) => {
 		  					return (srs.MainDicomTags.SeriesDate) || (srs.MainDicomTags.SeriesDescription);
 		  				})
 		  				if (samplingSrs) {
@@ -1348,7 +1348,7 @@ module.exports = function ( jq ) {
 			/* ================== */
 			let rsTable = $('<table width="100%" cellpadding="5" cellspacing="0"></table>');
 			let headRow = $('<tr style="background-color: green;"></tr>');
-			let headColumns = $('<td width="5%" align="center">No.</td><td width="10%" align="left">Study Date</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
+			let headColumns = $('<td width="5%" align="center">No.</td><td width="15%" align="left">Study Date</td><td width="10%" align="left">HN</td><td width="15%" align="left">Name</td><td width="5%" align="left">Sex/Age</td><td width="5%" align="left">Modality</td><td width="20%" align="left">Study Desc. / Protocol Name</td><td width="*" align="center">Operation</td>');
 			$(rsTable).append($(headRow));
 			$(headRow).append($(headColumns));
 			for (let i=0; i < dj.length; i++) {
@@ -1396,7 +1396,7 @@ module.exports = function ( jq ) {
 					let dataRow = $('<tr class="case-row"></tr>');
 					let dataColText = '';
 					dataColText += '<td align="center">'+ (i + 1 + startRef) + '</td>'
-					dataColText += '<td align="left">' + '<div class="tooltip">' + studydate + '<span class="tooltiptext">'+ dj[i].MainDicomTags.StudyTime + '</span></div>'  + '</td>'
+					dataColText += '<td align="left">' + '<div style="float: left;">' + studydate + '</div><div style="background-color: gray; color: white; text-align: center; float: left; margin: -6px 10px; padding: 5px; border-radius: 5px;">' + util.formatStudyTime(dj[i].MainDicomTags.StudyTime) + '</div></td>'
 					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientID + '</td>'
 					dataColText += '<td align="left">' + dj[i].PatientMainDicomTags.PatientName + '</td>'
 					dataColText += '<td align="left">' + sa + '</td>'
@@ -1407,8 +1407,8 @@ module.exports = function ( jq ) {
 
 					operatingCol = $('<td align="center"></td>');
 					$(dataRow).append($(operatingCol));
-					let previewCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/preview-icon.png" title="Dicom Image Preview."/>');
-					let instancePreview = dj[i].SamplingSeries.Instances[0];
+					let previewCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/preview-icon.png" title="เปิดดูรูปด้วย Web Viewer"/>');
+					//let instancePreview = dj[i].SamplingSeries.Instances[0];
 					$(previewCmd).on('click', function(evt){
 						//doOpenPreview(instancePreview, dj[i].Series[0]);
 						doOpenStoneWebViewer(dj[i].MainDicomTags.StudyInstanceUID);
@@ -1417,15 +1417,15 @@ module.exports = function ( jq ) {
 
 					let patientProps = sa.split('/');
 					let defualtValue = {patient: {id: dj[i].PatientMainDicomTags.PatientID, name: dj[i].PatientMainDicomTags.PatientName, age: patientProps[1], sex: patientProps[0]}, bodypart: bdp, studyID: dj[i].ID, acc: dj[i].MainDicomTags.AccessionNumber, mdl: mld};
-					let creatwNewCaseCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/doctor-icon.png" title="Create New case."/>');
+					let creatwNewCaseCmd = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/doctor-icon.png" title="ส่งรังสีแพทย์เพื่ออ่านผล"/>');
 					$(creatwNewCaseCmd).on('click', function(evt){
-						doOpenCreateNewCase(defualtValue);
+						doOpenCreateNewCase(defualtValue, dj[i].Series);
 					});
 
 					$(operatingCol).append($(spacingBox));
 					$(operatingCol).append($(creatwNewCaseCmd));
 
-					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="Download Dicom to zip file."/>');
+					let downloadDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/zip-icon.png" title="ดาวน์โหลด zip ไฟล์"/>');
 					$(downloadDicomCmd).on('click', function(evt){
 						let dicomFilename = dj[i].PatientMainDicomTags.PatientName.split(' ');
 						dicomFilename = dicomFilename.join('_');
@@ -1436,7 +1436,7 @@ module.exports = function ( jq ) {
 					$(operatingCol).append($(spacingBox));
 					$(operatingCol).append($(downloadDicomCmd));
 
-					let deleteDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="Delete local file."/>');
+					let deleteDicomCmd = $('<img class="pacs-command" data-toggle="tooltip" src="images/delete-icon.png" title="ลบรายการนี้"/>');
 					$(deleteDicomCmd).on('click', function(evt){
 						doDeleteDicom(dj[i].ID);
 					});
@@ -1521,7 +1521,7 @@ module.exports = function ( jq ) {
 		}
 	}
 
-  function doOpenCreateNewCase(defualtValue) {
+  function doOpenCreateNewCase(defualtValue, seriesList) {
   	$('body').loading('start');
 		$("#dialog").load('form/newcase-dialog.html', async function(){
 			const main = require('../main.js');
@@ -1532,15 +1532,31 @@ module.exports = function ( jq ) {
 
 			await doPrepareOptionForm(defualtValue);
 
-			$("#upload-scan-cmd").click(function(){
-				doUploadSacanedImage();
+			let dicomImgCount = 0;
+			let seriesParam = {method: 'get', username: main.doGetCookie().username};
+			var promiseList = new Promise(function(resolve, reject){
+				seriesList.forEach((srs) => {
+					seriesParam.uri = '/series/' + srs;
+					apiconnector.doCallOrthancApiByProxy(seriesParam).then((sr) =>{
+						dicomImgCount += Number(sr.Instances.length);
+					});
+				});
+				setTimeout(()=> {
+					resolve(dicomImgCount);
+				},1200);
 			});
+			Promise.all([promiseList]).then((ob)=>{
+				$('#MainTableForm').append($('<tr><td class="input-label">Dicom Summary</td><td colspan="3">' + seriesList.length + ' Series / ' + ob[0] + ' images</td></tr>'));
+				$("#upload-scan-cmd").click(function(){
+					doUploadSacanedImage();
+				});
 
-			$("#SaveNewCase-Cmd").click(function(){
-				doSaveNewCase();
+				$("#SaveNewCase-Cmd").click(function(){
+					doSaveNewCase();
+				});
+
+				$('body').loading('stop');
 			});
-
-			$('body').loading('stop');
 		});
   }
 
@@ -2939,8 +2955,17 @@ exports.formatStudyDate = function(studydateStr){
 		var stdDate = new Date(stddf);
 		var month = stdDate.toLocaleString('default', { month: 'short' });
 		return Number(dd) + ' ' + month + ' ' + yy;
-	}else {
+	} else {
 		return studydateStr;
+	}
+}
+exports.formatStudyTime = function(studytimeStr){
+	if (studytimeStr.length >= 4) {
+		var hh = studytimeStr.substr(0, 2);
+		var mn = studytimeStr.substr(2, 2);
+		return hh + '.' + mn;
+	} else {
+		return studytimeStr;
 	}
 }
 exports.getDatetimeValue = function(studydateStr, studytimeStr){

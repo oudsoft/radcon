@@ -141,11 +141,16 @@ app.post('/find', function(req, res) {
 	//let rqBody = JSON.stringify(req.body.body);
 	let rqBody = req.body.body;
 	let username = req.body.username;
-	//console.log('rqBody >>', rqBody);
+	let method = req.body.method;
 
 	// console.log('userpass >>', userpass);
 	//var command = 'curl -X POST --user ' + userpass + ' -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
-	var command = 'curl -X POST --user ' + userpass + ' -H "user: ' + username + '" -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
+	var command;
+	if (method.toLowerCase() == 'post') {
+		command = 'curl -X POST --user ' + userpass + ' -H "user: ' + username + '" -H "Content-Type: application/json" ' + ORTHANC_URL + req.body.uri + ' -d \'' + rqBody + '\'';
+	} else if (method.toLowerCase() == 'get') {
+		command = 'curl -X GET --user ' + userpass + ' ' + ORTHANC_URL + req.body.uri + '?user=' + username;
+	}
 	console.log('curl command >>', command);
 
 	runcommand(command).then((stdout) => {
@@ -156,6 +161,17 @@ app.post('/find', function(req, res) {
 		*/
 		let studyObj = JSON.parse(stdout);
 		//console.log('studyObj >>', studyObj);
+		res.status(200).send(studyObj);
+	});
+});
+
+app.get('/find', function(req, res) {
+	let rqBody = req.body.body;
+	let username = req.body.username;
+	var command = 'curl -X GET --user ' + userpass + ' -H "user: ' + username + ' ' + ORTHANC_URL + req.body.uri;
+	console.log('curl command >>', command);
+	runcommand(command).then((stdout) => {
+		let studyObj = JSON.parse(stdout);
 		res.status(200).send(studyObj);
 	});
 });
