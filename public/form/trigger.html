@@ -2,7 +2,7 @@
   <input type="hidden" id="dcmname"/>
   <input type="submit" value=" OK ">
 </form>
-
+<script src="../lib/jquery.js"></script>
 <script>
   function urlQueryToObject(url) {
   	let result = url.split(/[?&]/).slice(1).map(function(paramPair) {
@@ -13,13 +13,13 @@
   		}, {});
   	return result;
   }
-
+  /*
   function doSetCookieForOrthanc(Username, Password) {
     var myDate = new Date();
     myDate.setMonth(myDate.getMonth() + 12);
     document.cookie = 'Username' + "=" + Username + ";expires=" + myDate + ";domain=localhost:8042;path=/";
   }
-
+  */
   let urlParams = urlQueryToObject(window.location.search);
   let dcmnameParam = urlParams.dcmname;
   console.log(dcmnameParam);
@@ -39,4 +39,14 @@
     triggerForm.submit();
   }, 2500);
   */
+  let formData = new Blob([data], {type:"application/octet-stream"});
+  $.ajax({
+    url: triggerUrl,
+    type: "POST",
+    cache: false,
+    contentType: false,
+    processData: false,
+    data: formData}).done(function(e){
+      console.log(e);
+    })
 </script>
