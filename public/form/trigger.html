@@ -39,14 +39,22 @@
     triggerForm.submit();
   }, 2500);
   */
+  /*
+  $.support.cors = true;
   let formData = new Blob([data], {type:"application/octet-stream"});
   $.ajax({
     url: triggerUrl,
+    crossDomain: true,
+    cors: true,
     type: "POST",
     cache: false,
     contentType: false,
     processData: false,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
     data: formData}).done(function(e){
       console.log(e);
     })
+    */
 </script>
