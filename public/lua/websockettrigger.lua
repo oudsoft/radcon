@@ -1,39 +1,64 @@
 function OnStoredInstance(instanceId, tags, metadata)
 	print("===========OnStoredInstance==============")
-  print("===========WebsocketTrigger==============")
-
-  -- create client:
-
-  local websocket = require'websocket'
-  local client = websocket.client.copas({timeout=2})
-
-  -- connect to the server:
-
-  local ok,err = client:connect('wss://172.17.0.6:9443','echo-protocol')
-  if not ok then
-     print('could not connect',err)
-  end
-
-  -- send data:
-
-  local ok = client:send('hello')
-  if ok then
-     print('msg sent')
-  else
-     print('connection closed')
-  end
-
-  -- receive data:
-
-  local message,opcode = client:receive()
-  if message then
-     print('msg',message,opcode)
-  else
-     print('connection closed')
-  end
-
-  -- close connection:
-
-  local close_was_clean,close_code,close_reason = client:close(4001,'lost interest')
-  print("===========End Trigger==============")
+	print(instanceId)
+	print(tags)
+	print(metadata)
+	-- Delete(SendToPeer(instanceId, 'myshopman'))
+	-- SendToPeer(instanceId, 'myshopman')
+	SendToModality(instanceId, 'Nongjok')
 end
+
+function linuxSleep(n)
+	os.execute("sleep " .. tonumber(n))
+end
+
+function windowsSleep(n)
+	if n > 0 then os.execute("ping -n " .. tonumber(n+1) .. " localhost > NUL") end
+end
+
+function doReadFile(path)
+	local open = io.open
+	local file = open(path, "rb") -- r read mode and b binary mode
+	if not file then return nil end
+	local content = file:read "*a" -- *a or *all reads the whole file
+	file:close()
+	return content
+end
+-- local fileContent = doReadFile("foo.html");
+-- print (fileContent);
+
+function doDownloadDicom(dicomFilename)
+	print("=========== Start Download Dicom ==============")
+	local downloadcommand = ('curl --user limparty:Limparty -k https://172.17.0.6/webapp/img/usr/pdf/' .. dicomFilename .. ' -o ' .. dicomFilename)
+	print("Run Command => " .. downloadcommand)
+	os.execute(downloadcommand)
+	print("=========== End Download Dicom ==============")
+end
+
+function doStoreDicom(dicomFilename)
+	print("=========== Start Store Dicom ==============")
+	local storecommand = ('curl -X POST --user demo:demo http://localhost:8042/instances --data-binary @' .. dicomFilename)
+	print("Run Command => " .. storecommand)
+	local response = os.execute(storecommand)
+	print("The Response from Orthanc => " .. response)
+	print("=========== End Store Dicom ==============")
+end
+
+function doStoreDicomWithApi(dicomFilename)
+	print("=========== Start Store Dicom ==============")
+	local uri = '/instances'
+	local body = doReadFile(dicomFilename)
+	local builin = true;
+	local headers = {   ["content-type"] = "application/x-binary",  }
+	RestApiPost(uri, body, builtin, headers)
+	print("=========== End Store Dicom ==============")
+end
+
+function doLocalStore(dicomFilename)
+	doDownloadDicom(dicomFilename)
+	linuxSleep(3.5)
+	doStoreDicom(dicomFilename)
+end
+
+-- doStoreDicom('c13eb9d9-7afe.dcm')
+-- doLocalStore('c13eb9d9-7afe.dcm')

@@ -51,7 +51,7 @@ const runcommand = function (command) {
 		logger().info(new Date()  + " Command " + command);
 		exec(command, (error, stdout, stderr) => {
 			if(error === null) {
-				logger().info(new Date()  + " Resolve " + `${stdout}`);
+				//logger().info(new Date()  + " Resolve " + `${stdout}`);
 				resolve(`${stdout}`);
 			} else {
 				logger().error(new Date()  + " Reject " + `${stderr}`);

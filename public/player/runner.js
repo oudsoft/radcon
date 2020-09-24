@@ -50,9 +50,9 @@ function next(n){
 
 localClipFile.addEventListener('change', function() {
   files = localClipFile.files;
+  console.log(files);
   let filesArray = files.toArray();
-  //console.log(files);
-  fileList.innerHTML = '';
+  //fileList.innerHTML = '';
   filesArray.forEach((item, index) => {
     let clipOption = document.createElement('option');
     clipOption.textContent = index + '. ' + item.name;

@@ -29,11 +29,18 @@ webApp.use('/orthancproxy', orthancproxy);
 webApp.use('/bush', bushStatic, bushIndex);
 
 webApp.get('/', (req, res) => {
+	console.log(req.connection._peername);
 	const hostname = req.headers.host;
 	const rootname = req.originalUrl.split('/')[1];
 	let url = '/' + rootname + '/index.html';
 	res.redirect(url);
 });
+
+webApp.post('/', (req, res) => {
+	console.log(req.connection._peername);
+	res.status(200).send(req.body);
+});
+
 /*
 webApp.get('/bush/(:collection)/(:allabum)/(:filename)', (req, res) => {
 	const hostname = req.headers.host;
@@ -43,9 +50,10 @@ webApp.get('/bush/(:collection)/(:allabum)/(:filename)', (req, res) => {
 	res.status(200).sendFile(bushPath + '/' + req.params.collection + '/' + req.params.allabum + '/' + req.params.filename);
 });
 */
+
 module.exports = ( httpsServer ) => {
+	const webSocketServer = require('./websocket.js')(httpsServer);
 	const uploader = require('./uploader.js')(webApp);
-	const pdfconvertor = require('./pdfconvertor.js')(webApp);
-	//const webSocketServer = require('./websocket.js')(httpsServer);
+	const pdfconvertor = require('./pdfconvertor.js')(webApp, webSocketServer);
 	return { webApp };
 }

@@ -87,7 +87,9 @@ const removeTempFile = function(fileCode) {
   let endSS = endDate.getSeconds();
   let scheduleRemove = endSS + ' ' + endMN + ' ' + endHH + ' ' + endDD + ' ' + endMM + ' *';
 	let task = cron.schedule(scheduleRemove, function(){
-    var command = parseStr('rm %s/%s.*', parentDir + PDF_DIR, fileCode);
+    var command = parseStr('rm %s/%s.bmp', parentDir + PDF_DIR, fileCode);
+    command += parseStr(' && rm %s/%s.html', parentDir + PDF_DIR, fileCode);
+    command += parseStr(' && rm %s/%s.pdf', parentDir + PDF_DIR, fileCode);
     console.log(command);
     runcommand(command).then((stdout) => {
       console.log(stdout);
@@ -97,7 +99,7 @@ const removeTempFile = function(fileCode) {
   });
 }
 
-module.exports = function (app) {
+module.exports = function (app, wssocket) {
 
   app.post('/convertfromurl', function(req, res) {
     const rootname = req.originalUrl.split('/')[1];
@@ -164,7 +166,14 @@ module.exports = function (app) {
       runcommand(command).then((cmdout) => {
         console.log(cmdout);
         removeTempFile(fileCode);
-        res.status(200).send({status: {code: 200}, dicom : {filename: dcmFile}, studyObj: studyObj});
+        let cwss = wssocket.socket.clients;
+        cwss.forEach((wc) => {
+          if (wc.id == body.username) {
+            let socketTrigger = {type: 'trigger', message: 'Please tell your orthanc update', studyid: body.studyID, dcmname: dcmFile};
+            wc.send(JSON.stringify(socketTrigger));
+          }
+        });
+        res.status(200).send({status: {code: 200}, dicom : {filename: '/' + rootname + PDF_DIR + '/' + dcmFile}});
       }).catch((cmderr) => {
         console.log('cmderr: 500 >>', cmderr);
         reject(cmderr);
@@ -174,6 +183,18 @@ module.exports = function (app) {
       reject(err);
     });
   });
+
+  app.post('/requestnotify', (req, res) => {
+  	let userid = req.body.userid;
+    let message = req.body.message;
+    let cwss = wssocket.socket.clients;
+    cwss.forEach((wc) => {
+      if (wc.id == userid) {
+        let socketMessage = {type: 'notify', message: message};
+        wc.send(JSON.stringify(socketMessage));
+      }
+    });
+  })
 
   return {
     runcommand

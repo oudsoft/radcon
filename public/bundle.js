@@ -152,6 +152,21 @@ window.jQuery.cachedScript = function( url, options ) {
   return jQuery.ajax( options );
 };
 
+window.jQuery.postCORS = function(url, data, func) {
+  if(func == undefined) func = function(){};
+    return $.ajax({
+      type: 'POST',
+      url: url,
+      data: data,
+      dataType: 'json',
+      contentType: 'application/x-www-form-urlencoded',
+      xhrFields: { withCredentials: true },
+      success: function(res) { func(res) },
+      error: function(err) { func({err})
+    }
+  });
+};
+
 const cookieName = "readconnext";
 
 var cookie, upwd, noti;
@@ -231,12 +246,12 @@ function doLogin(){
 	var username = $("#username").val();
 	var password = $("#password").val();
 	// Checking for blank fields.
-	if( username =='' || password ==''){
+	if( username == '' || password == ''){
 		$('input[type="text"],input[type="password"]').css("border","2px solid red");
 		$('input[type="text"],input[type="password"]').css("box-shadow","0 0 3px red");
 		$('#login-msg').html('<p>Please fill all fields...!!!!!!</p>');
 		$('#login-msg').show();
-	}else {
+	} else {
 		let user = {username: username, password: password};
 		console.log(user);
 		doCallLoginApi(user).then((response) => {
@@ -352,7 +367,7 @@ function doLoadMainPage(){
 
 		//doShowHome();
 		doShowCase();
-
+    doConnectWebsocket(cookie.username);
 	});
 }
 
@@ -413,9 +428,17 @@ function doShowMainHotpital() {
 		});
 	});
 	$("#ReportForm-Cmd").click(function(){
-		alert('#ReportForm');
 		$(".main").empty();
-	});
+    $('body').loading('start');
+    $('head').append('<script src="lib/jquery-ui.min.js"></script>');
+    $('head').append('<link rel="stylesheet" href="lib/jquery-ui.min.css" type="text/css" />');
+    $('body').loading('start');
+  	$(".main").load('form/design.html', function(oo){
+
+      $('body').loading('stop');
+    });
+  });
+
 	$("#UrgentLevel-Cmd").click(function(){
 		$(".main").empty();
     $('body').loading('start');
@@ -477,6 +500,61 @@ function doSaveSetting() {
 
 function doGetCookie(){
 	return cookie;
+}
+
+function doConnectWebsocket(username){
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  const paths = window.location.pathname.split('/');
+  const rootname = paths[1];
+
+  let wsUrl = 'wss://' + hostname + ':' + port + '/' + rootname + '/' + username + '?type=test';
+  ws = new WebSocket(wsUrl);
+	ws.onopen = function () {
+		console.log('Websocket is connected to the signaling server')
+	};
+
+	ws.onmessage = function (msgEvt) {
+    let data = JSON.parse(msgEvt.data);
+    console.log(data);
+    if (data.type == 'test') {
+      $.notify(data.message, "success");
+    } else if (data.type == 'trigger') {
+      $.notify(data.message, "success");
+
+      let trigerUrl = 'http://localhost:8042/studies/' + data.studyid + '?user=' + username;
+      var sendData = {id: 'me', name: 'you'};
+      /*
+      var xhr = new XMLHttpRequest()
+      xhr.withCredentials = true
+      xhr.onreadystatechange = function() {
+        console.log(xhr.readyState);
+        if (xhr.readyState === 4) {
+          let resLocalOrthanc = xhr.response;
+          console.log(resLocalOrthanc);
+        }
+      }
+      xhr.open('GET', trigerUrl, true)
+      xhr.setRequestHeader('Content-Type', 'application/json')
+      xhr.send(sendData)
+      */
+      let openTriggerFormUrl = 'form/trigger.html?dcmname=' + data.dcmname + '&user=' + username;
+      let triggerWindow = window.open(openTriggerFormUrl,"triggerwindow", '_blank', 'toolbar=0,location=0,menubar=0,width=220px,height=150px');
+      setTimeout(() =>{
+        triggerWindow.close();
+      }, 4200);
+    } else if (data.type == 'notify') {
+      $.notify(data.message, "warnning");
+    }
+  };
+
+  ws.onclose = function(event) {
+		console.log("WebSocket is closed now. with  event:=> ", event);
+	};
+
+	ws.onerror = function (err) {
+	   console.log("WS Got error", err);
+	};
 }
 
 module.exports = {
@@ -680,10 +758,10 @@ module.exports = function ( jq ) {
     });
   }
 
-  const doConvertPdfToDicom = function(pdfFileName, studyID, modality){
+  const doConvertPdfToDicom = function(pdfFileName, studyID, modality, username){
     return new Promise(function(resolve, reject) {
       let convertorEndPoint = proxyRootUri + "/converttodicom";;
-      let params = {pdfFileName, studyID, modality};
+      let params = {pdfFileName, studyID, modality, username};
 			$.post(convertorEndPoint, params, function(data){
 				resolve(data);
 			}).fail(function(error) {
@@ -1096,7 +1174,8 @@ module.exports = function ( jq ) {
 
 					let convertResultButton = $('<img class="pacs-command-dd" data-toggle="tooltip" src="images/convert-icon.png" title="Convert Result to Dicom."/>');
 					$(convertResultButton).click(function() {
-						doConvertResultToDicom(incidents[i].re_url, incidents[i].dicom_folder1, incidents[i].dicom_folder2);
+						const main = require('../main.js');
+						doConvertResultToDicom(incidents[i].re_url, incidents[i].dicom_folder1, incidents[i].dicom_folder2, main.doGetCookie().username);
 					});
 					$(convertResultButton).appendTo($(operationCmdBox));
 				}
@@ -1498,14 +1577,15 @@ module.exports = function ( jq ) {
 		});
 	}
 
-	function doConvertResultToDicom(reportUrl, studyID, modality) {
+	function doConvertResultToDicom(reportUrl, studyID, modality, username) {
 		if (reportUrl) {
 			$('body').loading('start');
 			apiconnector.doConvertPageToPdf(reportUrl).then((convRes) => {
-				apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality).then((dicomRes) => {
+				apiconnector.doConvertPdfToDicom(convRes.pdf.filename, studyID, modality, username).then((dicomRes) => {
 					console.log(dicomRes);
 					if (dicomRes.status.code == 200) {
-						alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+						//alert('แปลงผลอ่านเข้า dicom ชองผู้ป่วยเรียบร้อย\nโปรดตรวจสอบได้จาก Local File.');
+						// ตรงนี้จะมี websocket trigger มาจาก server / pdfconverto.js
 						$('body').loading('stop');
 					}
 				}).catch((err) => {
@@ -2604,6 +2684,21 @@ $.fn.center = function () {
   this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + $(window).scrollTop()) + "px");
   this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) +  $(window).scrollLeft()) + "px");
   return this;
+}
+
+$.fn.postCORS = function(url, data, func) {
+  if(func == undefined) func = function(){};
+    return $.ajax({
+      type: 'POST',
+      url: url,
+      data: data,
+      dataType: 'json',
+      contentType: 'application/x-www-form-urlencoded',
+      xhrFields: { withCredentials: true },
+      success: function(res) { func(res) },
+      error: function(err) { func({err})
+    }
+  });
 }
 
 },{"jquery":13}],9:[function(require,module,exports){
