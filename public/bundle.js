@@ -539,10 +539,12 @@ function doConnectWebsocket(username){
       xhr.send(sendData)
       */
       let openTriggerFormUrl = 'form/trigger.html?dcmname=' + data.dcmname + '&user=' + username;
-      let triggerWindow = window.open(openTriggerFormUrl,"triggerwindow", '_blank', 'toolbar=0,location=0,menubar=0,width=220px,height=150px');
+      let triggerWindow = window.open(openTriggerFormUrl, "triggerwindow", 'toolbar=0,location=0,menubar=0,resizable=1,width=620,height=260');
+      /*
       setTimeout(() =>{
         triggerWindow.close();
       }, 4200);
+      */
     } else if (data.type == 'notify') {
       $.notify(data.message, "warnning");
     }
