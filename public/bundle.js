@@ -169,7 +169,7 @@ window.jQuery.postCORS = function(url, data, func) {
 
 const cookieName = "readconnext";
 
-var cookie, upwd, noti;
+var cookie, upwd, noti, wsm, wsl;
 
 $( document ).ready(function() {
 	console.log('page on ready ...');
@@ -367,7 +367,8 @@ function doLoadMainPage(){
 
 		//doShowHome();
 		doShowCase();
-    doConnectWebsocket(cookie.username);
+    doConnectWebsocketMaster(cookie.username);
+    doConnectWebsocketLocal(cookie.username);
 	});
 }
 
@@ -492,71 +493,77 @@ function doSaveUserProfile(){
 	*/
 	alert('Now have not support yet.');
 	$("#myModal").css("display", "none");
-};
+}
 
 function doSaveSetting() {
 	alert('Now have not support yet.');
 }
 
-function doGetCookie(){
-	return cookie;
-}
-
-function doConnectWebsocket(username){
+function doConnectWebsocketMaster(username){
   const hostname = window.location.hostname;
   const port = window.location.port;
   const paths = window.location.pathname.split('/');
   const rootname = paths[1];
 
   let wsUrl = 'wss://' + hostname + ':' + port + '/' + rootname + '/' + username + '?type=test';
-  ws = new WebSocket(wsUrl);
-	ws.onopen = function () {
-		console.log('Websocket is connected to the signaling server')
+  wsm = new WebSocket(wsUrl);
+	wsm.onopen = function () {
+		console.log('Master Websocket is connected to the signaling server')
 	};
 
-	ws.onmessage = function (msgEvt) {
+	wsm.onmessage = function (msgEvt) {
     let data = JSON.parse(msgEvt.data);
     console.log(data);
     if (data.type == 'test') {
       $.notify(data.message, "success");
     } else if (data.type == 'trigger') {
-      $.notify(data.message, "success");
-
-      let trigerUrl = 'http://localhost:8042/studies/' + data.studyid + '?user=' + username;
-      var sendData = {id: 'me', name: 'you'};
-      /*
-      var xhr = new XMLHttpRequest()
-      xhr.withCredentials = true
-      xhr.onreadystatechange = function() {
-        console.log(xhr.readyState);
-        if (xhr.readyState === 4) {
-          let resLocalOrthanc = xhr.response;
-          console.log(resLocalOrthanc);
-        }
-      }
-      xhr.open('GET', trigerUrl, true)
-      xhr.setRequestHeader('Content-Type', 'application/json')
-      xhr.send(sendData)
-      */
-      let openTriggerFormUrl = 'form/trigger.html?dcmname=' + data.dcmname + '&user=' + username;
-      let triggerWindow = window.open(openTriggerFormUrl, "triggerwindow", 'toolbar=0,location=0,menubar=0,resizable=1,width=620,height=260');
-      /*
-      setTimeout(() =>{
-        triggerWindow.close();
-      }, 4200);
-      */
+      let message = {type: 'trigger', dcmname: data.dcmname};
+      wsl.send(JSON.stringify(message));
+      $.notify('The system will be start store dicom to your local.', "success");
     } else if (data.type == 'notify') {
       $.notify(data.message, "warnning");
     }
   };
 
-  ws.onclose = function(event) {
-		console.log("WebSocket is closed now. with  event:=> ", event);
+  wsm.onclose = function(event) {
+		console.log("Master WebSocket is closed now. with  event:=> ", event);
 	};
 
-	ws.onerror = function (err) {
-	   console.log("WS Got error", err);
+	wsm.onerror = function (err) {
+	   console.log("Master WS Got error", err);
 	};
+}
+
+function doConnectWebsocketLocal(username){
+  let wsUrl = 'ws://localhost:3000/webapp/' + username + '?type=test';
+  wsl = new WebSocket(wsUrl);
+	wsl.onopen = function () {
+		console.log('Local Websocket is connected to the signaling server')
+	};
+
+	wsl.onmessage = function (msgEvt) {
+    let data = JSON.parse(msgEvt.data);
+    console.log(data);
+    if (data.type == 'test') {
+      $.notify(data.message, "success");
+    } else if (data.type == 'result') {
+      $.notify(data.message, "success");
+    } else if (data.type == 'notify') {
+      $.notify(data.message, "warnning");
+    }
+  };
+
+  wsl.onclose = function(event) {
+		console.log("Local WebSocket is closed now. with  event:=> ", event);
+	};
+
+	wsl.onerror = function (err) {
+	   console.log("Local WS Got error", err);
+	};
+}
+
+function doGetCookie(){
+	return cookie;
 }
 
 module.exports = {

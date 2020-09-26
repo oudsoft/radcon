@@ -19,7 +19,7 @@ function RadconWebSocketServer (arg) {
 		wssPath = wssPath.split('/');
 		console.log(wssPath);
 		ws.id = wssPath[2];
-		ws.send(JSON.stringify({type: 'test', message: ws.id + ', You have Connected websocket success.'}));
+		ws.send(JSON.stringify({type: 'test', message: ws.id + ', You have Connected master websocket success.'}));
 
 		ws.on('message', function (message) {
 			var data;

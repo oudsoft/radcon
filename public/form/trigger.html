@@ -1,5 +1,5 @@
 <div id="trigger-form-div" style="display: none;">
-  <form id="trigger-form" method="post">
+  <form id="trigger-form" method="post" enctype="multipart/form-data">
     <input type="hidden" id="dcmname"/>
     <input type="submit" value=" OK ">
   </form>
@@ -53,29 +53,12 @@
   triggerForm.append(new Blob([data], {type:"plain/text"}));
   //triggerForm.append(data);
   triggerForm.setAttribute("action", triggerUrl);
-  /*
+
   setTimeout(() => {
-    triggerForm.submit();
+    //triggerForm.submit();
   }, 2500);
-  */
-  /*
-  $.support.cors = true;
-  let formData = new Blob([data], {type:"application/octet-stream"});
-  $.ajax({
-    url: triggerUrl,
-    crossDomain: true,
-    cors: true,
-    type: "POST",
-    cache: false,
-    contentType: false,
-    processData: false,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-    data: formData}).done(function(e){
-      console.log(e);
-    })
-    */
+
+
     let yourcommand = 'curl -X POST http://localhost:8042/tools/execute-script -d "doLocalStore(\'' + dcmnameParam + '\')"';
     $('#your-command').val(yourcommand);
 

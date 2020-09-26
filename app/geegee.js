@@ -16,6 +16,11 @@ const GEEGEE_PATH = '/mnt/e/Final Release/Revise';
 //const GEEGEE_PATH = '/home/blueseas/workshop/node/slideshow/public/pic1';
 const geegeePath = path.normalize(GEEGEE_PATH);
 
+app.post('/test', (req, res) => {
+	console.log(req.body);
+	res.status(200).send({geegeePath});
+});
+
 app.get('/geegeeitems', function(req, res) {
 	fs.readdir(geegeePath, (err, dirs) => {
 		/*
